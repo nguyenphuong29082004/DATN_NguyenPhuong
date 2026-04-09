@@ -1,0 +1,17 @@
+# Robots.txt for Catwalk.AI
+# https://catwalk.ai
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://catwalk.ai/sitemap.xml
+
+# Crawl-delay (optional, for polite crawling)
+Crawl-delay: 1
+
+# Disallow admin/private areas (if any)
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /static/

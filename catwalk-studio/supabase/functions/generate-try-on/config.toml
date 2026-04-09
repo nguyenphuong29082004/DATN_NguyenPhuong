@@ -1,0 +1,2 @@
+[functions.generate-try-on]
+verify_jwt = false

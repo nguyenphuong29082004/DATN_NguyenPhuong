@@ -1,0 +1,174 @@
+/* ===== SidePanel Overlay ===== */
+.cm-side-panel-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: flex-end;
+    animation: cm-side-panel-fade-in 0.2s ease;
+}
+
+/* ===== SidePanel Container ===== */
+.cm-side-panel {
+    width: min(460px, 100%);
+    height: 100%;
+    background: var(--surface-dark, #141414);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: cm-side-panel-slide-in 0.25s ease;
+}
+
+/* ===== Fixed Header ===== */
+.cm-side-panel__header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cm-side-panel__title {
+    margin: 0;
+    font-family: var(--font-serif, "Cormorant Garamond", serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--white, #FFFFFF);
+}
+
+/* ===== Scrollable Body ===== */
+.cm-side-panel__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overscroll-behavior: contain;
+}
+
+.cm-side-panel__body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.cm-side-panel__body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cm-side-panel__body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+.cm-side-panel__body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Fixed Footer ===== */
+.cm-side-panel__footer {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ===== Form Elements inside SidePanel ===== */
+.cm-side-panel__body .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.cm-side-panel__body .form-group label {
+    display: block;
+    font-family: var(--font-display, "Inter", sans-serif);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary, #F1E0B6);
+    margin-bottom: 6px;
+}
+
+.cm-side-panel__body .form-group label .optional {
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.cm-side-panel__body .form-group input,
+.cm-side-panel__body .form-group select,
+.cm-side-panel__body .form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: var(--white, #FFFFFF);
+    font-family: var(--font-display, "Inter", sans-serif);
+    font-size: 0.85rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.cm-side-panel__body .form-group input::placeholder,
+.cm-side-panel__body .form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.cm-side-panel__body .form-group input:focus,
+.cm-side-panel__body .form-group select:focus,
+.cm-side-panel__body .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary, #F1E0B6);
+}
+
+.cm-side-panel__body .form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.5;
+}
+
+/* ===== Meta info (for prompt view etc.) ===== */
+.cm-side-panel__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cm-side-panel__meta span {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+/* ===== Animations ===== */
+@keyframes cm-side-panel-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes cm-side-panel-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+    .cm-side-panel {
+        width: 100%;
+        border-left: none;
+    }
+}

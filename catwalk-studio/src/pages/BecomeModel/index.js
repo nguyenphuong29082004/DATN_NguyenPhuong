@@ -1,0 +1,1 @@
+export { BecomeModelPage } from './BecomeModelPage';

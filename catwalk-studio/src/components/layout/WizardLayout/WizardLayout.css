@@ -1,0 +1,42 @@
+.wizard-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background-dark);
+}
+
+.wizard-layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .wizard-layout__main {
+    padding: 2rem 1.5rem;
+  }
+}
+
+.wizard-layout__container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.wizard-layout__progress {
+  max-width: 42rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.wizard-layout__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  animation: fadeIn 0.5s ease-out;
+}

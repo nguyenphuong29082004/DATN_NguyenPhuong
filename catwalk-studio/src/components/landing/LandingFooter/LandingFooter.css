@@ -1,0 +1,132 @@
+.landing-footer {
+  background-color: #0a0a0a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 64px 24px 32px;
+}
+
+.landing-footer__container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Link Grid */
+.landing-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.landing-footer__column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.landing-footer__column-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.landing-footer__column-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.landing-footer__column-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.landing-footer__column-link:hover {
+  color: #F1E0B6;
+}
+
+/* Bottom Bar */
+.landing-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding-top: 32px;
+}
+
+.landing-footer__logo {
+  flex-shrink: 0;
+  color: #F1E0B6;
+}
+
+.landing-footer__social {
+  display: flex;
+  gap: 16px;
+}
+
+.landing-footer__social-icon {
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.2s ease;
+}
+
+.landing-footer__social-icon:hover {
+  color: #F1E0B6;
+}
+
+.landing-footer__social-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.landing-footer__copyright {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .landing-footer__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-footer {
+    padding: 48px 24px 24px;
+  }
+
+  .landing-footer__grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+  }
+
+  .landing-footer__column-links {
+    align-items: center;
+  }
+
+  .landing-footer__bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .landing-footer__social {
+    order: 2;
+  }
+
+  .landing-footer__copyright {
+    order: 3;
+  }
+}

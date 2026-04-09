@@ -1,0 +1,147 @@
+.help-page {
+    background-color: #0a0a0a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.help-page__content {
+    flex: 1;
+    padding: 140px 0 80px;
+}
+
+.help-container {
+    display: flex;
+    gap: 64px;
+    align-items: flex-start;
+}
+
+.help-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 100px;
+    /* Offset for header */
+}
+
+.help-sidebar__title {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+    font-family: 'Integral CF', sans-serif;
+    text-transform: uppercase;
+}
+
+.help-sidebar__nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+    padding-right: 12px;
+}
+
+/* Custom scrollbar for sidebar nav */
+.help-sidebar__nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.help-sidebar__nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.help-sidebar__nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.help-sidebar__nav a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    transition: all 0.2s ease;
+    display: block;
+    padding: 10px 16px;
+    border-radius: 8px;
+}
+
+.help-sidebar__nav a:hover,
+.help-sidebar__nav a.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.help-sidebar__nav a.active {
+    color: #F1E0B6;
+    /* Brand color highlight */
+    font-weight: 500;
+}
+
+.help-articles {
+    flex: 1;
+    max-width: 800px;
+}
+
+.help-page__title {
+    color: #fff;
+    font-size: 2.5rem;
+    margin-bottom: 48px;
+    font-family: 'Integral CF', sans-serif;
+}
+
+.help-article {
+    margin-bottom: 64px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-article:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.help-article__title {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+    font-weight: 600;
+    scroll-margin-top: 100px;
+    /* Important for anchor scrolling */
+}
+
+.help-article__body {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+@media (max-width: 900px) {
+    .help-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .help-sidebar {
+        width: 100%;
+        position: static;
+    }
+
+    .help-sidebar__nav {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 600px) {
+    .help-page__title {
+        font-size: 2rem;
+    }
+
+    .help-article__title {
+        font-size: 1.25rem;
+    }
+}

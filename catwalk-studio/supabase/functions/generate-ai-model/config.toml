@@ -1,0 +1,2 @@
+[functions.generate-ai-model]
+verify_jwt = false

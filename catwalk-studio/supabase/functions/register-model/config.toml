@@ -1,0 +1,2 @@
+[functions.register-model]
+verify_jwt = false

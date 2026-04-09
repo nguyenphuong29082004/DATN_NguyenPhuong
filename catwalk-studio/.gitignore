@@ -1,0 +1,7 @@
+# Project-specific ignores
+node_modules/
+dist/
+.env
+.env.local
+tmp/
+*.log

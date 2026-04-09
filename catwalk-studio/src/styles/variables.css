@@ -1,0 +1,50 @@
+:root {
+  --primary: #F1E0B6;
+  --primary-hover: #E5D4A8;
+  --primary-focus: rgba(241, 224, 182, 0.25);
+  --primary-inverse: #0a0a0a;
+
+  --secondary: #F1E0B6;
+  --secondary-hover: #E5D4A8;
+
+  --background-light: #fafafa;
+  --background-dark: #0A0A0A;
+  --surface-dark: #141414;
+  --surface-darker: #0A0A0A;
+  --surface-light: #1A1A1A;
+
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.5);
+
+  --border-color: rgba(255, 255, 255, 0.05);
+  --border-color-strong: rgba(255, 255, 255, 0.1);
+  --border-radius: 0rem;
+  /* Editorial style uses square corners mostly */
+  --border-radius-lg: 0rem;
+  --border-radius-xl: 0rem;
+  --border-radius-2xl: 0rem;
+
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-family: var(--font-display);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(241, 224, 182, 0.05);
+  --shadow-glow-active: 0 0 40px rgba(241, 224, 182, 0.15);
+
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+  --transition-slow: 500ms ease;
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --max-width: 1600px;
+}

@@ -1,0 +1,202 @@
+/* ===== Base Button ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--font-display, "Inter", sans-serif);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn__icon {
+  font-size: 16px;
+  transition: transform 0.3s ease;
+}
+
+.btn__text {
+  line-height: 1;
+}
+
+/* ===== Sizes ===== */
+.btn--sm {
+  padding: 10px 16px;
+  font-size: 0.6rem;
+}
+
+.btn--sm .btn__icon {
+  font-size: 14px;
+}
+
+.btn--md {
+  padding: 12px 22px;
+  font-size: 0.7rem;
+}
+
+.btn--md .btn__icon {
+  font-size: 16px;
+}
+
+.btn--lg {
+  padding: 16px 30px;
+  font-size: 0.8rem;
+}
+
+.btn--lg .btn__icon {
+  font-size: 18px;
+}
+
+/* ===== Variants ===== */
+
+/* Primary - solid gold */
+.btn--primary {
+  background-color: var(--primary, #F1E0B6);
+  color: var(--surface-dark, #0A0A0A);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: #E5D4A8;
+  transform: translateY(-1px);
+}
+
+.btn--primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Secondary - transparent with subtle border */
+.btn--secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  border-color: var(--primary, #F1E0B6);
+  color: var(--primary, #F1E0B6);
+  background: rgba(241, 224, 182, 0.05);
+}
+
+/* Outline - gold border */
+.btn--outline {
+  background: transparent;
+  border: 1px solid var(--primary, #F1E0B6);
+  color: var(--primary, #F1E0B6);
+}
+
+.btn--outline:hover:not(:disabled) {
+  background: rgba(241, 224, 182, 0.1);
+}
+
+/* Ghost - no border, no bg */
+.btn--ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: none;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  color: var(--white, #FFFFFF);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Danger - red accent */
+.btn--danger {
+  background: transparent;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: rgba(255, 107, 107, 0.8);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: rgba(255, 107, 107, 0.5);
+  color: #ff6b6b;
+}
+
+/* Shimmer */
+.btn--shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+}
+
+.btn--shimmer:hover::before {
+  animation: shimmer 1.5s infinite;
+}
+
+/* ===== Icon Only ===== */
+.btn--icon-only {
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+}
+
+.btn--icon-only.btn--sm {
+  width: 24px;
+  height: 24px;
+}
+
+.btn--icon-only.btn--md {
+  width: 28px;
+  height: 28px;
+}
+
+.btn--icon-only.btn--lg {
+  width: 36px;
+  height: 36px;
+}
+
+.btn--icon-only .btn__icon {
+  margin: 0;
+}
+
+/* ===== Full Width ===== */
+.btn--full {
+  width: 100%;
+}
+
+/* ===== Loading State ===== */
+.btn--loading {
+  pointer-events: none;
+}
+
+.btn__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+.btn--primary .btn__spinner {
+  border-color: rgba(10, 10, 10, 0.2);
+  border-top-color: var(--surface-dark, #0A0A0A);
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}

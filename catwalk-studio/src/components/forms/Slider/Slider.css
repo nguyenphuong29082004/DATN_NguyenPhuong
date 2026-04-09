@@ -1,0 +1,136 @@
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.slider-group__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+}
+
+.slider-group__value-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.slider-group__prefix {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--text-muted);
+  transform: translateY(-4px);
+}
+
+.slider-group__value {
+  font-size: 4.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .slider-group__value {
+    font-size: 6rem;
+  }
+}
+
+.slider-group__suffix {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.slider-group__control {
+  width: 100%;
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .slider-group__control {
+    padding: 0 3rem;
+  }
+}
+
+.slider-group__range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.slider-group__track-wrapper {
+  position: relative;
+  height: 2rem;
+}
+
+.slider-group__track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  transform: translateY(-50%);
+}
+
+.slider-group__fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--primary), #d4c49a);
+  border-radius: 9999px;
+}
+
+.slider-group__thumb {
+  position: absolute;
+  top: 50%;
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--primary);
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 4px rgba(241, 224, 182, 0.2), var(--shadow-lg);
+  cursor: grab;
+  transition: transform var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.slider-group__thumb-inner {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--primary-inverse);
+  border-radius: 9999px;
+}
+
+.slider-group__input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: grab;
+}
+
+.slider-group__input:active {
+  cursor: grabbing;
+}
+
+.slider-group__hint {
+  text-align: center;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+}

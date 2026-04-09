@@ -1,0 +1,350 @@
+/* Page Loader for lazy loading */
+.page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--background-dark, #0a0a0a);
+}
+
+.page-loader__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-top-color: var(--primary, #F1E0B6);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.step-content {
+  max-width: 64rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.step-content--wide {
+  max-width: 80rem;
+}
+
+.step-header {
+  text-align: center;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.step-header h2 {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 2rem;
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.step-header p {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 32rem;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.step-title {
+  font-size: 2.25rem;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  margin: 0 0 1rem;
+  color: var(--text-primary);
+}
+
+@media (min-width: 768px) {
+  .step-title {
+    font-size: 3rem;
+  }
+}
+
+.step-description {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 72rem;
+}
+
+@media (min-width: 768px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.slider-panel {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: var(--border-radius-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .slider-panel {
+    padding: 3rem;
+  }
+}
+
+.earnings-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(241, 224, 182, 0.08);
+  border: 1px solid rgba(241, 224, 182, 0.15);
+  border-radius: 9999px;
+  color: var(--primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.earnings-badge .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.section-title .material-symbols-outlined {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.social-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .social-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.upsell-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  width: 100%;
+  background: var(--glass-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-2xl);
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .upsell-grid {
+    grid-template-columns: 7fr 5fr;
+  }
+}
+
+.upsell-left {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .upsell-left {
+    padding: 3rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  width: fit-content;
+}
+
+.premium-badge .material-symbols-outlined {
+  font-size: 1rem;
+  color: #d4af37;
+}
+
+.upsell-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+}
+
+@media (min-width: 1024px) {
+  .upsell-title {
+    font-size: 3rem;
+  }
+}
+
+.upsell-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 28rem;
+  margin: 0;
+}
+
+.upsell-right {
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .upsell-right {
+    padding: 3rem;
+  }
+}
+
+.benefits-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 1rem;
+}
+
+.final-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .final-grid {
+    grid-template-columns: 5fr 7fr;
+  }
+}
+
+.profile-preview {
+  background-color: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-2xl);
+  overflow: hidden;
+}
+
+.profile-cover {
+  height: 12rem;
+  background: linear-gradient(135deg, #0a0a0a, #141414, #1a1a1a);
+}
+
+.profile-avatar {
+  padding: 0 1.5rem;
+  margin-top: -4rem;
+}
+
+.profile-info {
+  padding: 1rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.final-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  background-color: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-2xl);
+}
+
+.chips-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chips-section label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.chips-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

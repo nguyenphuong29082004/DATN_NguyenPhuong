@@ -1,0 +1,2 @@
+[functions.delete-from-r2]
+verify_jwt = false

@@ -1,0 +1,408 @@
+.studio-page {
+  min-height: 100vh;
+  background-color: var(--background-dark);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Global Section Spacing */
+.section-padding {
+  padding: clamp(6rem, 10vw, 12rem) 2rem;
+}
+
+.studio-main {
+  width: 100%;
+}
+
+/* Hero Section */
+.studio-hero {
+  text-align: center;
+  position: relative;
+}
+
+.studio-hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 300;
+  line-height: 1;
+  margin-bottom: 2.5rem;
+}
+
+.studio-hero-description {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin: 0 auto 3rem;
+  font-weight: 300;
+}
+
+.studio-hero-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Shared Buttons from Design System */
+.btn-hero-primary {
+  background: var(--primary);
+  color: var(--primary-inverse);
+  padding: 1.25rem 3rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  text-decoration: none;
+}
+
+.btn-hero-primary:hover {
+  background: var(--primary-hover);
+  /* Override global a:hover (same hue as --primary-hover) so text stays visible */
+  color: var(--primary-inverse);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-hero-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  padding: 1.25rem 3rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-hero-secondary:hover {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Tools Section */
+.studio-section-title {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 300;
+  margin-bottom: 4rem;
+}
+
+.studio-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.studio-tool-card {
+  background: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  padding: 4rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.studio-tool-card:hover {
+  border-color: rgba(241, 224, 182, 0.2);
+  transform: translateY(-5px);
+}
+
+.studio-tool-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  color: var(--primary);
+  transition: var(--transition-normal);
+}
+
+.studio-tool-card:hover .studio-tool-icon {
+  border-color: var(--primary);
+}
+
+.studio-tool-title {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+}
+
+.studio-tool-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Preview Section */
+.studio-preview-grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 6rem;
+  align-items: center;
+}
+
+.studio-preview-title {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  font-weight: 300;
+  margin: 1.5rem 0 2rem;
+}
+
+.studio-preview-description {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 3rem;
+}
+
+.studio-preview-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.studio-preview-features li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.125rem;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+
+.studio-preview-features .material-symbols-outlined {
+  color: var(--primary);
+}
+
+/* Mockup Window Styling */
+.editorial-mockup-wrapper {
+  background: var(--surface-darker);
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+}
+
+.mockup-window {
+  background: var(--background-dark);
+  border: 1px solid var(--border-color-strong);
+  overflow: hidden;
+  height: 450px;
+}
+
+.mockup-window-header {
+  height: 40px;
+  background: var(--surface-dark);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 1.5rem;
+}
+
+.mockup-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.mockup-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-color-strong);
+}
+
+.mockup-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+}
+
+.mockup-window-content {
+  display: grid;
+  grid-template-columns: 60px 1fr 200px;
+  height: calc(100% - 40px);
+}
+
+.mockup-sidebar {
+  border-right: 1px solid var(--border-color);
+  background: var(--surface-darker);
+}
+
+.mockup-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.mockup-placeholder {
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--border-color-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  opacity: 0.3;
+}
+
+.mockup-placeholder span {
+  font-size: 4rem;
+}
+
+.mockup-panel {
+  border-left: 1px solid var(--border-color);
+  background: var(--surface-darker);
+}
+
+/* Pricing Section */
+.studio-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 3rem;
+}
+
+.studio-pricing-card {
+  background: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  padding: 4rem 3rem;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition-normal);
+  position: relative;
+}
+
+.studio-pricing-card.highlight {
+  border-color: var(--primary);
+}
+
+.pricing-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--primary);
+  color: var(--primary-inverse);
+  padding: 0.5rem 1.5rem;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.pricing-name {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 2rem;
+}
+
+.pricing-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+}
+
+.currency {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+.amount {
+  font-size: 4rem;
+  font-family: var(--font-serif);
+  font-weight: 300;
+}
+
+.period {
+  color: var(--text-muted);
+}
+
+.pricing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+.pricing-features li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+.pricing-features .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 1.25rem;
+}
+
+.btn-pricing {
+  width: 100%;
+  padding: 1.25rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-pricing.active {
+  background: var(--primary);
+  color: var(--primary-inverse);
+  border-color: var(--primary);
+}
+
+.btn-pricing:hover {
+  background: var(--text-primary);
+  color: var(--background-dark);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .studio-preview-grid {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .studio-hero-title {
+    font-size: 3.5rem;
+  }
+}

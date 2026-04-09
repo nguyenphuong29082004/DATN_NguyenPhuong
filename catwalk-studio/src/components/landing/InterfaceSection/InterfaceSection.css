@@ -1,0 +1,247 @@
+.interface-section {
+  width: 100%;
+  background-color: #141414;
+  background-image: radial-gradient(circle, rgba(241, 224, 182, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  padding: 128px 0;
+}
+
+.interface-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.interface-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+/* Profile Card */
+.interface-card-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-card {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-width: 360px;
+  width: 100%;
+}
+
+.profile-card__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F1E0B6 0%, #E5D4A8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-card__avatar-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+
+.profile-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-card__name {
+  font-family: 'Noto Serif', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.profile-card__status {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.15);
+  padding: 4px 12px;
+  border-radius: 9999px;
+}
+
+.profile-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+}
+
+.profile-card__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-card__stat-value {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.profile-card__stat-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.profile-card__tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 9999px;
+}
+
+.profile-card__tag--solid {
+  background-color: #F1E0B6;
+  color: #0a0a0a;
+}
+
+.profile-card__tag--outline {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-card__rate {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-card__rate-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.profile-card__rate-value {
+  font-family: 'Noto Serif', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #F1E0B6;
+}
+
+.profile-card__button {
+  background-color: #F1E0B6;
+  color: #0a0a0a;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-card__button:hover {
+  background-color: #E5D4A8;
+}
+
+/* Text Content */
+.interface-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.interface-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #F1E0B6;
+}
+
+.interface-heading {
+  font-family: 'Noto Serif', Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.interface-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.interface-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.interface-checklist__icon {
+  color: #F1E0B6;
+  font-size: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .interface-section {
+    padding: 80px 0;
+  }
+
+  .interface-grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .interface-content {
+    order: -1;
+    text-align: center;
+    align-items: center;
+  }
+
+  .interface-checklist {
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,2 @@
+[functions.generate-quick-shoot]
+verify_jwt = false
