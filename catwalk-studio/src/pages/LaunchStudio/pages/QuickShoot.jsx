@@ -4,6 +4,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useShootableModels, useAIEngines, useUserAICharacters } from '../../../hooks/models/useShootModels';
 import { useInvokeQuickShoot, useGenerationStatus, useAddToGallery, useSaveGeneration } from '../../../hooks/generations/useQuickShoot';
 import { useUserPrompts, usePublicPrompts, useCreatePrompt } from '../../../hooks/prompts/usePrompts';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { Button } from '../../../components/common/Button/Button';
 import { RegisterPromptModal } from '../../../components/common/RegisterPromptModal';
 import { SidePanel } from '../../../components/common/SidePanel/SidePanel';
@@ -83,6 +84,7 @@ const ENGINE_UI_CONFIG = {
 
 const QuickShoot = () => {
     const { user, profile, refreshProfile, isAnonymous, isGuest } = useAuth();
+    const { t } = useLanguage();
     const [searchParams] = useSearchParams();
 
     // Data from hooks
@@ -254,19 +256,19 @@ const QuickShoot = () => {
 
     const handleGenerate = async () => {
         if (!user?.id) {
-            setError('Please sign in to generate images');
+            setError(t('quickShoot.pleaseSignIn'));
             return;
         }
         if (!profile) {
-            setError('Your profile is still loading. Please wait a moment and try again.');
+            setError(t('quickShoot.profileLoading'));
             return;
         }
         if (shouldShowModelSelector && !effectiveSelectedModel) {
-            setError('Please select a model');
+            setError(t('quickShoot.pleaseSelectModel'));
             return;
         }
         if (!sanitizedPromptData.prompt.trim()) {
-            setError('Please enter a prompt');
+            setError(t('quickShoot.pleaseEnterPrompt'));
             return;
         }
         if (creditBalance < generationCost) {
@@ -322,10 +324,10 @@ const QuickShoot = () => {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            setSuccessMessage('Image downloaded!');
+            setSuccessMessage(t('quickShoot.imageDownloaded'));
             setTimeout(() => setSuccessMessage(null), 2000);
         } catch (err) {
-            setError('Download failed: ' + err.message);
+            setError(t('quickShoot.downloadFailed') + err.message);
         }
     };
 
@@ -338,10 +340,10 @@ const QuickShoot = () => {
         if (!generationId) return;
         try {
             await saveGenerationAsync({ generationId });
-            setSuccessMessage('Image saved to your collection!');
+            setSuccessMessage(t('quickShoot.imageSaved'));
             setTimeout(() => setSuccessMessage(null), 2000);
         } catch (err) {
-            setError('Failed to save: ' + err.message);
+            setError(t('quickShoot.saveFailed') + err.message);
         }
     };
 
@@ -356,7 +358,7 @@ const QuickShoot = () => {
         const shareUrl = `${window.location.origin}/studio/quick-shoot${generationId ? `?gen_id=${generationId}` : ''}`;
         try {
             await navigator.clipboard.writeText(shareUrl);
-            setSuccessMessage('Link copied to clipboard!');
+            setSuccessMessage(t('quickShoot.linkCopied'));
             setTimeout(() => setSuccessMessage(null), 2000);
         } catch {
             const textArea = document.createElement('textarea');
@@ -365,7 +367,7 @@ const QuickShoot = () => {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            setSuccessMessage('Link copied!');
+            setSuccessMessage(t('quickShoot.linkCopied'));
             setTimeout(() => setSuccessMessage(null), 2000);
         }
     };
@@ -382,7 +384,7 @@ const QuickShoot = () => {
         if (!generationId) return;
         const title = galleryTitle.trim();
         if (!title) {
-            setError('Please enter a title for your gallery item.');
+            setError(t('quickShoot.pleaseEnterTitle'));
             return;
         }
         setShowGalleryModal(false);
@@ -399,13 +401,13 @@ const QuickShoot = () => {
                 setGeneratedImage(result.outputUrl);
             }
             if (result.alreadyExists) {
-                setSuccessMessage('Image already in gallery!');
+                setSuccessMessage(t('quickShoot.alreadyInGallery'));
             } else {
-                setSuccessMessage('Image added to gallery!');
+                setSuccessMessage(t('quickShoot.addedToGallery'));
             }
             setTimeout(() => setSuccessMessage(null), 2000);
         } catch (err) {
-            setError(`Failed to add to gallery: ${err.message}`);
+            setError(t('quickShoot.addToGalleryFailed') + err.message);
         }
     };
 
@@ -427,12 +429,12 @@ const QuickShoot = () => {
                     height: promptData.height
                 }
             });
-            setSuccessMessage('Prompt saved successfully!');
+            setSuccessMessage(t('quickShoot.promptSaved'));
             setShowSavePromptModal(false);
             setPromptName('');
             setTimeout(() => setSuccessMessage(null), 2000);
         } catch (err) {
-            setError('Failed to save prompt: ' + err.message);
+            setError(t('quickShoot.savePromptFailed') + err.message);
         }
     };
 
@@ -484,20 +486,20 @@ const QuickShoot = () => {
                                 <span className="material-symbols-outlined">
                                     {generationType === 'video' ? 'videocam' : 'photo_camera'}
                                 </span>
-                                Quick Shoot
+                                {t('quickShoot.title')}
                             </h3>
                             <div className="generation-mode-toggle">
                                 <button
                                     className={generationType === 'photo' ? 'active' : ''}
                                     onClick={() => setGenerationType('photo')}
                                 >
-                                    Photo
+                                    {t('quickShoot.photo')}
                                 </button>
                                 <button
                                     className={generationType === 'video' ? 'active' : ''}
                                     onClick={() => setGenerationType('video')}
                                 >
-                                    Video
+                                    {t('quickShoot.video')}
                                 </button>
                             </div>
                         </div>
@@ -507,7 +509,7 @@ const QuickShoot = () => {
 
                     {/* AI Engine */}
                     <div className="form-group">
-                        <label>AI Engine</label>
+                        <label>{t('quickShoot.aiEngine')}</label>
                         <select
                             value={effectiveAiModel?.frontend_slug || ''}
                             onChange={(e) => setSelectedAiModel(aiModels.find(m => m.frontend_slug === e.target.value))}
@@ -523,7 +525,7 @@ const QuickShoot = () => {
                     {/* Model Selector */}
                     {shouldShowModelSelector && (
                     <div className="form-group">
-                        <label>Model <span className="required">*</span></label>
+                        <label>{t('quickShoot.model')} <span className="required">*</span></label>
                         <div className="model-dropdown" ref={modelDropdownRef}>
                             <button
                                 type="button"
@@ -544,7 +546,7 @@ const QuickShoot = () => {
                                     </span>
                                 ) : (
                                     <span className="model-dropdown__placeholder">
-                                        {isLoadingModels ? 'Loading models...' : 'Select a model'}
+                                        {isLoadingModels ? t('quickShoot.loadingModels') : t('quickShoot.selectModel')}
                                     </span>
                                 )}
                                 <span className="material-symbols-outlined model-dropdown__chevron">expand_more</span>
@@ -556,7 +558,7 @@ const QuickShoot = () => {
                                         <input
                                             ref={modelSearchRef}
                                             type="text"
-                                            placeholder="Search models..."
+                                            placeholder={t('quickShoot.searchModels')}
                                             value={modelSearch}
                                             onChange={(e) => setModelSearch(e.target.value)}
                                             autoFocus
@@ -566,7 +568,7 @@ const QuickShoot = () => {
                                         {/* User's AI Characters from Models Generator */}
                                         {!marketplaceEnabled && userAiCharacters.filter(c => !modelSearch || c.name.toLowerCase().includes(modelSearch.toLowerCase()) || (c.style && c.style.toLowerCase().includes(modelSearch.toLowerCase()))).length > 0 && (
                                             <>
-                                                <div className="model-dropdown__section-label">My AI Models</div>
+                                                <div className="model-dropdown__section-label">{t('quickShoot.myAiModels')}</div>
                                                 {userAiCharacters
                                                     .filter(c => !modelSearch || c.name.toLowerCase().includes(modelSearch.toLowerCase()) || (c.style && c.style.toLowerCase().includes(modelSearch.toLowerCase())))
                                                     .map(character => (
@@ -596,7 +598,7 @@ const QuickShoot = () => {
 
                                         {/* Marketplace Models */}
                                         {marketplaceEnabled && models.filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase()) || (m.style && m.style.toLowerCase().includes(modelSearch.toLowerCase()))).length > 0 && (
-                                            <div className="model-dropdown__section-label">Marketplace</div>
+                                            <div className="model-dropdown__section-label">{t('quickShoot.marketplace')}</div>
                                         )}
                                         {marketplaceEnabled && models
                                             .filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase()) || (m.style && m.style.toLowerCase().includes(modelSearch.toLowerCase())))
@@ -620,7 +622,7 @@ const QuickShoot = () => {
                                             </div>
                                         ))}
                                         {((marketplaceEnabled ? models.filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase()) || (m.style && m.style.toLowerCase().includes(modelSearch.toLowerCase()))).length : 0) === 0) && userAiCharacters.filter(c => !modelSearch || c.name.toLowerCase().includes(modelSearch.toLowerCase()) || (c.style && c.style.toLowerCase().includes(modelSearch.toLowerCase()))).length === 0 && (
-                                            <div className="model-dropdown__empty">No models found</div>
+                                            <div className="model-dropdown__empty">{t('quickShoot.noModelsFound')}</div>
                                         )}
                                     </div>
                                 </div>
@@ -632,18 +634,18 @@ const QuickShoot = () => {
                     {/* Prompt */}
                     <div className="form-group">
                         <div className="label-with-action">
-                            <label>Prompt <span className="required">*</span></label>
+                            <label>{t('quickShoot.prompt')} <span className="required">*</span></label>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 {promptData.prompt.trim() && !isGuest && (
                                     <button className="btn-picker" onClick={() => setShowSavePromptModal(true)} title="Save this prompt as a template">
                                         <span className="material-symbols-outlined">save</span>
-                                        Save
+                                        {t('common.save')}
                                     </button>
                                 )}
                                 {savedPrompts.length > 0 && (
                                     <button className="btn-picker" onClick={() => setShowPromptPicker(!showPromptPicker)}>
                                         <span className="material-symbols-outlined">description</span>
-                                        {showPromptPicker ? 'Close' : 'Saved Prompts'}
+                                        {showPromptPicker ? t('common.close') : t('quickShoot.savedPrompts')}
                                     </button>
                                 )}
                             </div>
@@ -655,7 +657,7 @@ const QuickShoot = () => {
                                     <span className="material-symbols-outlined">search</span>
                                     <input
                                         type="text"
-                                        placeholder="Search prompts..."
+                                        placeholder={t('quickShoot.searchPrompts')}
                                         value={promptSearch}
                                         onChange={(e) => setPromptSearch(e.target.value)}
                                         autoFocus
@@ -673,18 +675,18 @@ const QuickShoot = () => {
                                             setPromptSearch('');
                                         }}
                                     >
-                                        <span className="picker-item-title">{p.name || 'Untitled Prompt'}</span>
+                                        <span className="picker-item-title">{p.name || t('quickShoot.untitledPrompt')}</span>
                                         <span className="picker-item-text">{(p.promptText || '').substring(0, 60)}...</span>
                                     </div>
                                 ))}
                                 {savedPrompts.filter(p => !promptSearch || (p.name || '').toLowerCase().includes(promptSearch.toLowerCase()) || (p.promptText || '').toLowerCase().includes(promptSearch.toLowerCase())).length === 0 && (
-                                    <div className="picker-empty">No prompts found</div>
+                                    <div className="picker-empty">{t('quickShoot.noPromptsFound')}</div>
                                 )}
                             </div>
                         )}
 
                         <textarea
-                            placeholder="Describe the shot: lighting, pose, mood, background..."
+                            placeholder={t('quickShoot.promptPlaceholder')}
                             value={promptData.prompt}
                             onChange={(e) => {
                                 if (e.target.value.length <= PROMPT_MAX_LENGTH) {
@@ -705,9 +707,9 @@ const QuickShoot = () => {
                     {/* Negative Prompt */}
                     {engineUiConfig.supportsNegativePrompt ? (
                     <div className="form-group">
-                        <label>Negative Prompt <span className="optional">(optional)</span></label>
+                        <label>{t('quickShoot.negativePrompt')} <span className="optional">{t('common.optional')}</span></label>
                         <textarea
-                            placeholder="What to avoid in the image..."
+                            placeholder={t('quickShoot.negativePromptPlaceholder')}
                             value={promptData.negativePrompt}
                             onChange={(e) => setPromptData(prev => ({ ...prev, negativePrompt: e.target.value }))}
                             rows="2"
@@ -716,7 +718,7 @@ const QuickShoot = () => {
                     ) : (
                     <div className="engine-note">
                         <span className="material-symbols-outlined">info</span>
-                        <span>This engine does not support negative prompts.</span>
+                        <span>{t('quickShoot.negativePromptNotSupported')}</span>
                     </div>
                     )}
 
@@ -734,11 +736,11 @@ const QuickShoot = () => {
                     {/* Output Settings (Photo Only) */}
                     {generationType === 'photo' && (
                     <div className="form-group">
-                        <label>Output Settings</label>
+                        <label>{t('quickShoot.outputSettings')}</label>
                         {!engineUiConfig.supportsCustomDimensions && (
                             <div className="engine-note">
                                 <span className="material-symbols-outlined">straighten</span>
-                                <span>Aspect ratio follows the selected preset for this engine.</span>
+                                <span>{t('quickShoot.aspectRatioNote')}</span>
                             </div>
                         )}
                         <div className="size-presets">
@@ -760,7 +762,7 @@ const QuickShoot = () => {
                                     className={`size-preset-btn ${promptData.quality === opt.value ? 'active' : ''}`}
                                     onClick={() => setPromptData(prev => ({ ...prev, quality: opt.value }))}
                                 >
-                                    {opt.label} · {opt.credits} credits
+                                    {t(`quickShoot.${opt.value}`)} · {opt.credits} {t('quickShoot.creditsNeeded')}
                                 </button>
                             ))}
                         </div>
@@ -822,16 +824,7 @@ const QuickShoot = () => {
                         <div className="generate-footer">
                             <div className="credit-info">
                                 <span className="material-symbols-outlined">generating_tokens</span>
-                                <span>{generationCost} credits</span>
-                                <span className="credit-divider">·</span>
-                                <span className="credit-balance">{creditBalance} available</span>
-                                {creditBalance < generationCost && (
-                                    <span className="credit-insufficient">
-                                        {isGuest ? (
-                                            <a href="/login" className="credit-signup-link">Sign up for more</a>
-                                        ) : 'Insufficient'}
-                                    </span>
-                                )}
+                                <span>{generationCost} {t('quickShoot.creditsNeeded')}</span>
                             </div>
                             <button
                                 className="btn-generate"
@@ -839,9 +832,9 @@ const QuickShoot = () => {
                                 disabled={isGenerating || !selectedModel || !sanitizedPromptData.prompt.trim() || creditBalance < generationCost}
                             >
                                 {isGenerating ? (
-                                    <><div className="spinner"></div> Generating...</>
+                                    <><div className="spinner"></div> {t('quickShoot.generating')}</>
                                 ) : (
-                                    <><span className="material-symbols-outlined">auto_awesome</span> Generate</>
+                                    <><span className="material-symbols-outlined">auto_awesome</span> {t('quickShoot.generate')}</>
                                 )}
                             </button>
                         </div>
@@ -885,11 +878,11 @@ const QuickShoot = () => {
                                 </div>
                                 {generatedImage && (
                                     <div className="result-actions">
-                                        <Button variant="secondary" size="sm" icon="download" onClick={handleDownload}>Download</Button>
-                                        <Button variant="secondary" size="sm" icon="bookmark" onClick={handleSave}>Save</Button>
-                                        <Button variant="secondary" size="sm" icon="refresh" onClick={handleRemix}>Remix</Button>
-                                        <Button variant="secondary" size="sm" icon="share" onClick={handleShare}>Share</Button>
-                                        <Button variant="outline" size="sm" icon="add_photo_alternate" onClick={handleAddToGallery}>Gallery</Button>
+                                        <Button variant="secondary" size="sm" icon="download" onClick={handleDownload}>{t('common.download')}</Button>
+                                        <Button variant="secondary" size="sm" icon="bookmark" onClick={handleSave}>{t('common.save')}</Button>
+                                        <Button variant="secondary" size="sm" icon="refresh" onClick={handleRemix}>{t('quickShoot.remix')}</Button>
+                                        <Button variant="secondary" size="sm" icon="share" onClick={handleShare}>{t('common.share')}</Button>
+                                        <Button variant="outline" size="sm" icon="add_photo_alternate" onClick={handleAddToGallery}>{t('nav.gallery')}</Button>
                                     </div>
                                 )}
                             </div>
@@ -908,31 +901,29 @@ const QuickShoot = () => {
             <SidePanel
                 open={showGalleryModal}
                 onClose={() => setShowGalleryModal(false)}
-                title="Add to Gallery"
+                title={t('quickShoot.addToGallery')}
                 footer={
                     <>
-                        <Button variant="ghost" size="sm" onClick={() => setShowGalleryModal(false)}>Cancel</Button>
-                        <Button variant="primary" size="sm" icon="add_photo_alternate" onClick={confirmAddToGallery}>Add to Gallery</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setShowGalleryModal(false)}>{t('common.cancel')}</Button>
+                        <Button variant="primary" size="sm" icon="add_photo_alternate" onClick={confirmAddToGallery}>{t('quickShoot.addToGallery')}</Button>
                     </>
                 }
             >
                 <div className="form-group">
-                    <label>Title *</label>
+                    <label>{t('quickShoot.galleryTitle')} <span className="required">*</span></label>
                     <input
                         type="text"
                         value={galleryTitle}
                         onChange={(e) => setGalleryTitle(e.target.value)}
-                        placeholder="e.g. Silver Metallic Dress"
                         maxLength={120}
                         autoFocus
                     />
                 </div>
                 <div className="form-group">
-                    <label>Description <span className="optional">(optional)</span></label>
+                    <label>{t('quickShoot.galleryDescription')} <span className="optional">{t('common.optional')}</span></label>
                     <textarea
                         value={galleryDescription}
                         onChange={(e) => setGalleryDescription(e.target.value)}
-                        placeholder="Describe your creation..."
                         rows={3}
                     />
                 </div>
@@ -942,21 +933,21 @@ const QuickShoot = () => {
             <Modal
                 open={showSavePromptModal}
                 onClose={() => setShowSavePromptModal(false)}
-                title="Save Prompt Template"
+                title={t('quickShoot.savePromptTitle')}
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setShowSavePromptModal(false)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={() => setShowSavePromptModal(false)}>{t('common.cancel')}</Button>
                         <Button variant="primary" size="md" onClick={handleSavePrompt} disabled={!promptName.trim() || isSavingPrompt}>
-                            {isSavingPrompt ? 'Saving...' : 'Save'}
+                            {isSavingPrompt ? t('common.loading') : t('common.save')}
                         </Button>
                     </>
                 }
             >
                 <div className="form-group">
-                    <label>Template Name</label>
+                    <label>{t('quickShoot.promptNameLabel')}</label>
                     <input
                         type="text"
-                        placeholder="e.g., Summer Collection Look"
+                        placeholder={t('quickShoot.promptNamePlaceholder')}
                         value={promptName}
                         onChange={(e) => setPromptName(e.target.value)}
                         autoFocus

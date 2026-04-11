@@ -12,6 +12,7 @@ import {
 } from '../../../hooks/wardrobe/useWardrobe';
 import { useUserCollections, useCreateCollection, useDeleteCollection } from '../../../hooks/designer/useDesigner';
 import { useFileUpload } from '../../../hooks/storage/useFileUpload';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { getNearestColorName } from '../../../utils/colors';
 import './Designer.css';
 
@@ -24,7 +25,7 @@ const CATEGORIES = [
     { id: 'jewellery', label: 'Jewellery', icon: 'diamond' },
 ];
 
-const ItemCard = ({ item, isOwner, onEdit, onUse, onDelete, onAddToCollection }) => (
+const ItemCard = ({ item, isOwner, onEdit, onUse, onDelete, onAddToCollection, t }) => (
     <div className="designer-card">
         <div className="designer-card__image">
             {item.thumbnailUrl ? (
@@ -41,21 +42,21 @@ const ItemCard = ({ item, isOwner, onEdit, onUse, onDelete, onAddToCollection })
             )}
             <div className="designer-card__overlay">
                 {isOwner && (
-                    <IconButton icon="edit" variant="ghost" onClick={() => onEdit(item)} title="Edit by Prompt" />
+                    <IconButton icon="edit" variant="ghost" onClick={() => onEdit(item)} title={t('designer.editByPrompt')} />
                 )}
-                <IconButton icon="photo_camera" variant="ghost" onClick={() => onUse(item)} title="Use in Quick Shoot" />
+                <IconButton icon="photo_camera" variant="ghost" onClick={() => onUse(item)} title={t('quickShoot.title')} />
                 {isOwner && onAddToCollection && (
-                    <IconButton icon="playlist_add" variant="ghost" onClick={() => onAddToCollection(item)} title="Add to Collection" />
+                    <IconButton icon="playlist_add" variant="ghost" onClick={() => onAddToCollection(item)} title={t('designer.addToCollection')} />
                 )}
                 {isOwner && (
-                    <IconButton icon="delete" variant="ghost" className="btn-delete-action" onClick={() => onDelete(item.id)} title="Delete" />
+                    <IconButton icon="delete" variant="ghost" className="btn-delete-action" onClick={() => onDelete(item.id)} title={t('common.delete')} />
                 )}
             </div>
         </div>
         <div className="designer-card__info">
             <div className="designer-card__meta">
                 <h3>{item.title}</h3>
-                <span className="designer-card__category">{item.category}</span>
+                <span className="designer-card__category">{t(`designer.categories.${item.category}`) || item.category}</span>
                 {item.brand && <span className="designer-card__brand">{item.brand}</span>}
             </div>
             {item.colour && (
@@ -73,7 +74,7 @@ const ItemCard = ({ item, isOwner, onEdit, onUse, onDelete, onAddToCollection })
     </div>
 );
 
-const CollectionCard = ({ collection, onView, onDelete, itemCount }) => (
+const CollectionCard = ({ collection, onView, onDelete, itemCount, t }) => (
     <div className="collection-card" onClick={() => onView(collection)}>
         <div className="collection-card__header">
             <div className="collection-card__icon">
@@ -85,14 +86,14 @@ const CollectionCard = ({ collection, onView, onDelete, itemCount }) => (
                         <span className="material-symbols-outlined">public</span>
                     </span>
                 )}
-                <IconButton icon="delete" variant="ghost" className="btn-delete-action" onClick={() => onDelete(collection)} title="Delete" />
+                <IconButton icon="delete" variant="ghost" className="btn-delete-action" onClick={() => onDelete(collection)} title={t('common.delete')} />
             </div>
         </div>
         <div className="collection-card__info">
             <h3>{collection.name}</h3>
             {collection.description && <p className="collection-card__desc">{collection.description}</p>}
             <div className="collection-card__meta">
-                <span>{itemCount} items</span>
+                <span>{itemCount === 1 ? t('designer.collectionCountSingle').replace('{count}', itemCount) : t('designer.itemsCount').replace('{count}', itemCount)}</span>
                 {collection.tags?.length > 0 && (
                     <span className="collection-card__tags">
                         {collection.tags.slice(0, 3).map(tag => (
@@ -107,6 +108,7 @@ const CollectionCard = ({ collection, onView, onDelete, itemCount }) => (
 
 const Designer = () => {
     const { user, isGuest } = useAuth();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const userId = user?.id;
 
@@ -184,7 +186,7 @@ const Designer = () => {
     const mySentinelRef = useRef(null);
     const selectedCategoryLabels = CATEGORIES
         .filter(cat => activeCategories.includes(cat.id))
-        .map(cat => cat.label);
+        .map(cat => t(`designer.categories.${cat.id}`));
 
     const handleCategoryChange = useCallback((catId) => {
         setActiveCategories(prev => prev.includes(catId)
@@ -333,8 +335,8 @@ const Designer = () => {
         <div className="designer-page">
             <main className="designer-main">
                 <div className="step-header">
-                    <h2>Designer</h2>
-                    <p>Create and manage fashion items &amp; collections for your shoots</p>
+                    <h2>{t('designer.title')}</h2>
+                    <p>{t('designer.subtitle')}</p>
                 </div>
 
                 {/* Tab Navigation */}
@@ -344,14 +346,14 @@ const Designer = () => {
                         onClick={() => handleTabChange('items')}
                     >
                         <span className="material-symbols-outlined">checkroom</span>
-                        Wardrobe
+                        {t('designer.wardrobe')}
                     </button>
                     <button
                         className={`designer-tab ${activeTab === 'collections' ? 'active' : ''}`}
                         onClick={() => handleTabChange('collections')}
                     >
                         <span className="material-symbols-outlined">folder_special</span>
-                        Collections
+                        {t('designer.collections')}
                         {collections.length > 0 && <span className="designer-tab__count">{collections.length}</span>}
                     </button>
                 </div>
@@ -375,13 +377,13 @@ const Designer = () => {
                                 ))}
                                 {activeCategories.length > 0 && (
                                     <Button variant="outline" size="sm" onClick={() => setActiveCategories([])}>
-                                        Clear Filters
+                                        {t('designer.clearFilters')}
                                     </Button>
                                 )}
                             </div>
                             {!isGuest && (
                                 <Button variant="primary" size="md" icon="add" onClick={() => setShowNewItemModal(true)}>
-                                    New Item
+                                    {t('designer.newItem')}
                                 </Button>
                             )}
                         </div>
@@ -389,14 +391,14 @@ const Designer = () => {
                         {isLoading && (
                             <div className="designer-empty">
                                 <span className="material-symbols-outlined">hourglass_empty</span>
-                                <h3>Loading items...</h3>
+                                <h3>{t('designer.loadingItems')}</h3>
                             </div>
                         )}
 
                         {error && (
                             <div className="designer-empty">
                                 <span className="material-symbols-outlined">error</span>
-                                <h3>Failed to load items</h3>
+                                <h3>{t('designer.failedToLoadItems')}</h3>
                                 <p>{error.message}</p>
                             </div>
                         )}
@@ -408,7 +410,7 @@ const Designer = () => {
                                     <div className="designer-section">
                                         <h3 className="designer-section__title">
                                             <span className="material-symbols-outlined">person</span>
-                                            My Items
+                                            {t('designer.myItems')}
                                         </h3>
                                         {myItems.length > 0 ? (
                                             <>
@@ -422,17 +424,18 @@ const Designer = () => {
                                                             onUse={handleUseInQuickShoot}
                                                             onDelete={() => handleDeleteItem(item)}
                                                             onAddToCollection={collections.length > 0 ? handleAddToCollection : null}
+                                                            t={t}
                                                         />
                                                     ))}
                                                 </div>
                                                 {(hasMoreMy || isFetchingMoreMy) && (
                                                     <div className="designer-load-more" ref={mySentinelRef}>
                                                         <span className="spinner" />
-                                                        <span>{isFetchingMoreMy ? 'Loading more items...' : 'Scroll to load more items'}</span>
+                                                        <span>{isFetchingMoreMy ? t('designer.loadingMoreItems') : t('designer.scrollToLoadMore')}</span>
                                                     </div>
                                                 )}
                                                 <p className="designer-item-count">
-                                                    {hasMoreMy ? `Loaded ${myItems.length} items` : `Showing all ${myItems.length} items`}
+                                                    {hasMoreMy ? t('designer.loadedItems').replace('{count}', myItems.length) : t('designer.showingAllItems').replace('{count}', myItems.length)}
                                                 </p>
                                             </>
                                         ) : (
@@ -440,8 +443,8 @@ const Designer = () => {
                                                 <span className="material-symbols-outlined">palette</span>
                                                 <p>
                                                     {activeCategories.length > 0
-                                                        ? `No saved items found in ${selectedCategoryLabels.join(', ')}.`
-                                                        : 'No saved items yet. Click "New Item" to create one.'}
+                                                        ? t('designer.noSavedItemsFoundIn').replace('{categories}', selectedCategoryLabels.join(', '))
+                                                        : t('designer.noSavedItemsYet')}
                                                 </p>
                                             </div>
                                         )}
@@ -452,7 +455,7 @@ const Designer = () => {
                                 <div className="designer-section">
                                     <h3 className="designer-section__title">
                                         <span className="material-symbols-outlined">auto_awesome</span>
-                                        Platform Wardrobe
+                                        {t('designer.platformWardrobe')}
                                     </h3>
                                     {platformItems.length > 0 ? (
                                         <>
@@ -465,17 +468,18 @@ const Designer = () => {
                                                         onEdit={handleEditItem}
                                                         onUse={handleUseInQuickShoot}
                                                         onDelete={handleDeleteItem}
+                                                        t={t}
                                                     />
                                                 ))}
                                             </div>
                                             {(hasMorePlatform || isFetchingMorePlatform) && (
                                                 <div className="designer-load-more" ref={platformSentinelRef}>
                                                     <span className="spinner" />
-                                                    <span>{isFetchingMorePlatform ? 'Loading more items...' : 'Scroll to load more items'}</span>
+                                                    <span>{isFetchingMorePlatform ? t('designer.loadingMoreItems') : t('designer.scrollToLoadMore')}</span>
                                                 </div>
                                             )}
                                             <p className="designer-item-count">
-                                                {hasMorePlatform ? `Loaded ${platformItems.length} items` : `Showing all ${platformItems.length} items`}
+                                                {hasMorePlatform ? t('designer.loadedItems').replace('{count}', platformItems.length) : t('designer.showingAllItems').replace('{count}', platformItems.length)}
                                             </p>
                                         </>
                                     ) : (
@@ -483,8 +487,8 @@ const Designer = () => {
                                             <span className="material-symbols-outlined">inventory_2</span>
                                             <p>
                                                 {activeCategories.length > 0
-                                                    ? `No platform items found in ${selectedCategoryLabels.join(', ')}.`
-                                                    : 'No platform items available.'}
+                                                    ? t('designer.noPlatformItemsFoundIn').replace('{categories}', selectedCategoryLabels.join(', '))
+                                                    : t('designer.noPlatformItemsAvailable')}
                                             </p>
                                         </div>
                                     )}
@@ -501,11 +505,11 @@ const Designer = () => {
                     <>
                         <div className="designer-toolbar">
                             <div className="designer-toolbar__info">
-                                <span className="designer-toolbar__count">{collections.length} collection{collections.length !== 1 ? 's' : ''}</span>
+                                <span className="designer-toolbar__count">{collections.length === 1 ? t('designer.collectionCountSingle').replace('{count}', collections.length) : t('designer.collectionsCount').replace('{count}', collections.length)}</span>
                             </div>
                             {!isGuest && (
                                 <Button variant="primary" size="md" icon="create_new_folder" onClick={() => setShowNewCollectionModal(true)}>
-                                    New Collection
+                                    {t('designer.newCollection')}
                                 </Button>
                             )}
                         </div>
@@ -513,7 +517,7 @@ const Designer = () => {
                         {collectionsLoading && (
                             <div className="designer-empty">
                                 <span className="material-symbols-outlined">hourglass_empty</span>
-                                <h3>Loading collections...</h3>
+                                <h3>{t('designer.loadingCollections')}</h3>
                             </div>
                         )}
 
@@ -526,17 +530,18 @@ const Designer = () => {
                                         onView={handleViewCollection}
                                         onDelete={handleDeleteCollection}
                                         itemCount={col.itemIds?.length || 0}
+                                        t={t}
                                     />
                                 ))}
                             </div>
                         ) : !collectionsLoading && (
                             <div className="designer-empty">
                                 <span className="material-symbols-outlined">folder_off</span>
-                                <h3>No Collections Yet</h3>
-                                <p>Organise your fashion items into collections for easy access during shoots.</p>
+                                <h3>{t('designer.noCollectionsYet')}</h3>
+                                <p>{t('designer.organiseItemsIntoCollections')}</p>
                                 {!isGuest && (
                                     <Button variant="outline" size="md" icon="create_new_folder" onClick={() => setShowNewCollectionModal(true)} style={{ marginTop: 16 }}>
-                                        Create First Collection
+                                        {t('designer.createFirstCollection')}
                                     </Button>
                                 )}
                             </div>
@@ -553,22 +558,22 @@ const Designer = () => {
             <Modal
                 open={showNewItemModal}
                 onClose={() => setShowNewItemModal(false)}
-                title="Create New Item"
+                title={t('designer.createNewItem')}
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setShowNewItemModal(false)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={() => setShowNewItemModal(false)}>{t('common.cancel')}</Button>
                         <Button
                             variant="primary" size="md"
                             onClick={handleCreateItem}
                             disabled={!newItem.title.trim() || !selectedFile || isCreating || isUploading}
                         >
-                            {isUploading ? 'Uploading...' : isCreating ? 'Saving...' : 'Save Item'}
+                            {isUploading ? t('designer.uploading') : isCreating ? t('designer.savingItem') : t('designer.saveItem')}
                         </Button>
                     </>
                 }
             >
                 <div className="form-group">
-                    <label>Image <span className="form-required">*</span></label>
+                    <label>{t('designer.imageRequired')}</label>
                     {imagePreview ? (
                         <div className="image-preview-container">
                             <img src={imagePreview} alt="Preview" className="image-preview" />
@@ -587,13 +592,13 @@ const Designer = () => {
                                 {isUploading ? (
                                     <>
                                         <div className="processing-spinner spinner-small"></div>
-                                        <span className="file-upload-text">Uploading...</span>
+                                        <span className="file-upload-text">{t('designer.uploading')}</span>
                                     </>
                                 ) : (
                                     <>
                                         <span className="material-symbols-outlined">add_photo_alternate</span>
-                                        <span className="file-upload-text">Click to upload image or Drag & Drop</span>
-                                        <span className="file-upload-hint">PNG, JPG, WEBP up to 5MB</span>
+                                        <span className="file-upload-text">{t('designer.clickToUpload')}</span>
+                                        <span className="file-upload-hint">{t('designer.uploadHint')}</span>
                                     </>
                                 )}
                             </label>
@@ -601,11 +606,11 @@ const Designer = () => {
                     )}
                 </div>
                 <div className="form-group">
-                    <label>Title <span className="form-required">*</span></label>
+                    <label>{t('designer.titleRequired')}</label>
                     <input type="text" placeholder="e.g., Classic Blazer" value={newItem.title} onChange={e => setNewItem({ ...newItem, title: e.target.value })} />
                 </div>
                 <div className="form-group">
-                    <label>Category</label>
+                    <label>{t('designer.category')}</label>
                     <div className="category-buttons">
                         {CATEGORIES.map(cat => (
                             <button
@@ -614,22 +619,22 @@ const Designer = () => {
                                 onClick={() => setNewItem({ ...newItem, category: cat.id })}
                             >
                                 <span className="material-symbols-outlined thin-icon">{cat.icon}</span>
-                                {cat.label}
+                                {t(`designer.categories.${cat.id}`)}
                             </button>
                         ))}
                     </div>
                 </div>
                 <div className="form-group">
-                    <label>Brand <span className="form-optional">(optional)</span></label>
+                    <label>{t('designer.brandOptional')}</label>
                     <input type="text" placeholder="e.g., Zara, Nike, Gucci" value={newItem.brand} onChange={e => setNewItem({ ...newItem, brand: e.target.value })} />
                 </div>
                 <div className="form-row">
                     <div className="form-group">
-                        <label>Style <span className="form-optional">(optional)</span></label>
+                        <label>{t('designer.styleOptional')}</label>
                         <input type="text" placeholder="e.g., Casual, Formal" value={newItem.style} onChange={e => setNewItem({ ...newItem, style: e.target.value })} />
                     </div>
                     <div className="form-group">
-                        <label>Colour <span className="form-optional">(optional)</span></label>
+                        <label>{t('designer.colourOptional')}</label>
                         <div className="color-picker-container" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <input
                                 type="color"
@@ -642,7 +647,7 @@ const Designer = () => {
                             />
                             <input
                                 type="text"
-                                placeholder="Hex or Name (e.g. #FF0000 or Red)"
+                                placeholder={t('designer.hexOrName')}
                                 value={newItem.colour}
                                 onChange={e => setNewItem({ ...newItem, colour: e.target.value })}
                                 style={{ flex: 1 }}
@@ -651,17 +656,17 @@ const Designer = () => {
                     </div>
                 </div>
                 <div className="form-group">
-                    <label>Gender <span className="form-optional">(optional)</span></label>
+                    <label>{t('designer.genderOptional')}</label>
                     <select value={newItem.gender} onChange={e => setNewItem({ ...newItem, gender: e.target.value })}>
-                        <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="unisex">Unisex</option>
+                        <option value="">{t('designer.selectGender')}</option>
+                        <option value="male">{t('designer.male')}</option>
+                        <option value="female">{t('designer.female')}</option>
+                        <option value="unisex">{t('designer.unisex')}</option>
                     </select>
                 </div>
                 <div className="form-group">
-                    <label>Description <span className="form-optional">(optional)</span></label>
-                    <textarea placeholder="Describe the fashion item in detail..." value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} rows="3" />
+                    <label>{t('designer.descriptionOptional')}</label>
+                    <textarea placeholder={t('designer.describeFashionItem')} value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} rows="3" />
                 </div>
             </Modal>
 
@@ -670,10 +675,10 @@ const Designer = () => {
             <Modal
                 open={showEditItemModal && !!selectedItem}
                 onClose={() => setShowEditItemModal(false)}
-                title="Edit by Prompt"
+                title={t('designer.editByPrompt')}
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setShowEditItemModal(false)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={() => setShowEditItemModal(false)}>{t('common.cancel')}</Button>
                         <Button
                             variant="primary" size="md" icon="auto_awesome"
                             onClick={() => {
@@ -682,7 +687,7 @@ const Designer = () => {
                             }}
                             disabled={!editPrompt.trim()}
                         >
-                            Create Variation
+                            {t('designer.createVariation')}
                         </Button>
                     </>
                 }
@@ -698,9 +703,9 @@ const Designer = () => {
                     </div>
                 )}
                 <div className="form-group">
-                    <label>Modification Prompt</label>
+                    <label>{t('designer.modificationPrompt')}</label>
                     <textarea
-                        placeholder="Describe how to modify this item... e.g., 'Change colour to navy blue' or 'Make it a cropped version'"
+                        placeholder={t('designer.modificationPromptPlaceholder')}
                         value={editPrompt}
                         onChange={e => setEditPrompt(e.target.value)}
                         rows="3"
@@ -708,7 +713,7 @@ const Designer = () => {
                 </div>
                 <div className="edit-prompt-hint">
                     <span className="material-symbols-outlined">info</span>
-                    <span>AI will generate a new variation of this item based on your prompt. Costs 3 credits.</span>
+                    <span>{t('designer.editPromptHint')}</span>
                 </div>
             </Modal>
 
@@ -716,32 +721,32 @@ const Designer = () => {
             <Modal
                 open={showNewCollectionModal}
                 onClose={() => setShowNewCollectionModal(false)}
-                title="New Collection"
+                title={t('designer.newCollection')}
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setShowNewCollectionModal(false)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={() => setShowNewCollectionModal(false)}>{t('common.cancel')}</Button>
                         <Button variant="primary" size="md" onClick={handleCreateCollection} disabled={!newCollection.name.trim() || isCreatingCollection}>
-                            {isCreatingCollection ? 'Creating...' : 'Create Collection'}
+                            {isCreatingCollection ? t('common.loading') : t('designer.newCollection')}
                         </Button>
                     </>
                 }
             >
                 <div className="form-group">
-                    <label>Collection Name <span className="form-required">*</span></label>
-                    <input type="text" placeholder="e.g., Summer 2026 Lookbook" value={newCollection.name} onChange={e => setNewCollection({ ...newCollection, name: e.target.value })} />
+                    <label>{t('designer.collectionNameRequired')}</label>
+                    <input type="text" placeholder={t('designer.collectionNamePlaceholder')} value={newCollection.name} onChange={e => setNewCollection({ ...newCollection, name: e.target.value })} />
                 </div>
                 <div className="form-group">
-                    <label>Description <span className="form-optional">(optional)</span></label>
-                    <textarea placeholder="Describe this collection..." value={newCollection.description} onChange={e => setNewCollection({ ...newCollection, description: e.target.value })} rows="2" />
+                    <label>{t('designer.descriptionOptional')}</label>
+                    <textarea placeholder={t('designer.describeCollection')} value={newCollection.description} onChange={e => setNewCollection({ ...newCollection, description: e.target.value })} rows="2" />
                 </div>
                 <div className="form-group">
-                    <label>Tags <span className="form-optional">(comma-separated)</span></label>
-                    <input type="text" placeholder="e.g., summer, casual, streetwear" value={newCollection.tags} onChange={e => setNewCollection({ ...newCollection, tags: e.target.value })} />
+                    <label>{t('designer.tagsCommaSeparated')}</label>
+                    <input type="text" placeholder={t('designer.tagsPlaceholder')} value={newCollection.tags} onChange={e => setNewCollection({ ...newCollection, tags: e.target.value })} />
                 </div>
                 <div className="form-group form-group--inline">
                     <label>
                         <input type="checkbox" checked={newCollection.isPublic} onChange={e => setNewCollection({ ...newCollection, isPublic: e.target.checked })} />
-                        <span>Make this collection public</span>
+                        <span>{t('designer.makePublic')}</span>
                     </label>
                 </div>
             </Modal>
@@ -750,18 +755,18 @@ const Designer = () => {
             <Modal
                 open={!!deleteCollectionConfirm}
                 onClose={() => setDeleteCollectionConfirm(null)}
-                title="Delete Collection"
+                title={t('designer.deleteCollection')}
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setDeleteCollectionConfirm(null)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={() => setDeleteCollectionConfirm(null)}>{t('common.cancel')}</Button>
                         <Button variant="danger" size="md" onClick={confirmDeleteCollection} disabled={isDeletingCollection}>
-                            {isDeletingCollection ? 'Deleting...' : 'Delete'}
+                            {isDeletingCollection ? t('common.loading') : t('common.delete')}
                         </Button>
                     </>
                 }
             >
-                <p>Are you sure you want to delete collection <strong>&quot;{deleteCollectionConfirm?.name}&quot;</strong>?</p>
-                <p style={{ marginTop: '8px', color: 'rgba(255, 255, 255, 0.5)' }}>Items in this collection will not be deleted.</p>
+                <p>{t('designer.deleteCollectionConfirmMessage').replace('{name}', deleteCollectionConfirm?.name)}</p>
+                <p style={{ marginTop: '8px', color: 'rgba(255, 255, 255, 0.5)' }}>{t('designer.itemsWillNotBeDeleted')}</p>
             </Modal>
 
             {/* Collection Detail Modal */}
@@ -800,7 +805,7 @@ const Designer = () => {
                             ) : (
                                 <div className="designer-empty designer-empty--compact">
                                     <span className="material-symbols-outlined">inventory_2</span>
-                                    <p>No items in this collection yet. Add items from your wardrobe.</p>
+                                    <p>{t('designer.noItemsInCollection')}</p>
                                 </div>
                             )}
                         </div>
@@ -812,7 +817,7 @@ const Designer = () => {
             <Modal
                 open={showAddToCollectionModal && !!selectedItem}
                 onClose={() => setShowAddToCollectionModal(false)}
-                title="Add to Collection"
+                title={t('designer.addToCollection')}
             >
                 {selectedItem && (
                     <div className="add-to-collection__item">
@@ -835,13 +840,13 @@ const Designer = () => {
                             >
                                 <span className="material-symbols-outlined">{alreadyIn ? 'check_circle' : 'folder_special'}</span>
                                 <span>{col.name}</span>
-                                {alreadyIn && <span className="add-to-collection__badge">Added</span>}
+                                {alreadyIn && <span className="add-to-collection__badge">{t('designer.added')}</span>}
                             </button>
                         );
                     })}
                     {collections.length === 0 && (
                         <div className="designer-empty designer-empty--compact">
-                            <p>No collections yet. Create one first.</p>
+                            <p>{t('designer.noCollectionsCreateFirst')}</p>
                         </div>
                     )}
                 </div>
@@ -851,18 +856,18 @@ const Designer = () => {
             <Modal
                 open={!!deleteConfirm}
                 onClose={() => setDeleteConfirm(null)}
-                title="Confirm Delete"
+                title={t('common.delete')}
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={() => setDeleteConfirm(null)}>{t('common.cancel')}</Button>
                         <Button variant="danger" size="md" onClick={confirmDelete} disabled={isDeleting}>
-                            {isDeleting ? 'Deleting...' : 'Delete'}
+                            {isDeleting ? t('common.loading') : t('common.delete')}
                         </Button>
                     </>
                 }
             >
-                <p>Are you sure you want to delete <strong>&quot;{deleteConfirm?.title}&quot;</strong>?</p>
-                <p style={{ marginTop: '8px', color: 'rgba(255, 255, 255, 0.5)' }}>This action cannot be undone.</p>
+                <p>{t('designer.deleteItemConfirmMessage').replace('{title}', deleteConfirm?.title)}</p>
+                <p style={{ marginTop: '8px', color: 'rgba(255, 255, 255, 0.5)' }}>{t('designer.actionCannotBeUndone')}</p>
             </Modal>
         </div>
     );

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { Button } from '../../../components/common/Button/Button';
 import './Account.css';
 
 const Account = () => {
     const { user, profile, isGuest, creditBalance, signOut } = useAuth();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const [signingOut, setSigningOut] = useState(false);
 
@@ -24,8 +26,8 @@ const Account = () => {
             <div className="account-main">
                 {/* Header */}
                 <div className="account-header">
-                    <h2>Account</h2>
-                    <p>Manage your profile and preferences</p>
+                    <h2>{t('account.title')}</h2>
+                    <p>{t('account.subtitle')}</p>
                 </div>
 
                 <div className="account-sections">
@@ -33,7 +35,7 @@ const Account = () => {
                     <section className="account-card">
                         <div className="account-card__header">
                             <span className="material-symbols-outlined">person</span>
-                            Profile
+                            {t('account.profile')}
                         </div>
                         <div className="account-card__body">
                             <div className="account-profile">
@@ -45,12 +47,12 @@ const Account = () => {
                                     )}
                                 </div>
                                 <div className="account-profile__info">
-                                    <h3>{profile?.display_name || (isGuest ? 'Guest User' : 'User')}</h3>
+                                    <h3>{profile?.display_name || (isGuest ? t('auth.guestUser') : t('common.user'))}</h3>
                                     <p className="account-profile__email">
-                                        {isGuest ? 'No email linked' : (profile?.email || user?.email)}
+                                        {isGuest ? t('auth.noEmailLinked') : (profile?.email || user?.email)}
                                     </p>
                                     <span className={`account-badge ${isGuest ? 'account-badge--guest' : ''}`}>
-                                        {isGuest ? 'Guest' : (profile?.subscription_tier || 'Free')}
+                                        {isGuest ? t('auth.guest') : (profile?.subscription_tier || t('account.free'))}
                                     </span>
                                 </div>
                             </div>
@@ -61,22 +63,22 @@ const Account = () => {
                     <section className="account-card">
                         <div className="account-card__header">
                             <span className="material-symbols-outlined">toll</span>
-                            Credits
+                            {t('account.credits')}
                         </div>
                         <div className="account-card__body">
                             <div className="account-credits">
                                 <div className="account-credits__balance">
                                     <span className="account-credits__number">{creditBalance}</span>
-                                    <span className="account-credits__label">Credits Available</span>
+                                    <span className="account-credits__label">{t('account.creditsAvailable')}</span>
                                 </div>
                                 <div className="account-credits__costs">
                                     <div className="account-credits__cost-item">
-                                        <span>Quick Shoot</span>
-                                        <span className="account-credits__cost-value">5 credits</span>
+                                        <span>{t('account.quickShootCost')}</span>
+                                        <span className="account-credits__cost-value">5 {t('account.creditsCost')}</span>
                                     </div>
                                     <div className="account-credits__cost-item">
-                                        <span>AI Model</span>
-                                        <span className="account-credits__cost-value">15 credits</span>
+                                        <span>{t('account.aiModelCost')}</span>
+                                        <span className="account-credits__cost-value">15 {t('account.creditsCost')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -90,15 +92,15 @@ const Account = () => {
                             <span className="material-symbols-outlined">
                                 {isGuest ? 'login' : 'logout'}
                             </span>
-                            Session
+                            {t('auth.session')}
                         </div>
                         <div className="account-card__body">
                             <div className="account-session">
                                 {isGuest ? (
                                     <>
                                         <div className="account-session__info">
-                                            <h4>Sign Up</h4>
-                                            <p>Create an account to save your progress</p>
+                                            <h4>{t('auth.signUp')}</h4>
+                                            <p>{t('auth.createAccountToSave')}</p>
                                         </div>
                                         <Button
                                             variant="primary"
@@ -106,14 +108,14 @@ const Account = () => {
                                             icon="login"
                                             onClick={handleSignUp}
                                         >
-                                            Sign Up
+                                            {t('auth.signUp')}
                                         </Button>
                                     </>
                                 ) : (
                                     <>
                                         <div className="account-session__info">
-                                            <h4>Sign Out</h4>
-                                            <p>End your current session</p>
+                                            <h4>{t('auth.signOut')}</h4>
+                                            <p>{t('auth.endYourSession')}</p>
                                         </div>
                                         <Button
                                             variant="danger"
@@ -122,7 +124,7 @@ const Account = () => {
                                             loading={signingOut}
                                             onClick={handleSignOut}
                                         >
-                                            Sign Out
+                                            {t('auth.signOut')}
                                         </Button>
                                     </>
                                 )}

@@ -10,15 +10,16 @@ import {
     useDeletePrompt,
 } from '../../../hooks/prompts/usePrompts';
 import { PROMPT_CATEGORY_OPTIONS } from './promptCategoryOptions';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import './Prompts.css';
 
-const PromptCard = ({ prompt, isOwner, onUse, onDelete }) => (
+const PromptCard = ({ prompt, isOwner, onUse, onDelete, t }) => (
     <div className="prompt-card">
         <div className="prompt-card__header">
             <h3>{prompt.name}</h3>
             <div className="prompt-card__actions">
                 {isOwner && (
-                    <IconButton icon="delete" variant="ghost" onClick={onDelete} title="Delete" />
+                    <IconButton icon="delete" variant="ghost" onClick={onDelete} title={t('common.delete')} />
                 )}
             </div>
         </div>
@@ -28,7 +29,7 @@ const PromptCard = ({ prompt, isOwner, onUse, onDelete }) => (
             </div>
             {prompt.negativePrompt && (
                 <div className="negative-preview" title={prompt.negativePrompt}>
-                    <span className="label">Negative:</span>
+                    <span className="label">{t('prompts.negativePrompt')}:</span>
                     <p>{prompt.negativePrompt}</p>
                 </div>
             )}
@@ -38,7 +39,7 @@ const PromptCard = ({ prompt, isOwner, onUse, onDelete }) => (
             </div>
         </div>
         <div className="prompt-card__footer">
-            <Button variant="outline" size="sm" icon="play_arrow" fullWidth onClick={() => onUse(prompt)}>Use Template</Button>
+            <Button variant="outline" size="sm" icon="play_arrow" fullWidth onClick={() => onUse(prompt)}>{t('prompts.useTemplate')}</Button>
         </div>
     </div>
 );
@@ -47,6 +48,7 @@ const ITEMS_PER_PAGE = 20;
 
 const Prompts = () => {
     const { user, isGuest } = useAuth();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const userId = user?.id;
 
@@ -165,13 +167,13 @@ const Prompts = () => {
         <div className="prompts-page">
             <main className="prompts-main">
                 <div className="step-header">
-                    <h2>Prompt Templates</h2>
-                    <p>Save and manage your favorite prompts for quick access</p>
+                    <h2>{t('prompts.title')}</h2>
+                    <p>{t('prompts.subtitle')}</p>
                 </div>
 
                 <div className="prompts-toolbar">
                     {!isGuest && (
-                        <Button variant="primary" size="md" icon="add" onClick={() => setShowAddForm(true)}>New Template</Button>
+                        <Button variant="primary" size="md" icon="add" onClick={() => setShowAddForm(true)}>{t('prompts.newTemplate')}</Button>
                     )}
                 </div>
 
@@ -179,27 +181,27 @@ const Prompts = () => {
                 <Modal
                     open={showAddForm}
                     onClose={() => setShowAddForm(false)}
-                    title="New Prompt Template"
+                    title={t('prompts.newTemplate')}
                     footer={
                         <>
-                            <Button variant="secondary" size="md" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                            <Button variant="secondary" size="md" onClick={() => setShowAddForm(false)}>{t('common.cancel')}</Button>
                             <Button variant="primary" size="md" onClick={handleAddPrompt} disabled={!newPrompt.name.trim() || !newPrompt.prompt.trim() || isCreating}>
-                                {isCreating ? 'Saving...' : 'Save Template'}
+                                {isCreating ? t('common.loading') : t('prompts.saveTemplate')}
                             </Button>
                         </>
                     }
                 >
                     <div className="form-group">
-                        <label>Template Name</label>
+                        <label>{t('prompts.templateName')}</label>
                         <input
                             type="text"
-                            placeholder="e.g., Editorial Portrait"
+                            placeholder={t('prompts.templateNamePlaceholder')}
                             value={newPrompt.name}
                             onChange={(e) => setNewPrompt({ ...newPrompt, name: e.target.value })}
                         />
                     </div>
                     <div className="form-group">
-                        <label>Category</label>
+                        <label>{t('prompts.category')}</label>
                         <select
                             value={newPrompt.category}
                             onChange={(e) => setNewPrompt({ ...newPrompt, category: e.target.value })}
@@ -210,18 +212,18 @@ const Prompts = () => {
                         </select>
                     </div>
                     <div className="form-group">
-                        <label>Prompt</label>
+                        <label>{t('prompts.prompt')}</label>
                         <textarea
-                            placeholder="Describe the image style..."
+                            placeholder={t('prompts.promptPlaceholder')}
                             value={newPrompt.prompt}
                             onChange={(e) => setNewPrompt({ ...newPrompt, prompt: e.target.value })}
                             rows="4"
                         />
                     </div>
                     <div className="form-group">
-                        <label>Negative Prompt <span className="optional">(optional)</span></label>
+                        <label>{t('prompts.negativePrompt')} <span className="optional">{t('common.optional')}</span></label>
                         <textarea
-                            placeholder="What to avoid..."
+                            placeholder={t('prompts.negativePromptPlaceholder')}
                             value={newPrompt.negativePrompt}
                             onChange={(e) => setNewPrompt({ ...newPrompt, negativePrompt: e.target.value })}
                             rows="2"
@@ -229,7 +231,7 @@ const Prompts = () => {
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Width</label>
+                            <label>{t('prompts.width')}</label>
                             <input
                                 type="number"
                                 value={newPrompt.presets.width}
@@ -240,7 +242,7 @@ const Prompts = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Height</label>
+                            <label>{t('prompts.height')}</label>
                             <input
                                 type="number"
                                 value={newPrompt.presets.height}
@@ -257,25 +259,25 @@ const Prompts = () => {
                 <Modal
                     open={!!deleteConfirm}
                     onClose={() => setDeleteConfirm(null)}
-                    title="Confirm Delete"
+                    title={t('prompts.confirmDelete')}
                     footer={
                         <>
-                            <Button variant="secondary" size="md" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+                            <Button variant="secondary" size="md" onClick={() => setDeleteConfirm(null)}>{t('common.cancel')}</Button>
                             <Button variant="danger" size="md" onClick={confirmDelete} disabled={isDeleting}>
-                                {isDeleting ? 'Deleting...' : 'Delete'}
+                                {isDeleting ? t('common.loading') : t('common.delete')}
                             </Button>
                         </>
                     }
                 >
-                    <p>Are you sure you want to delete template <strong>"{deleteConfirm?.name}"</strong>?</p>
-                    <p style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>This action cannot be undone.</p>
+                    <p>{t('prompts.deleteConfirmMessage').replace('{name}', deleteConfirm?.name)}</p>
+                    <p style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>{t('prompts.cannotBeUndone')}</p>
                 </Modal>
 
                 {/* Loading State */}
                 {isLoading && (
                     <div className="prompts-empty">
                         <span className="material-symbols-outlined">hourglass_empty</span>
-                        <h3>Loading templates...</h3>
+                        <h3>{t('prompts.loadingTemplates')}</h3>
                     </div>
                 )}
 
@@ -283,7 +285,7 @@ const Prompts = () => {
                 {error && (
                     <div className="prompts-empty">
                         <span className="material-symbols-outlined">error</span>
-                        <h3>Failed to load templates</h3>
+                        <h3>{t('prompts.failedToLoad')}</h3>
                         <p>{error.message}</p>
                     </div>
                 )}
@@ -296,7 +298,7 @@ const Prompts = () => {
                             <div className="prompts-section">
                                 <h3 className="prompts-section__title">
                                     <span className="material-symbols-outlined">person</span>
-                                    My Templates
+                                    {t('prompts.myTemplates')}
                                 </h3>
                                 {myPrompts.length > 0 ? (
                                     <>
@@ -308,23 +310,24 @@ const Prompts = () => {
                                                     isOwner
                                                     onUse={handleUsePrompt}
                                                     onDelete={() => handleDeletePrompt(prompt)}
+                                                    t={t}
                                                 />
                                             ))}
                                         </div>
                                         {hasMoreMy && (
                                             <div className="prompts-load-more" ref={mySentinelRef}>
                                                 <span className="spinner" />
-                                                <span>Loading more templates...</span>
+                                                <span>{t('prompts.loadingTemplates')}</span>
                                             </div>
                                         )}
                                         <p className="prompts-item-count">
-                                            Loaded {myPrompts.length} templates
+                                            {t('prompts.loadedTemplates').replace('{count}', myPrompts.length)}
                                         </p>
                                     </>
                                 ) : (
                                     <div className="prompts-empty prompts-empty--compact">
                                         <span className="material-symbols-outlined">edit_note</span>
-                                        <p>No saved templates yet. Click "New Template" to create one.</p>
+                                        <p>{t('prompts.noSavedTemplates')}</p>
                                     </div>
                                 )}
                             </div>
@@ -335,7 +338,7 @@ const Prompts = () => {
                             <div className="prompts-section">
                                 <h3 className="prompts-section__title">
                                     <span className="material-symbols-outlined">auto_awesome</span>
-                                    Platform Templates
+                                    {t('prompts.platformTemplates')}
                                 </h3>
                                 <div className="prompts-grid">
                                     {platformPrompts.map(prompt => (
@@ -346,17 +349,18 @@ const Prompts = () => {
                                             onUse={handleUsePrompt}
                                             onDelete={handleDeletePrompt}
                                             isDeleting={isDeleting}
+                                            t={t}
                                         />
                                     ))}
                                 </div>
                                 {hasMorePlatform && (
                                     <div className="prompts-load-more" ref={platformSentinelRef}>
                                         <span className="spinner" />
-                                        <span>Loading more templates...</span>
+                                        <span>{t('prompts.loadingTemplates')}</span>
                                     </div>
                                 )}
                                 <p className="prompts-item-count">
-                                    Loaded {platformPrompts.length} templates
+                                    {t('prompts.loadedTemplates').replace('{count}', platformPrompts.length)}
                                 </p>
                             </div>
                         )}

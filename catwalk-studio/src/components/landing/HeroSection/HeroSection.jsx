@@ -1,25 +1,29 @@
+import { useLanguage } from '../../../contexts/LanguageContext';
+
 export function HeroSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="hero-section">
       <div className="container-wide hero-grid">
         <div className="hero-content">
           <div className="subtitle-group">
             <div className="subtitle-line"></div>
-            <span className="subtitle-text">Establishing a new paradigm</span>
+            <span className="subtitle-text">{t('landing.hero.subtitle')}</span>
           </div>
           <h1 className="hero-title editorial-kern">
-            The Future <br />
-            <span className="italic">of Modelling</span>
+            {t('landing.hero.titleLine1')} <br />
+            <span className="italic">{t('landing.hero.titleLine2')}</span>
           </h1>
           <p className="hero-description">
-            A refined ecosystem where elite talent meets digital mastery. Bridging the gap between the physical runway and virtual licensing.
+            {t('landing.hero.description')}
           </p>
           <div className="hero-actions">
             <button className="btn-hero-primary" onClick={() => window.location.href = '/models/register'}>
-              Become a Model
+              {t('landing.hero.becomeModel')}
             </button>
             <button className="btn-hero-secondary" onClick={() => window.location.href = '/models'}>
-              <span>Hire Talent</span>
+              <span>{t('landing.hero.hireTalent')}</span>
               <span className="material-symbols-outlined thin-icon">arrow_forward</span>
             </button>
           </div>
@@ -35,7 +39,7 @@ export function HeroSection() {
                 alt="Real-Life Talent"
               />
               <div className="card-label">
-                <span className="card-label-text">Real-Life</span>
+                <span className="card-label-text">{t('landing.hero.realLife')}</span>
               </div>
             </div>
             <div className="visual-card visual-card--offset">
@@ -45,7 +49,7 @@ export function HeroSection() {
                 alt="AI-Synthetic Talent"
               />
               <div className="card-label card-label--accent">
-                <span className="card-label-text">AI-Synthetic</span>
+                <span className="card-label-text">{t('landing.hero.aiSynthetic')}</span>
               </div>
             </div>
           </div>

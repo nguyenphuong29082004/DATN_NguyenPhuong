@@ -1,26 +1,28 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { user, profile, creditBalance, isAnonymous, signOut } = useAuth();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
 
     const navItems = [
-        { label: 'Quick Shoot', path: '/studio/quick-shoot', icon: 'photo_camera' },
-        { label: 'Try On', path: '/studio/try-on', icon: 'styler' },
-        { label: 'Create Campaign', path: '/studio/create-campaign', icon: 'campaign' },
-        { label: 'Designer', path: '/studio/designer', icon: 'palette' },
-        { label: 'Models', path: '/studio/models', icon: 'face_3' },
-        { label: 'Prompts', path: '/studio/prompts', icon: 'edit_note' },
+        { label: t('sidebar.quickShoot'), path: '/studio/quick-shoot', icon: 'photo_camera' },
+        { label: t('sidebar.tryOn'), path: '/studio/try-on', icon: 'styler' },
+        { label: t('sidebar.createCampaign'), path: '/studio/create-campaign', icon: 'campaign' },
+        { label: t('sidebar.designer'), path: '/studio/designer', icon: 'palette' },
+        { label: t('sidebar.models'), path: '/studio/models', icon: 'face_3' },
+        { label: t('sidebar.prompts'), path: '/studio/prompts', icon: 'edit_note' },
         // Separator
         { type: 'separator' },
         // Account & Settings
-        { label: 'Become a Model', path: '/models/register', icon: 'star' },
-        { label: 'Account', path: '/studio/account', icon: 'settings' },
+        { label: t('sidebar.becomeModel'), path: '/models/register', icon: 'star' },
+        { label: t('sidebar.account'), path: '/studio/account', icon: 'settings' },
     ];
 
     const toggleSidebar = () => {
@@ -38,7 +40,7 @@ const Sidebar = () => {
                 <button
                     className="sidebar__toggle"
                     onClick={toggleSidebar}
-                    aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    aria-label={isCollapsed ? t('sidebar.expandSidebar') : t('sidebar.collapseSidebar')}
                 >
                     <span className="material-symbols-outlined thin-icon" style={{ fontSize: '20px' }}>
                         {isCollapsed ? 'chevron_right' : 'chevron_left'}
@@ -54,7 +56,7 @@ const Sidebar = () => {
                     </div>
                     {!isCollapsed && (
                         <div className="sidebar__credits-info">
-                            <span className="sidebar__credits-label">Credits</span>
+                            <span className="sidebar__credits-label">{t('sidebar.credits')}</span>
                             <span className="sidebar__credits-value">{creditBalance}</span>
                         </div>
                     )}
@@ -92,15 +94,15 @@ const Sidebar = () => {
                             onClick={() => navigate('/login', { state: { from: location.pathname } })}
                         >
                             <span className="material-symbols-outlined thin-icon">login</span>
-                            <span>Sign Up</span>
+                            <span>{t('auth.signUp')}</span>
                         </button>
                     ) : (
                         <>
                             <div className="sidebar__user-info">
                                 <span className="material-symbols-outlined thin-icon">account_circle</span>
-                                <span>{profile?.email || 'User'}</span>
+                                <span>{profile?.email || t('common.user')}</span>
                             </div>
-                            <button className="sidebar__signout" onClick={signOut} title="Sign Out">
+                            <button className="sidebar__signout" onClick={signOut} title={t('auth.signOut')}>
                                 <span className="material-symbols-outlined thin-icon">logout</span>
                             </button>
                         </>

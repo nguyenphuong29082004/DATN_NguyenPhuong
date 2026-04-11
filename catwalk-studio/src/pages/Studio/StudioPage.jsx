@@ -1,67 +1,88 @@
 import { Link } from 'react-router-dom';
 import './StudioPage.css';
 import { LandingHeader, LandingFooter } from '../../components/landing';
-const tools = [
-  {
-    icon: 'photo_camera',
-    title: 'Photo Editor',
-    description: 'Professional-grade editing tools for perfect shots every time.',
-  },
-  {
-    icon: 'auto_awesome',
-    title: 'AI Enhancement',
-    description: 'Intelligent retouching and enhancement powered by AI.',
-  },
-  {
-    icon: 'accessibility_new',
-    title: 'Pose Library',
-    description: 'Extensive collection of poses with real-time guidance.',
-  },
-  {
-    icon: 'light_mode',
-    title: 'Lighting Setup',
-    description: 'Virtual lighting studio with realistic simulations.',
-  },
-  {
-    icon: 'palette',
-    title: 'Color Grading',
-    description: 'Cinema-quality color correction and grading tools.',
-  },
-  {
-    icon: 'view_in_ar',
-    title: '3D Preview',
-    description: 'Visualize your work in immersive 3D environments.',
-  },
-];
-
-const plans = [
-  {
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    features: ['5 projects/month', 'Basic editing tools', 'Standard exports', 'Community support'],
-    cta: 'Get Started',
-    highlight: false,
-  },
-  {
-    name: 'Pro',
-    price: '$29',
-    period: '/month',
-    features: ['Unlimited projects', 'AI enhancement', 'All editing tools', '4K exports', 'Priority support'],
-    cta: 'Start Pro Trial',
-    highlight: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    features: ['Everything in Pro', 'Team collaboration', 'API access', 'Custom integrations', 'Dedicated support'],
-    cta: 'Contact Sales',
-    highlight: false,
-  },
-];
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export function StudioPage() {
+  const { t } = useLanguage();
+
+  const tools = [
+    {
+      icon: 'photo_camera',
+      title: t('studioPage.tools.photoEditor'),
+      description: t('studioPage.tools.photoEditorDesc'),
+    },
+    {
+      icon: 'auto_awesome',
+      title: t('studioPage.tools.aiEnhancement'),
+      description: t('studioPage.tools.aiEnhancementDesc'),
+    },
+    {
+      icon: 'accessibility_new',
+      title: t('studioPage.tools.poseLibrary'),
+      description: t('studioPage.tools.poseLibraryDesc'),
+    },
+    {
+      icon: 'light_mode',
+      title: t('studioPage.tools.lightingSetup'),
+      description: t('studioPage.tools.lightingSetupDesc'),
+    },
+    {
+      icon: 'palette',
+      title: t('studioPage.tools.colorGrading'),
+      description: t('studioPage.tools.colorGradingDesc'),
+    },
+    {
+      icon: 'view_in_ar',
+      title: t('studioPage.tools.preview3d'),
+      description: t('studioPage.tools.preview3dDesc'),
+    },
+  ];
+
+  const plans = [
+    {
+      name: t('studioPage.plans.free'),
+      price: '$0',
+      period: t('studioPage.plans.forever'),
+      features: [
+        t('studioPage.plans.projects5'),
+        t('studioPage.plans.basicEditingTools'),
+        t('studioPage.plans.standardExports'),
+        t('studioPage.plans.communitySupport'),
+      ],
+      cta: t('studioPage.plans.getStarted'),
+      highlight: false,
+    },
+    {
+      name: t('studioPage.plans.pro'),
+      price: '$29',
+      period: t('studioPage.plans.perMonth'),
+      features: [
+        t('studioPage.plans.unlimitedProjects'),
+        t('studioPage.plans.aiEnhancement'),
+        t('studioPage.plans.allEditingTools'),
+        t('studioPage.plans.exports4k'),
+        t('studioPage.plans.prioritySupport'),
+      ],
+      cta: t('studioPage.plans.startProTrial'),
+      highlight: true,
+    },
+    {
+      name: t('studioPage.plans.enterprise'),
+      price: t('studioPage.plans.custom'),
+      period: '',
+      features: [
+        t('studioPage.plans.everythingInPro'),
+        t('studioPage.plans.teamCollaboration'),
+        t('studioPage.plans.apiAccess'),
+        t('studioPage.plans.customIntegrations'),
+        t('studioPage.plans.dedicatedSupport'),
+      ],
+      cta: t('studioPage.plans.contactSales'),
+      highlight: false,
+    },
+  ];
+
   return (
     <div className="studio-page">
       <LandingHeader />
@@ -72,24 +93,22 @@ export function StudioPage() {
             <div className="studio-hero-content">
               <div className="subtitle-group justify-center">
                 <div className="subtitle-line"></div>
-                <span className="subtitle-text">Creative Workspace</span>
+                <span className="subtitle-text">{t('studioPage.subtitle')}</span>
                 <div className="subtitle-line"></div>
               </div>
               <h1 className="studio-hero-title editorial-kern">
-                Catwalk <span className="italic">Studio</span>
+                {t('studioPage.heroTitle1')} <span className="italic">{t('studioPage.heroTitle2')}</span>
               </h1>
               <p className="studio-hero-description">
-                The ultimate creative suite for fashion photography and AI modeling.
-                Professional tools designed for modern creators to bridge the gap between
-                imagination and reality.
+                {t('studioPage.heroDescription')}
               </p>
               <div className="studio-hero-actions">
                 <Link to="/studio/quick-shoot" className="btn-hero-primary">
-                  <span>Launch Studio</span>
+                  <span>{t('studioPage.launchStudio')}</span>
                   <span className="material-symbols-outlined thin-icon">rocket_launch</span>
                 </Link>
                 <button className="btn-hero-secondary">
-                  <span>Watch Demo</span>
+                  <span>{t('studioPage.watchDemo')}</span>
                   <span className="material-symbols-outlined thin-icon">play_circle</span>
                 </button>
               </div>
@@ -103,11 +122,11 @@ export function StudioPage() {
             <div className="section-header text-center">
               <div className="subtitle-group justify-center">
                 <div className="subtitle-line"></div>
-                <span className="subtitle-text">The Suite</span>
+                <span className="subtitle-text">{t('studioPage.theSuite')}</span>
                 <div className="subtitle-line"></div>
               </div>
               <h2 className="studio-section-title editorial-kern">
-                Powerful <span className="italic">Tools</span>
+                {t('studioPage.powerfulTools')} <span className="italic">{t('studioPage.powerfulToolsItalic')}</span>
               </h2>
             </div>
 
@@ -132,32 +151,30 @@ export function StudioPage() {
               <div className="studio-preview-content">
                 <div className="subtitle-group">
                   <div className="subtitle-line"></div>
-                  <span className="subtitle-text">The Interface</span>
+                  <span className="subtitle-text">{t('studioPage.theInterface')}</span>
                 </div>
                 <h2 className="studio-preview-title editorial-kern">
-                  Intuitive <span className="italic">Workspace</span>
+                  {t('studioPage.intuitiveWorkspace')} <span className="italic">{t('studioPage.intuitiveWorkspaceItalic')}</span>
                 </h2>
                 <p className="studio-preview-description">
-                  A clean, modern interface that puts creativity first.
-                  Customize your workspace to match your unique workflow and
-                  unlock new levels of productivity.
+                  {t('studioPage.workspaceDescription')}
                 </p>
                 <ul className="studio-preview-features">
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    Drag-and-drop timeline
+                    {t('studioPage.dragDropTimeline')}
                   </li>
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    Real-time collaboration
+                    {t('studioPage.realtimeCollaboration')}
                   </li>
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    Cloud sync across devices
+                    {t('studioPage.cloudSync')}
                   </li>
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    Pro keyboard shortcuts
+                    {t('studioPage.proKeyboardShortcuts')}
                   </li>
                 </ul>
               </div>
@@ -192,11 +209,11 @@ export function StudioPage() {
             <div className="section-header text-center">
               <div className="subtitle-group justify-center">
                 <div className="subtitle-line"></div>
-                <span className="subtitle-text">Membership</span>
+                <span className="subtitle-text">{t('studioPage.membership')}</span>
                 <div className="subtitle-line"></div>
               </div>
               <h2 className="studio-section-title editorial-kern">
-                Elevate Your <span className="italic">Craft</span>
+                {t('studioPage.elevateYourCraft')} <span className="italic">{t('studioPage.elevateYourCraftItalic')}</span>
               </h2>
             </div>
 
@@ -206,10 +223,10 @@ export function StudioPage() {
                   key={plan.name}
                   className={`studio-pricing-card ${plan.highlight ? 'highlight' : ''}`}
                 >
-                  {plan.highlight && <div className="pricing-badge">Recommended</div>}
+                  {plan.highlight && <div className="pricing-badge">{t('studioPage.plans.recommended')}</div>}
                   <h3 className="pricing-name">{plan.name}</h3>
                   <div className="pricing-value">
-                    <span className="currency">$</span>
+                    <span className="currency">{plan.price === t('studioPage.plans.custom') ? '' : '$'}</span>
                     <span className="amount">{plan.price.replace('$', '')}</span>
                     <span className="period">{plan.period}</span>
                   </div>
@@ -234,6 +251,5 @@ export function StudioPage() {
     </div>
   );
 }
-
 
 export default StudioPage;

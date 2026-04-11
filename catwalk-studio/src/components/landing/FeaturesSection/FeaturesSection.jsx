@@ -1,20 +1,24 @@
+import { useLanguage } from '../../../contexts/LanguageContext';
+
 export function FeaturesSection() {
+  const { t } = useLanguage();
+
   const features = [
     {
       icon: 'calendar_today',
-      title: 'Real-Life Booking',
-      description: 'Bespoke management for high-fashion campaigns, runway appearances, and global editorial placements.'
+      title: t('landing.features.realLifeBooking'),
+      description: t('landing.features.realLifeBookingDesc'),
     },
     {
       icon: 'token',
-      title: 'AI Licensing',
-      description: 'Securely monetize your digital likeness. Our blockchain-verified licensing ensures you retain creative control.'
+      title: t('landing.features.aiLicensing'),
+      description: t('landing.features.aiLicensingDesc'),
     },
     {
       icon: 'auto_awesome',
-      title: 'Elite Visibility',
-      description: 'Unparalleled exposure to creative directors from the world\'s most prestigious luxury houses.'
-    }
+      title: t('landing.features.eliteVisibility'),
+      description: t('landing.features.eliteVisibilityDesc'),
+    },
   ];
 
   return (
