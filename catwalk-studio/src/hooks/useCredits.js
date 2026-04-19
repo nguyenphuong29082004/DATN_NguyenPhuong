@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { container } from '../di/container';
 import { useAuth } from './useAuth';
+import { getSupabaseClient } from '../lib/supabase';
 
 /**
  * Query keys for credit-related queries
@@ -9,6 +10,7 @@ export const creditKeys = {
     all: ['credits'],
     balance: (userId) => [...creditKeys.all, 'balance', userId],
     history: (userId) => [...creditKeys.all, 'history', userId],
+    packages: () => [...creditKeys.all, 'packages'],
 };
 
 /**
@@ -144,6 +146,71 @@ export function useAddCredits() {
         addCredits: mutation.mutate,
         addCreditsAsync: mutation.mutateAsync,
         isAdding: mutation.isPending,
+        error: mutation.error,
+        data: mutation.data,
+    };
+}
+
+export function useCreditPackages() {
+    const supabase = getSupabaseClient();
+
+    const query = useQuery({
+        queryKey: creditKeys.packages(),
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('credit_packages')
+                .select('id, package_id, name, usd_amount, credits_amount, is_active, sort_order')
+                .eq('is_active', true)
+                .order('sort_order', { ascending: true });
+
+            if (error) {
+                throw new Error(error.message || 'Failed to load credit packages');
+            }
+
+            return data ?? [];
+        },
+        staleTime: 5 * 60 * 1000,
+    });
+
+    return {
+        packages: query.data ?? [],
+        isLoading: query.isLoading,
+        error: query.error,
+        refetch: query.refetch,
+    };
+}
+
+export function useStartCreditPurchase() {
+    const supabase = getSupabaseClient();
+
+    const mutation = useMutation({
+        mutationFn: async ({ provider, packageId }) => {
+            const endpoint = provider === 'cryptomus'
+                ? 'create-cryptomus-payment'
+                : 'create-stripe-checkout';
+
+            const { data, error } = await supabase.functions.invoke(endpoint, {
+                body: {
+                    packageId,
+                },
+            });
+
+            if (error) {
+                throw new Error(error.message || 'Failed to start checkout');
+            }
+
+            if (!data?.url) {
+                throw new Error('Checkout URL was not returned');
+            }
+
+            return data;
+        },
+    });
+
+    return {
+        startPurchase: mutation.mutate,
+        startPurchaseAsync: mutation.mutateAsync,
+        isStartingPurchase: mutation.isPending,
         error: mutation.error,
         data: mutation.data,
     };

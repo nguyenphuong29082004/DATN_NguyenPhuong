@@ -92,6 +92,18 @@ export class CreditTransaction extends Entity {
         return this.props.createdAt;
     }
 
+    get amountPaid() {
+        return this.props.amountPaid ?? null;
+    }
+
+    get currency() {
+        return this.props.currency ?? null;
+    }
+
+    get paymentMethod() {
+        return this.props.paymentMethod ?? null;
+    }
+
     // ========================================================
     // Business Logic Methods
     // ========================================================
@@ -150,6 +162,9 @@ export class CreditTransaction extends Entity {
             reason: this.reason,
             metadata: this.metadata,
             createdAt: this.createdAt,
+            amountPaid: this.amountPaid,
+            currency: this.currency,
+            paymentMethod: this.paymentMethod,
             type: this.getTransactionType(),
         };
     }

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { useShootableModels, useUserAICharacters } from '../../../hooks/models/useShootModels';
 import { useInvokeTryOn } from '../../../hooks/generations/useTryOn';
@@ -853,7 +853,9 @@ const TryOn = () => {
                                 {profile?.credits_balance < creditsNeeded && (
                                     <span className="credit-insufficient">
                                         {isGuest ? (
-                                            <a href="/login" className="credit-signup-link">Sign up for more</a>
+                                        <div className="credit-topup-prompt">
+                                            <Link to="/studio/credits" className="credit-signup-link">Top up for more</Link>
+                                        </div>
                                         ) : 'Insufficient'}
                                     </span>
                                 )}

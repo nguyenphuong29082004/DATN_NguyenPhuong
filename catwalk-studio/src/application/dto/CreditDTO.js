@@ -15,6 +15,9 @@ export class CreditTransactionDTO {
         this.reason = data.reason;
         this.metadata = data.metadata;
         this.createdAt = data.createdAt;
+        this.amountPaid = data.amountPaid ?? null;
+        this.currency = data.currency ?? null;
+        this.paymentMethod = data.paymentMethod ?? null;
         this.type = data.type; // 'credit' or 'debit'
     }
 
@@ -27,6 +30,9 @@ export class CreditTransactionDTO {
             reason: transaction.reason,
             metadata: transaction.metadata,
             createdAt: transaction.createdAt,
+            amountPaid: transaction.amountPaid,
+            currency: transaction.currency,
+            paymentMethod: transaction.paymentMethod,
             type: transaction.getTransactionType(),
         });
     }

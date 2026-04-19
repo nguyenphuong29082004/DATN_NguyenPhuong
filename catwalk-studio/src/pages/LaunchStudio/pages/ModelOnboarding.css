@@ -777,6 +777,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
+    min-width: 0;
     /* Reduced from 12px */
 }
 
@@ -807,6 +809,8 @@
 .social-details {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
 
 .social-name {

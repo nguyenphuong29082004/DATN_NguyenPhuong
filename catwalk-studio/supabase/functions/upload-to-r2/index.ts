@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0"
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -70,33 +69,6 @@ serve(async (req) => {
     }
 
     try {
-        // Authenticate user
-        const authHeader = req.headers.get('Authorization')
-        if (!authHeader) {
-            return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-                status: 401,
-            })
-        }
-
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')
-        const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
-        if (!supabaseUrl || !supabaseAnonKey) {
-            throw new Error('Missing Supabase configuration')
-        }
-
-        const token = authHeader.replace('Bearer ', '')
-        const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-            global: { headers: { Authorization: authHeader } }
-        })
-        const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
-        if (authError || !user) {
-            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-                status: 401,
-            })
-        }
-
         const accountId = Deno.env.get("R2_ACCOUNT_ID")
         const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID")
         const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY")

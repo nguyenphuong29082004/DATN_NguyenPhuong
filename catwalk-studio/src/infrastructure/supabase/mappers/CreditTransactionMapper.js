@@ -20,6 +20,9 @@ export class CreditTransactionMapper {
             reason: row.reason,
             metadata: row.metadata || {},
             createdAt: row.created_at ? new Date(row.created_at) : new Date(),
+            amountPaid: row.amount_paid ?? null,
+            currency: row.currency || null,
+            paymentMethod: row.payment_method || null,
         };
 
         return CreditTransaction.create(props, row.id);
@@ -39,6 +42,9 @@ export class CreditTransactionMapper {
             reason: transaction.reason,
             metadata: transaction.metadata,
             created_at: transaction.createdAt.toISOString(),
+            amount_paid: transaction.amountPaid,
+            currency: transaction.currency,
+            payment_method: transaction.paymentMethod,
         };
     }
 
@@ -58,6 +64,9 @@ export class CreditTransactionMapper {
             reason: row.reason,
             metadata: row.metadata || {},
             createdAt: row.created_at ? new Date(row.created_at) : new Date(),
+            amountPaid: row.amount_paid ?? null,
+            currency: row.currency || null,
+            paymentMethod: row.payment_method || null,
             type: row.amount >= 0 ? 'credit' : 'debit',
         };
     }

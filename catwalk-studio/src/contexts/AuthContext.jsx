@@ -254,6 +254,29 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateProfile = async (updates) => {
+        if (!user) return { error: new Error('User not authenticated') };
+
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .update(updates)
+                .eq('user_id', user.id)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            if (data) {
+                setProfile(data);
+            }
+            return { data, error: null };
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            return { data: null, error };
+        }
+    };
+
     // explicit signInAsGuest for studio access
     const signInAsGuest = async () => {
         if (!isSupabaseConfigured() || user || (initialized && !loading && isCreatingAnonUser.current)) return { user: null };
@@ -398,7 +421,8 @@ export const AuthProvider = ({ children }) => {
         signOut,
         signInAsGuest,
         signInWithGoogle,
-        refreshProfile
+        refreshProfile,
+        updateProfile
     };
 
     return (

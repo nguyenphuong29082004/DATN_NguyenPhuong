@@ -145,7 +145,7 @@ export function BecomeModelPage() {
               you earn licensing income — without being there.
             </p>
             <div className="become-model-hero__actions">
-              <Link to="/studio/launch" className="become-model-hero__cta">
+              <Link to="/models/register" className="become-model-hero__cta">
                 <span>Start Your Journey</span>
                 <span className="material-symbols-outlined">arrow_forward</span>
               </Link>
@@ -224,7 +224,7 @@ export function BecomeModelPage() {
             <p className="become-model-cta__description">
               Join thousands of models already earning with Catwalk.AI
             </p>
-            <Link to="/studio/launch" className="become-model-cta__btn">
+            <Link to="/models/register" className="become-model-cta__btn">
               <span className="material-symbols-outlined">rocket_launch</span>
               <span>Get Started Now — It's Free</span>
             </Link>

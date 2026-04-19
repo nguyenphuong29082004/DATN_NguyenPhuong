@@ -92,7 +92,7 @@ export class AIModel extends Entity {
 
         const validGenders = ['male', 'female', 'unisex'];
         if (!validGenders.includes(this.props.gender)) {
-            throw new Error('Gender must be male, female, or unisex');
+            throw new Error('Invalid gender');
         }
 
         if (typeof this.props.isPublic !== 'boolean') {

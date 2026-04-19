@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-theme="dark">
+<html lang="en" data-theme="dark">
 
 <head>
   <meta charset="UTF-8" />
@@ -8,24 +8,24 @@
 
   <!-- SEO Meta Tags -->
   <meta name="description"
-    content="Catwalk.AI - Nền tảng người mẫu và nhiếp ảnh thời trang AI đột phá. Tạo không gian mô phỏng, người mẫu AI, và nội dung chuyên nghiệp cho thương hiệu." />
+    content="Catwalk.AI - Revolutionary AI-powered fashion photography and modeling platform. Create stunning AI models, virtual try-on experiences, and professional content for brands." />
   <meta name="keywords"
-    content="AI fashion, thử đồ ảo, người mẫu AI, nhiếp ảnh thời trang, chụp ảnh AI, catwalk, nền tảng người mẫu, tạo nội dung AI" />
+    content="AI fashion, virtual try-on, AI models, fashion photography, AI photo shoot, catwalk, modeling platform, AI content generation" />
   <meta name="author" content="Catwalk.AI" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://catwalk.ai/" />
-  <meta property="og:title" content="Catwalk.AI - Nhiếp ảnh thời trang hỗ trợ bởi AI" />
+  <meta property="og:title" content="Catwalk.AI - AI-Powered Fashion Photography" />
   <meta property="og:description"
-    content="Nền tảng người mẫu và nhiếp ảnh thời trang AI đột phá. Tạo người mẫu AI và nội dung chuyên nghiệp." />
+    content="Revolutionary AI-powered fashion photography and modeling platform. Create stunning AI models and professional content." />
   <meta property="og:image" content="https://catwalk.ai/og-image.jpg" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://catwalk.ai/" />
-  <meta property="twitter:title" content="Catwalk.AI - Nhiếp ảnh thời trang hỗ trợ bởi AI" />
-  <meta property="twitter:description" content="Nền tảng người mẫu và nhiếp ảnh thời trang AI đột phá." />
+  <meta property="twitter:title" content="Catwalk.AI - AI-Powered Fashion Photography" />
+  <meta property="twitter:description" content="Revolutionary AI-powered fashion photography and modeling platform." />
   <meta property="twitter:image" content="https://catwalk.ai/og-image.jpg" />
 
   <!-- DNS Prefetch & Preconnect for faster font loading -->
@@ -40,7 +40,7 @@
   <!-- Material Symbols Outlined with full weight/fill range -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
-  <title>Catwalk.AI - Tương Lai Ngành Người Mẫu</title>
+  <title>Catwalk.AI - The Future of Fashion Modelling</title>
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -82,9 +82,13 @@
 
 <body>
   <div id="root">
-    <!-- Loading skeleton for better perceived performance -->
-    <div class="loading-skeleton">
-      <span>Đang tải...</span>
+    <!-- Initial Loading State -->
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #0a0a0a; color: #F1E0B6; font-family: 'Inter', sans-serif;">
+      <div class="spinner-load" style="width: 40px; height: 40px; border: 2px solid rgba(241, 224, 182, 0.1); border-top-color: #F1E0B6; border-radius: 50%; animation: spin-load 0.8s linear infinite;"></div>
+      <style>
+        @keyframes spin-load { to { transform: rotate(360deg); } }
+      </style>
+      <h1 style="margin-top: 24px; font-size: 14px; font-weight: 400; letter-spacing: 0.1em; opacity: 0.8; text-transform: uppercase;">Catwalk.AI</h1>
     </div>
   </div>
   <script type="module" src="/src/main.jsx"></script>

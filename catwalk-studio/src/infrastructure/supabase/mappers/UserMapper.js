@@ -17,11 +17,14 @@ export class UserMapper {
             email: row.email,
             displayName: row.username || row.email || 'Guest User',
             avatarUrl: null,
-            creditBalance: row.credits_balance || 0,
+            credits: row.credits_balance || 0,
             subscriptionTier: 'free',
             isModel: false,
             isElite: false,
             isGuest: row.is_guest || false,
+            companyName: row.company_name,
+            country: row.country,
+            taxId: row.tax_id,
             createdAt: row.created_at ? new Date(row.created_at) : new Date(),
             updatedAt: row.updated_at ? new Date(row.updated_at) : new Date()
         };
@@ -39,8 +42,11 @@ export class UserMapper {
             user_id: user.id,
             email: user.email,
             username: user.displayName,
-            credits_balance: user.creditBalance,
+            credits_balance: user.credits,
             is_guest: user.isGuest,
+            company_name: user.companyName,
+            country: user.country,
+            tax_id: user.taxId,
             updated_at: new Date().toISOString()
         };
     }
@@ -57,10 +63,13 @@ export class UserMapper {
             id: row.user_id,
             email: row.email,
             displayName: row.username || row.email || 'Guest User',
-            creditBalance: row.credits_balance || 0,
+            credits: row.credits_balance || 0,
             userType: row.user_type,
             status: row.status,
             isGuest: row.is_guest || false,
+            companyName: row.company_name,
+            country: row.country,
+            taxId: row.tax_id,
             createdAt: row.created_at ? new Date(row.created_at) : new Date(),
             updatedAt: row.updated_at ? new Date(row.updated_at) : new Date()
         };

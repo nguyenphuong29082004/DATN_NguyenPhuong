@@ -1,24 +1,24 @@
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export function FeaturesSection() {
-  const { t } = useLanguage();
-
+  const { t } = useTranslation();
+  
   const features = [
     {
       icon: 'calendar_today',
-      title: t('landing.features.realLifeBooking'),
-      description: t('landing.features.realLifeBookingDesc'),
+      title: t('landing.features.feature1.title'),
+      description: t('landing.features.feature1.description')
     },
     {
       icon: 'token',
-      title: t('landing.features.aiLicensing'),
-      description: t('landing.features.aiLicensingDesc'),
+      title: t('landing.features.feature2.title'),
+      description: t('landing.features.feature2.description')
     },
     {
       icon: 'auto_awesome',
-      title: t('landing.features.eliteVisibility'),
-      description: t('landing.features.eliteVisibilityDesc'),
-    },
+      title: t('landing.features.feature3.title'),
+      description: t('landing.features.feature3.description')
+    }
   ];
 
   return (

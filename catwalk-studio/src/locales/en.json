@@ -1,0 +1,222 @@
+{
+  "nav": {
+    "studio": "Studio",
+    "models": "Models",
+    "gallery": "Gallery",
+    "getApp": "Get App",
+    "login": "Login",
+    "logout": "Sign Out",
+    "signUp": "Sign Up",
+    "sidebar": {
+      "quickShoot": "Quick Shoot",
+      "tryOn": "Try On",
+      "designer": "Designer",
+      "library": "Library",
+      "campaigns": "All Campaigns",
+      "campaignsHeader": "CAMPAIGNS",
+      "models": "Models",
+      "prompts": "Prompts",
+      "becomeModel": "Become a Model",
+      "account": "Account",
+      "credits": "Credits",
+      "topUp": "Top up"
+    }
+  },
+  "login": {
+    "title": "Sign In",
+    "subtitle": "Choose your sign-in method",
+    "google": "Continue with Google",
+    "guest": "Continue as Guest",
+    "or": "or",
+    "signingIn": "Signing in...",
+    "error": "Google sign-in failed. Please try again."
+  },
+  "landing": {
+    "hero": {
+      "titlePart1": "The Future",
+      "titlePart2": "of Modelling",
+      "description": "A refined ecosystem where elite talent meets digital mastery. Bridging the gap between the physical runway and virtual licensing.",
+      "becomeModel": "Become a Model",
+      "hireTalent": "Hire Talent",
+      "realLife": "Real-Life",
+      "aiSynthetic": "AI-Synthetic"
+    },
+    "features": {
+      "feature1": {
+        "title": "Real-Life Booking",
+        "description": "Bespoke management for high-fashion campaigns, runway appearances, and global editorial placements."
+      },
+      "feature2": {
+        "title": "AI Licensing",
+        "description": "Securely monetize your digital likeness. Our blockchain-verified licensing ensures you retain creative control."
+      },
+      "feature3": {
+        "title": "Elite Visibility",
+        "description": "Unparalleled exposure to creative directors from the world's most prestigious luxury houses."
+      }
+    },
+    "stats": {
+      "talent": "Curated Talent",
+      "partners": "Luxury Partners",
+      "earnings": "Talent Earnings"
+    }
+  },
+  "marketplace": {
+    "header": {
+      "titlePart1": "Marketplace &",
+      "titlePart2": "Booking",
+      "description": "Discover and book AI models or real models for your fashion shoots. Browse curated talent and start your creative journey.",
+      "becomeModel": "Become a model"
+    },
+    "search": {
+      "placeholder": "Search models, agencies, locations..."
+    },
+    "categories": {
+      "all": "All Models",
+      "editorial": "Editorial",
+      "runway": "Runway",
+      "streetwear": "Streetwear",
+      "avantGarde": "Avant-Garde",
+      "minimalist": "Minimalist",
+      "commercial": "Commercial"
+    },
+    "sidebar": {
+      "title": "Refine Discovery",
+      "elite": "Elite Talent",
+      "eliteSub": "Top-tier curated models",
+      "modelType": "Model Type",
+      "aiModels": "AI MODELS",
+      "realModels": "REAL MODELS",
+      "both": "BOTH",
+      "styleSelection": "Style Selection",
+      "clearAll": "Clear All"
+    },
+    "grid": {
+      "titlePart1": "Model",
+      "titlePart2": "Discovery",
+      "results_one": "{{count}} MODEL AVAILABLE",
+      "results_other": "{{count}} MODELS AVAILABLE",
+      "sort": "Sort:",
+      "loading": "Loading models...",
+      "noModels": "No models found",
+      "adjustFilters": "Try adjusting your filters or search query."
+    },
+    "card": {
+      "elite": "ELITE",
+      "startShoot": "Start Shoot",
+      "bookModel": "Book Model",
+      "viewProfile": "View Profile",
+      "priceAi": "AI Shoot:",
+      "priceReal": "Real Booking:"
+    },
+    "booking": {
+      "title": "Book {{name}}",
+      "date": "Date",
+      "type": "Booking type",
+      "halfDay": "Half-Day",
+      "fullDay": "Full-Day",
+      "location": "Location",
+      "locationPlaceholder": "Enter location",
+      "details": "Additional Details",
+      "detailsPlaceholder": "Add any special requirements or notes...",
+      "cancel": "Cancel",
+      "submit": "Submit Booking Request",
+      "submitting": "Submitting...",
+      "success": "Booking request submitted!"
+    }
+  },
+  "gallery": {
+    "header": {
+      "title": "Community Gallery",
+      "subtitle": "Discover amazing AI-generated fashion content from our community"
+    },
+    "filters": {
+      "type": "Type:",
+      "style": "Style:",
+      "all": "All",
+      "photos": "Photos",
+      "videos": "Videos",
+      "allStyles": "All Styles"
+    },
+    "states": {
+      "loading": "Loading gallery...",
+      "empty": {
+        "title": "No items found",
+        "description": "Be the first to share your AI fashion creations!",
+        "action": "Create Your First"
+      }
+    },
+    "footer": {
+      "loadMore": "Load More",
+      "loading": "Loading..."
+    }
+  },
+  "studio_landing": {
+    "hero": {
+      "titlePart1": "Catwalk",
+      "titlePart2": "Studio",
+      "description": "The ultimate creative suite for fashion photography and AI modeling. Professional tools designed for modern creators to bridge the gap between imagination and reality.",
+      "launch": "Launch Studio",
+      "demo": "Watch Demo"
+    },
+    "tools": {
+      "titlePart1": "Powerful",
+      "titlePart2": "Tools",
+      "tool1": {
+        "title": "Photo Editor",
+        "description": "Professional-grade editing tools for perfect shots every time."
+      },
+      "tool2": {
+        "title": "AI Enhancement",
+        "description": "Intelligent retouching and enhancement powered by AI."
+      },
+      "tool3": {
+        "title": "Pose Library",
+        "description": "Extensive collection of poses with real-time guidance."
+      },
+      "tool4": {
+        "title": "Lighting Setup",
+        "description": "Virtual lighting studio with realistic simulations."
+      },
+      "tool5": {
+        "title": "Color Grading",
+        "description": "Cinema-quality color correction and grading tools."
+      },
+      "tool6": {
+        "title": "3D Preview",
+        "description": "Visualize your work in immersive 3D environments."
+      }
+    },
+    "preview": {
+      "titlePart1": "Intuitive",
+      "titlePart2": "Workspace",
+      "description": "A clean, modern interface that puts creativity first. Customize your workspace to match your unique workflow and unlock new levels of productivity.",
+      "f1": "Drag-and-drop timeline",
+      "f2": "Real-time collaboration",
+      "f3": "Cloud sync across devices",
+      "f4": "Pro keyboard shortcuts"
+    },
+    "pricing": {
+      "titlePart1": "Elevate Your",
+      "titlePart2": "Craft",
+      "recommended": "Recommended",
+      "forever": "forever",
+      "perMonth": "/month",
+      "free": {
+        "name": "Free",
+        "cta": "Get Started",
+        "features": ["5 projects/month", "Basic editing tools", "Standard exports", "Community support"]
+      },
+      "pro": {
+        "name": "Pro",
+        "cta": "Start Pro Trial",
+        "features": ["Unlimited projects", "AI enhancement", "All editing tools", "4K exports", "Priority support"]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "cta": "Contact Sales",
+        "features": ["Everything in Pro", "Team collaboration", "API access", "Custom integrations", "Dedicated support"]
+      }
+    }
+  }
+}

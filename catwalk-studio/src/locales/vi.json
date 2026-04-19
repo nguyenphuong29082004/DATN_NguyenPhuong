@@ -1,0 +1,222 @@
+{
+  "nav": {
+    "studio": "Studio",
+    "models": "Người mẫu",
+    "gallery": "Bộ sưu tập",
+    "getApp": "Tải App",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "signUp": "Đăng ký",
+    "sidebar": {
+      "quickShoot": "Chụp nhanh",
+      "tryOn": "Thử đồ",
+      "designer": "Thiết kế viên",
+      "library": "Thư viện",
+      "campaigns": "Tất cả chiến dịch",
+      "campaignsHeader": "CHIẾN DỊCH",
+      "models": "Người mẫu",
+      "prompts": "Gợi ý",
+      "becomeModel": "Trở thành người mẫu",
+      "account": "Tài khoản",
+      "credits": "Tín dụng",
+      "topUp": "Nạp tiền"
+    }
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "subtitle": "Chọn phương thức đăng nhập",
+    "google": "Tiếp tục với Google",
+    "guest": "Tiếp tục với tư cách khách",
+    "or": "hoặc",
+    "signingIn": "Đang đăng nhập...",
+    "error": "Đăng nhập Google thất bại. Vui lòng thử lại."
+  },
+  "landing": {
+    "hero": {
+      "titlePart1": "Tương lai",
+      "titlePart2": "của Người mẫu",
+      "description": "Một hệ sinh thái tinh tế nơi tài năng ưu tú gặp gỡ kỹ thuật số bậc thầy. Thu hẹp khoảng cách giữa sàn diễn vật lý và cấp phép ảo.",
+      "becomeModel": "Trở thành người mẫu",
+      "hireTalent": "Thuê người mẫu",
+      "realLife": "Thực tế",
+      "aiSynthetic": "Tổng hợp AI"
+    },
+    "features": {
+      "feature1": {
+        "title": "Đặt lịch Thực tế",
+        "description": "Quản lý riêng biệt cho các chiến dịch thời trang cao cấp, xuất hiện trên sàn diễn và các vị trí biên tập toàn cầu."
+      },
+      "feature2": {
+        "title": "Cấp phép AI",
+        "description": "Kiếm tiền an toàn từ hình ảnh kỹ thuật số của bạn. Việc cấp phép được xác minh bằng blockchain của chúng tôi đảm bảo bạn giữ quyền kiểm soát sáng tạo."
+      },
+      "feature3": {
+        "title": "Khả năng hiển thị Ưu tú",
+        "description": "Khả năng tiếp cận vô song với các giám đốc sáng tạo từ những nhà mốt thời trang xa xỉ danh giá nhất thế giới."
+      }
+    },
+    "stats": {
+      "talent": "Tài năng Tuyển chọn",
+      "partners": "Đối tác Xa xỉ",
+      "earnings": "Thu nhập Tài năng"
+    }
+  },
+  "marketplace": {
+    "header": {
+      "titlePart1": "Chợ trực tuyến &",
+      "titlePart2": "Đặt lịch",
+      "description": "Khám phá và đặt lịch với người mẫu AI hoặc người mẫu thật cho các buổi chụp hình thời trang của bạn. Duyệt qua các tài năng được tuyển chọn và bắt đầu hành trình sáng tạo của bạn.",
+      "becomeModel": "Trở thành người mẫu"
+    },
+    "search": {
+      "placeholder": "Tìm kiếm người mẫu, công ty quản lý, địa điểm..."
+    },
+    "categories": {
+      "all": "Tất cả người mẫu",
+      "editorial": "Biên tập",
+      "runway": "Sàn diễn",
+      "streetwear": "Thời trang đường phố",
+      "avantGarde": "Tiền phong",
+      "minimalist": "Tối giản",
+      "commercial": "Thương mại"
+    },
+    "sidebar": {
+      "title": "Tinh chỉnh Khám phá",
+      "elite": "Tài năng Ưu tú",
+      "eliteSub": "Người mẫu hàng đầu được tuyển chọn",
+      "modelType": "Loại người mẫu",
+      "aiModels": "NGƯỜI MẪU AI",
+      "realModels": "NGƯỜI MẪU THẬT",
+      "both": "CẢ HAI",
+      "styleSelection": "Lựa chọn Phong cách",
+      "clearAll": "Xóa tất cả"
+    },
+    "grid": {
+      "titlePart1": "Khám phá",
+      "titlePart2": "Người mẫu",
+      "results_one": "CÓ {{count}} NGƯỜI MẪU",
+      "results_other": "CÓ {{count}} NGƯỜI MẪU",
+      "sort": "Sắp xếp:",
+      "loading": "Đang tải người mẫu...",
+      "noModels": "Không tìm thấy người mẫu",
+      "adjustFilters": "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn."
+    },
+    "card": {
+      "elite": "ƯU TÚ",
+      "startShoot": "Bắt đầu chụp",
+      "bookModel": "Đặt lịch",
+      "viewProfile": "Xem hồ sơ",
+      "priceAi": "Chụp AI:",
+      "priceReal": "Đặt lịch thật:"
+    },
+    "booking": {
+      "title": "Đặt lịch {{name}}",
+      "date": "Ngày",
+      "type": "Loại đặt lịch",
+      "halfDay": "Nửa ngày",
+      "fullDay": "Cả ngày",
+      "location": "Địa điểm",
+      "locationPlaceholder": "Nhập địa điểm",
+      "details": "Chi tiết bổ sung",
+      "detailsPlaceholder": "Thêm bất kỳ yêu cầu đặc biệt hoặc ghi chú nào...",
+      "cancel": "Hủy",
+      "submit": "Gửi yêu cầu đặt lịch",
+      "submitting": "Đang gửi...",
+      "success": "Yêu cầu đặt lịch đã được gửi!"
+    }
+  },
+  "gallery": {
+    "header": {
+      "title": "Bộ sưu tập Cộng đồng",
+      "subtitle": "Khám phá nội dung thời trang tuyệt vời do AI tạo ra từ cộng đồng của chúng tôi"
+    },
+    "filters": {
+      "type": "Loại:",
+      "style": "Phong cách:",
+      "all": "Tất cả",
+      "photos": "Ảnh",
+      "videos": "Video",
+      "allStyles": "Tất cả phong cách"
+    },
+    "states": {
+      "loading": "Đang tải bộ sưu tập...",
+      "empty": {
+        "title": "Không tìm thấy mục nào",
+        "description": "Hãy là người đầu tiên chia sẻ sáng tạo thời trang AI của bạn!",
+        "action": "Tạo tác phẩm đầu tiên"
+      }
+    },
+    "footer": {
+      "loadMore": "Tải thêm",
+      "loading": "Đang tải..."
+    }
+  },
+  "studio_landing": {
+    "hero": {
+      "titlePart1": "Catwalk",
+      "titlePart2": "Studio",
+      "description": "Bộ công cụ sáng tạo tối thượng cho nhiếp ảnh thời trang và mô hình hóa AI. Các công cụ chuyên nghiệp được thiết kế cho những người sáng tạo hiện đại để thu hẹp khoảng cách giữa trí tưởng tượng và thực tế.",
+      "launch": "Khởi động Studio",
+      "demo": "Xem Demo"
+    },
+    "tools": {
+      "titlePart1": "Công cụ",
+      "titlePart2": "Mạnh mẽ",
+      "tool1": {
+        "title": "Chỉnh sửa Ảnh",
+        "description": "Các công cụ chỉnh sửa cấp chuyên nghiệp cho những bức ảnh hoàn hảo mọi lúc."
+      },
+      "tool2": {
+        "title": "Tăng cường AI",
+        "description": "Chỉnh sửa và nâng cao thông minh được hỗ trợ bởi AI."
+      },
+      "tool3": {
+        "title": "Thư viện Dáng",
+        "description": "Bộ sưu tập phong phú các tư thế với hướng dẫn thời gian thực."
+      },
+      "tool4": {
+        "title": "Thiết lập Ánh sáng",
+        "description": "Studio ánh sáng ảo với các mô phỏng thực tế."
+      },
+      "tool5": {
+        "title": "Phối màu",
+        "description": "Các công cụ chỉnh màu và cấp màu chất lượng điện ảnh."
+      },
+      "tool6": {
+        "title": "Xem trước 3D",
+        "description": "Hình dung công việc của bạn trong môi trường 3D sống động."
+      }
+    },
+    "preview": {
+      "titlePart1": "Không gian làm việc",
+      "titlePart2": "Trực quan",
+      "description": "Một giao diện sạch sẽ, hiện đại, ưu tiên sự sáng tạo. Tùy chỉnh không gian làm việc của bạn để phù hợp với quy trình làm việc độc đáo của bạn và mở khóa các cấp độ năng suất mới.",
+      "f1": "Dòng thời gian kéo thả",
+      "f2": "Cộng tác thời gian thực",
+      "f3": "Đồng bộ đám mây trên các thiết bị",
+      "f4": "Phím tắt chuyên nghiệp"
+    },
+    "pricing": {
+      "titlePart1": "Nâng tầm",
+      "titlePart2": "Tay nghề",
+      "recommended": "Được đề xuất",
+      "forever": "mãi mãi",
+      "perMonth": "/tháng",
+      "free": {
+        "name": "Miễn phí",
+        "cta": "Bắt đầu",
+        "features": ["5 dự án/tháng", "Công cụ chỉnh sửa cơ bản", "Xuất file tiêu chuẩn", "Hỗ trợ cộng đồng"]
+      },
+      "pro": {
+        "name": "Chuyên nghiệp",
+        "cta": "Bắt đầu dùng thử Pro",
+        "features": ["Không giới hạn dự án", "Tăng cường AI", "Tất cả công cụ chỉnh sửa", "Xuất file 4K", "Hỗ trợ ưu tiên"]
+      },
+      "enterprise": {
+        "name": "Doanh nghiệp",
+        "cta": "Liên hệ kinh doanh",
+        "features": ["Mọi thứ trong Pro", "Cộng tác nhóm", "Truy cập API", "Tích hợp tùy chỉnh", "Hỗ trợ riêng biệt"]
+      }
+    }
+  }
+}

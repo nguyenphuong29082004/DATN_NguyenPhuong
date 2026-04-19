@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useModelByUsername } from '../../hooks/models/useModels';
+import { useModelByUsername, useUpdateModelBio } from '../../hooks/models/useModels';
 import { useCreateBooking } from '../../hooks/bookings/useBookings';
 import { useCreateReport } from '../../hooks/reports/useReports';
 import { useAuth } from '../../hooks/useAuth';
@@ -17,6 +17,7 @@ function ModelProfilePage() {
     const { createBookingAsync, isCreating: bookingSubmitting } = useCreateBooking();
     const { createReportAsync, isCreating: reportSubmitting } = useCreateReport();
     const { model: dbModel, isLoading: loading, error: fetchError } = useModelByUsername(username);
+    const { updateModelBioAsync, isUpdating: bioUpdating } = useUpdateModelBio();
 
     // Map to UI-compatible format
     const model = dbModel ? {
@@ -26,7 +27,7 @@ function ModelProfilePage() {
         verified: dbModel.status === 'active',
         status: dbModel.status,
         createdByUserId: dbModel.createdByUserId,
-        location: dbModel.locations?.[0]?.city || '',
+        location: dbModel.locations?.[0]?.city || dbModel.location || '',
         agency: dbModel.locations?.[0]?.agency || '',
         tags: dbModel.styleTags || [],
         model_type: dbModel.modelType || (dbModel.isAi ? (dbModel.canBook ? 'both' : 'ai') : 'real'),
@@ -58,6 +59,9 @@ function ModelProfilePage() {
     const [reportReason, setReportReason] = useState('');
     const [reportSuccess, setReportSuccess] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [showBioEditor, setShowBioEditor] = useState(false);
+    const [bioValue, setBioValue] = useState('');
+    const [bioError, setBioError] = useState('');
 
     const embedUrl = `${window.location.origin}/studio/try-on?model_id=${model?.id}`;
     const embedScript = `<script src="${window.location.origin}/embed.js"></script>\n<catwalk-tryon model-id="${model?.id}"></catwalk-tryon>`;
@@ -81,6 +85,10 @@ function ModelProfilePage() {
             metaDesc.setAttribute('content', `Book ${model.username} for AI fashion shoots. ${model.description?.slice(0, 120) || 'Professional model available on Catwalk.ai'}`);
         }
     }, [fetchError, model?.description, model?.username]);
+
+    useEffect(() => {
+        setBioValue(model?.description || '');
+    }, [model?.description]);
 
     if (loading) {
         return (
@@ -185,6 +193,28 @@ function ModelProfilePage() {
         }
     };
 
+    const handleBioSave = async (e) => {
+        e.preventDefault();
+        setBioError('');
+
+        if (!model?.id || !model?.username) return;
+        if (!bioValue.trim()) {
+            setBioError('Bio is required');
+            return;
+        }
+
+        try {
+            await updateModelBioAsync({
+                modelId: model.id,
+                username,
+                bio: bioValue,
+            });
+            setShowBioEditor(false);
+        } catch (err) {
+            setBioError(err.message || 'Failed to update bio');
+        }
+    };
+
     return (
         <div className="model-profile-page">
             <Helmet>
@@ -235,6 +265,12 @@ function ModelProfilePage() {
                             </div>
                             {model.description && (
                                 <p className="model-profile__bio">{model.description}</p>
+                            )}
+                            {isOwner && (
+                                <button className="model-profile__bio-edit-btn" onClick={() => setShowBioEditor(true)}>
+                                    <span className="material-symbols-outlined">edit</span>
+                                    Edit bio
+                                </button>
                             )}
                         </div>
                     </div>
@@ -417,6 +453,35 @@ function ModelProfilePage() {
                     </div>
                 </section>
             </main>
+
+            {showBioEditor && (
+                <div className="model-profile__modal-overlay" onClick={() => setShowBioEditor(false)}>
+                    <div className="model-profile__modal" onClick={e => e.stopPropagation()}>
+                        <div className="model-profile__modal-header">
+                            <h3>Edit Bio</h3>
+                            <button onClick={() => setShowBioEditor(false)}>
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <form onSubmit={handleBioSave}>
+                            <div className="model-profile__form-group">
+                                <label>Bio</label>
+                                <textarea
+                                    rows="6"
+                                    maxLength={500}
+                                    value={bioValue}
+                                    onChange={e => setBioValue(e.target.value)}
+                                    placeholder="Edit your bio"
+                                />
+                            </div>
+                            {bioError && <p className="model-profile__bio-error">{bioError}</p>}
+                            <button className="model-profile__modal-submit" type="submit" disabled={bioUpdating}>
+                                {bioUpdating ? 'Saving...' : 'Save Bio'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Booking Modal */}
             {showBookingModal && (

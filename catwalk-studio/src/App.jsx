@@ -18,9 +18,9 @@ const GalleryDetailPage = lazy(() => import('./pages/Gallery/GalleryDetailPage')
 const LoginPage = lazy(() => import('./pages/Login/LoginPage'));
 const BecomeModelForm = lazy(() => import('./pages/LaunchStudio/pages/BecomeModel'));
 const HelpPage = lazy(() => import('./pages/Help/HelpPage'));
+const AppDownloadPage = lazy(() => import('./pages/AppDownload/AppDownloadPage'));
 
 import Sidebar from './components/Sidebar/Sidebar';
-import { RequireSession } from './components/guards/RequireSession';
 import './pages/LaunchStudio/LaunchStudioPage.css';
 
 // Loading fallback component
@@ -60,14 +60,11 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/app" element={<AppDownloadPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/models" element={<ModelsPage />} />
           <Route path="/models/:username" element={<ModelProfilePage />} />
-          <Route path="/models/register" element={
-            <RequireSession>
-              <BecomeModelForm />
-            </RequireSession>
-          } />
+          <Route path="/models/register" element={<BecomeModelForm />} />
           <Route path="/studio" element={
             <RequireGuest>
               <StudioPage />

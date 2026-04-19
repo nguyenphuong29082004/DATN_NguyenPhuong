@@ -1,8 +1,4 @@
-import { useLanguage } from '../../../contexts/LanguageContext';
-
 export function InterfaceSection() {
-  const { t } = useLanguage();
-
   return (
     <section className="interface-section">
       <div
@@ -22,7 +18,7 @@ export function InterfaceSection() {
                 </div>
                 <div className="profile-info">
                   <h4>Elena R.</h4>
-                  <span className="verified-badge">{t('landing.interface.verifiedPro')}</span>
+                  <span className="verified-badge">Verified Professional</span>
                 </div>
               </div>
               <span className="material-symbols-outlined thin-icon" style={{ opacity: 0.3 }}>more_horiz</span>
@@ -30,48 +26,48 @@ export function InterfaceSection() {
 
             <div className="profile-stats">
               <div className="stat-group">
-                <span className="stat-group-label">{t('landing.interface.height')}</span>
+                <span className="stat-group-label">Height</span>
                 <span className="stat-group-value">178 CM</span>
               </div>
               <div className="stat-group">
-                <span className="stat-group-label">{t('landing.interface.status')}</span>
-                <span className="stat-group-value stat-group-value--accent">{t('landing.interface.available')}</span>
+                <span className="stat-group-label">Status</span>
+                <span className="stat-group-value stat-group-value--accent">Available</span>
               </div>
             </div>
 
             <div className="profile-tags">
-              <span className="tag">{t('landing.interface.runway')}</span>
-              <span className="tag">{t('landing.interface.editorial')}</span>
-              <span className="tag tag--active">{t('landing.interface.aiSynthetic')}</span>
+              <span className="tag">Runway</span>
+              <span className="tag">Editorial</span>
+              <span className="tag tag--active">AI Synthetic</span>
             </div>
 
             <button className="btn-profile-request">
-              {t('landing.interface.requestPortfolio')}
+              Request Portfolio
             </button>
           </div>
         </div>
 
         <div className="interface-content">
-          <span className="interface-subtitle">{t('landing.interface.subtitle')}</span>
+          <span className="interface-subtitle">The Interface</span>
           <h2 className="interface-title">
-            {t('landing.interface.title1')} <br />
-            <span className="italic">{t('landing.interface.title2')}</span>
+            The Curator's <br />
+            <span className="italic">Dashboard</span>
           </h2>
           <p className="interface-description">
-            {t('landing.interface.description')}
+            Seamlessly manage your professional trajectory. A minimal, high-contrast workspace designed for clarity and efficiency.
           </p>
           <div className="interface-list">
             <div className="list-item">
               <span className="material-symbols-outlined list-icon thin-icon">verified</span>
-              <span className="list-text">{t('landing.interface.globalTalentExchange')}</span>
+              <span className="list-text">Global Talent Exchange</span>
             </div>
             <div className="list-item">
               <span className="material-symbols-outlined list-icon thin-icon">lock_open</span>
-              <span className="list-text">{t('landing.interface.smartContractIntegration')}</span>
+              <span className="list-text">Smart Contract Integration</span>
             </div>
             <div className="list-item">
               <span className="material-symbols-outlined list-icon thin-icon">analytics</span>
-              <span className="list-text">{t('landing.interface.royaltyTrackingEngine')}</span>
+              <span className="list-text">Royalty Tracking Engine</span>
             </div>
           </div>
         </div>

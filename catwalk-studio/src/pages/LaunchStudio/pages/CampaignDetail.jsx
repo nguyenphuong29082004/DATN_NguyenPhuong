@@ -44,7 +44,7 @@ const CampaignDetail = () => {
                 campaignId,
                 userId: user.id,
             });
-            navigate('/studio/create-campaign');
+            navigate('/studio/campaigns');
         } catch (err) {
             console.error('Delete campaign failed', err);
         } finally {
@@ -90,8 +90,8 @@ const CampaignDetail = () => {
                 <div className="campaign-detail__not-found">
                     <span className="material-symbols-outlined">lock</span>
                     <h3>Sign in to view campaigns</h3>
-                    <button className="btn-secondary" onClick={() => navigate('/studio/create-campaign')}>
-                        Back to Campaigns
+                    <button className="btn-secondary" onClick={() => navigate('/studio/campaigns')}>
+                    Back to Campaigns
                     </button>
                 </div>
             </div>
@@ -208,8 +208,8 @@ const CampaignDetail = () => {
                 <div className="campaign-detail__not-found">
                     <span className="material-symbols-outlined">error_outline</span>
                     <h3>Campaign not found</h3>
-                    <button className="btn-secondary" onClick={() => navigate('/studio/create-campaign')}>
-                        Back to Campaigns
+                    <button className="btn-secondary" onClick={() => navigate('/studio/campaigns')}>
+                    Back to Campaigns
                     </button>
                 </div>
             </div>
@@ -223,8 +223,8 @@ const CampaignDetail = () => {
                 {/* Back Navigation */}
                 <button
                     className="campaign-detail__back"
-                    onClick={() => navigate('/studio/create-campaign')}
-                >
+                    onClick={() => navigate('/studio/campaigns')}
+                    >
                     <span className="material-symbols-outlined">arrow_back</span>
                     All Campaigns
                 </button>

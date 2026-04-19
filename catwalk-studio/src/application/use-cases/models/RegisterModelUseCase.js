@@ -30,7 +30,7 @@ export class RegisterModelUseCase extends UseCase {
      * @param {string} input.displayName - Public display name
      * @param {string} input.accountType - 'ai_only' | 'real_only' | 'both'
      * @param {number} [input.targetEarnings] - Monthly earnings goal
-     * @param {string} [input.bio] - AI Twin biography
+     * @param {string} [input.bioDraft] - AI-generated biography draft
      * @param {string} [input.location] - Location for real bookings
      * @param {string[]} [input.styleTags] - Style tags
      * @param {Object} [input.socialLinks] - { instagram, tiktok, website }
@@ -45,12 +45,7 @@ export class RegisterModelUseCase extends UseCase {
      */
     async execute(input) {
         try {
-            const { userId, displayName, accountType } = input;
-
-            // Validation
-            if (!userId) {
-                throw new Error('User must be authenticated to register as a model');
-            }
+            const { displayName, accountType } = input;
 
             if (!displayName || displayName.trim() === '') {
                 throw new Error('Display name is required');
@@ -61,29 +56,28 @@ export class RegisterModelUseCase extends UseCase {
                 throw new Error('Account type must be "ai_only", "real_only", or "both"');
             }
 
-            // Validate content preferences
             const contentPreferences = input.contentPreferences || [];
             if (contentPreferences.length === 0) {
                 throw new Error('At least one content preference must be selected');
             }
 
-            // Validate minimum photos for real/both types
             const galleryPhotos = input.photos?.gallery?.filter(Boolean) || [];
-            const totalPhotos = (input.photos?.front ? 1 : 0) + galleryPhotos.length;
+            const videoUrls = input.photos?.videos?.filter(Boolean) || [];
+            const minPhotos = accountType === 'ai_only' ? 1 : 5;
 
-            if (accountType !== 'ai_only' && totalPhotos < 5) {
-                throw new Error(`Minimum 5 photos required for ${accountType} registration. Currently: ${totalPhotos}`);
+            if (galleryPhotos.length < minPhotos) {
+                throw new Error(`Minimum ${minPhotos} source photo${minPhotos > 1 ? 's' : ''} required for ${accountType} registration. Currently: ${galleryPhotos.length}`);
             }
 
-            // Prepare payload for Edge Function
             const payload = {
                 displayName: input.displayName,
                 accountType: input.accountType,
-                profileImageUrl: input.photos?.front || null,
+                profileImageUrl: galleryPhotos[0] || null,
                 galleryImageUrls: galleryPhotos,
+                videoUrls: videoUrls,
                 modelTypes: input.types || [],
                 styleTags: input.styleTags || [],
-                bio: input.bio || null,
+                bioDraft: input.bioDraft || null,
                 location: input.location || null,
                 contentPreferences: contentPreferences,
                 monthlyTarget: input.targetEarnings || 0,

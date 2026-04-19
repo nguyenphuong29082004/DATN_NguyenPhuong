@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../hooks/useAuth';
-import DIContainer from '../../../di/container';
+import { getSupabaseClient } from '../../../infrastructure/supabase/supabase.client';
+import { useRegisterModel } from '../../../hooks/models/useModels';
 import ImageCropModal from './ImageCropModal';
 import './ModelOnboarding.css';
 
@@ -56,16 +56,36 @@ const POPULAR_LOCATIONS = [
     'Lagos, Nigeria', 'Casablanca, Morocco'
 ];
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 5;
 
 const BecomeModel = () => {
-    const { user } = useAuth();
+    const { registerModelAsync } = useRegisterModel();
     const navigate = useNavigate();
+    const sessionId = useRef(crypto.randomUUID());
     const [step, setStep] = useState(1);
     const [createdModel, setCreatedModel] = useState(null);
 
-    // Step 1: Account Type — 3 options per SRS
-    const [accountType, setAccountType] = useState('both'); // 'ai_only' | 'real_only' | 'both'
+    // Step 1: Account Type selection (multi-select)
+    const [selection, setSelection] = useState({
+        real: true,
+        ai: true
+    });
+    
+    // accountType is derived for backward compatibility with the useCase
+    const accountType = selection.real && selection.ai ? 'both' : (selection.ai ? 'ai_only' : 'real_only');
+    const setAccountType = (value) => {
+        if (value === 'ai_only') {
+            setSelection({ real: false, ai: true });
+            return;
+        }
+
+        if (value === 'real_only') {
+            setSelection({ real: true, ai: false });
+            return;
+        }
+
+        setSelection({ real: true, ai: true });
+    };
 
     // Step 2: Profile Creation
     const [formData, setFormData] = useState({
@@ -79,8 +99,8 @@ const BecomeModel = () => {
 
     // Step 3: Media Upload
     const [photos, setPhotos] = useState({
-        profile: null, // main profile photo
-        gallery: [],   // additional photos (array of URLs)
+        profile: null, // legacy field, kept temporarily for submit compatibility
+        gallery: [],   // source photos (array of URLs)
         videos: []
     });
 
@@ -121,6 +141,9 @@ const BecomeModel = () => {
         galleryIndexes: new Set(), // track nhiều index gallery đang upload cùng lúc
         videos: null,  // sẽ lưu trữ index của video đang upload
     });
+    const [bioDraft, setBioDraft] = useState('');
+    const [bioDraftError, setBioDraftError] = useState(null);
+    const [isGeneratingBio, setIsGeneratingBio] = useState(false);
 
     // Crop modal state
     const [cropImageSrc, setCropImageSrc] = useState(null);
@@ -134,8 +157,14 @@ const BecomeModel = () => {
             try {
                 const parsed = JSON.parse(saved);
                 if (parsed.step) setStep(parsed.step);
-                if (parsed.accountType) setAccountType(parsed.accountType);
+                if (parsed.accountType) {
+                    setSelection({
+                        real: parsed.accountType === 'both' || parsed.accountType === 'real_only',
+                        ai: parsed.accountType === 'both' || parsed.accountType === 'ai_only'
+                    });
+                }
                 if (parsed.formData) setFormData(prev => ({ ...prev, ...parsed.formData }));
+                if (parsed.bioDraft) setBioDraft(parsed.bioDraft);
                 if (parsed.photos) setPhotos(prev => ({ ...prev, ...parsed.photos }));
                 if (parsed.contentPreferences) setContentPreferences(parsed.contentPreferences);
                 if (parsed.targetEarnings) setTargetEarnings(parsed.targetEarnings);
@@ -151,12 +180,12 @@ const BecomeModel = () => {
 
     useEffect(() => {
         const draft = {
-            step, accountType, formData, photos, contentPreferences,
+            step, accountType, formData, bioDraft, photos, contentPreferences,
             targetEarnings, pricing, socialLinks, eliteBoost,
             finalConfig: { ...finalConfig, confirmed: false },
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-    }, [step, accountType, formData, photos, contentPreferences, targetEarnings, pricing, socialLinks, eliteBoost, finalConfig]);
+    }, [step, accountType, formData, bioDraft, photos, contentPreferences, targetEarnings, pricing, socialLinks, eliteBoost, finalConfig]);
 
     const handleNext = () => setStep(step + 1);
     const handleBack = () => {
@@ -165,10 +194,8 @@ const BecomeModel = () => {
     };
 
     const handleFileUpload = async (type, file, index) => {
-        if (!file || !user?.id) return;
+        if (!file) return;
 
-        // Bật trạng thái loading
-        // Bật trạng thái loading và xoá lỗi cũ
         setUploadError(null);
         if (type === 'profile') {
             setUploading(prev => ({ ...prev, profile: true }));
@@ -181,32 +208,17 @@ const BecomeModel = () => {
             setUploading(prev => ({ ...prev, videos: index }));
         }
 
-        const storageService = DIContainer.getStorageService();
-
-        // Nếu có ảnh/video cũ ở vị trí này, thực hiện xoá file cũ trên Storage trước
         try {
-            let oldUrl = null;
-            if (type === 'profile') oldUrl = photos.profile;
-            else if (type === 'gallery') oldUrl = photos.gallery[index];
-            else if (type === 'videos' && photos.videos) oldUrl = photos.videos[index];
+            const folder = type === 'videos' ? 'draft-model-videos' : 'draft-model-photos';
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', `${folder}/${sessionId.current}`);
 
-            if (oldUrl) {
-                // oldUrl có định dạng như: .../storage/v1/object/public/media/draft-model-photos/...
-                const urlParts = oldUrl.split('/media/');
-                if (urlParts.length > 1) {
-                    const oldPath = urlParts[1]; // VD: draft-model-photos/user-uuid/profile_xxx.webp
-                    // Xoá ngầm, không quan tâm kết quả để không chặn upload
-                    storageService.delete(oldPath).catch(err => console.warn('Failed to delete old file:', err));
-                }
-            }
-        } catch (e) {
-            console.warn('Error during old file cleanup', e);
-        }
+            const supabase = getSupabaseClient();
+            const { data, error } = await supabase.functions.invoke('upload-to-r2', { body: formData });
 
-        try {
-            const ext = file.name.split('.').pop();
-            const path = `draft-model-photos/${user.id}/${type}_${Date.now()}_${index ?? 0}.${ext}`;
-            const { url } = await storageService.upload(file, path);
+            if (error || !data?.url) throw new Error(error?.message || 'Upload failed');
+            const { url } = data;
 
             if (type === 'profile') {
                 setPhotos(prev => ({ ...prev, profile: url }));
@@ -224,15 +236,9 @@ const BecomeModel = () => {
                 });
             }
         } catch (err) {
-            console.error(`Failed to upload ${type} photo:`, err);
-            setUploadError(`Lỗi tải lên mạng: ${err.message}. Vui lòng thử lại.`);
-
-            // Xoá loader khi có lỗi
-            if (type === 'profile') {
-                setCropImageSrc(null); // Đóng crop modal nếu bị kẹt
-            }
+            console.error(`Failed to upload ${type}:`, err);
+            setUploadError(`Upload failed: ${err.message}. Please try again.`);
         } finally {
-            // Tắt trạng thái loading
             if (type === 'profile') {
                 setUploading(prev => ({ ...prev, profile: false }));
             } else if (type === 'gallery') {
@@ -247,53 +253,84 @@ const BecomeModel = () => {
         }
     };
 
-    // Upload nhiều file gallery cùng lúc (song song)
-    const handleMultiGalleryUpload = async (files) => {
-        if (!files || files.length === 0 || !user?.id) return;
-        const startIndex = photos.gallery.length;
-        const uploads = Array.from(files).map((file, i) =>
-            handleFileUpload('gallery', file, startIndex + i)
-        );
-        await Promise.all(uploads);
-    };
-
-    const toggleStyleTag = (tag) => {
-        setFormData(prev => ({
-            ...prev,
-            styleTags: prev.styleTags.includes(tag)
-                ? prev.styleTags.filter(t => t !== tag)
-                : [...prev.styleTags, tag]
-        }));
-    };
-
     const toggleContentPreference = (key) => {
         setContentPreferences(prev =>
             prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
         );
     };
 
+    const handleGenerateBio = async () => {
+        setIsGeneratingBio(true);
+        setBioDraftError(null);
+
+        try {
+            const draftName = formData.name.trim();
+            if (!draftName) {
+                throw new Error('Display name is required before generating a bio');
+            }
+
+            if (!formData.location.trim()) {
+                throw new Error('City is required before generating a bio');
+            }
+
+            if (contentPreferences.length === 0) {
+                throw new Error('Select at least one content preference before generating a bio');
+            }
+
+            const supabase = getSupabaseClient();
+            const { data, error } = await supabase.functions.invoke('generate-model-bio', {
+                body: {
+                    modelData: {
+                        displayName: draftName,
+                        accountType,
+                        location: formData.location,
+                        styleTags: formData.styleTags,
+                        contentPreferences,
+                        hourlyRate: pricing.hourlyRate,
+                        halfDayRate: pricing.halfDayRate,
+                        fullDayRate: pricing.fullDayRate,
+                    },
+                },
+            });
+
+            if (error || !data?.success || !data?.bio) {
+                throw new Error(error?.message || data?.error || 'Failed to generate bio');
+            }
+
+            setBioDraft(data.bio);
+        } catch (error) {
+            setBioDraftError(error.message || 'Failed to generate bio');
+        } finally {
+            setIsGeneratingBio(false);
+        }
+    };
+
     // Count total uploaded photos
-    const totalPhotos = (photos.profile ? 1 : 0) + photos.gallery.filter(Boolean).length;
+    const galleryPhotoCount = photos.gallery.filter(Boolean).length;
+    const uploadedVideos = photos.videos.filter(Boolean);
+    const totalPhotos = galleryPhotoCount;
     const minPhotosRequired = accountType === 'ai_only' ? 1 : 5;
+    const remainingPhotosRequired = Math.max(minPhotosRequired - totalPhotos, 0);
+    const filteredLocations = POPULAR_LOCATIONS.filter(location =>
+        location.toLowerCase().includes(formData.location.toLowerCase())
+    ).slice(0, 8);
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setSubmitError(null);
 
         try {
-            const useCase = DIContainer.getRegisterModelUseCase();
-            const result = await useCase.execute({
-                userId: user.id,
+            const result = await registerModelAsync({
                 displayName: formData.name.trim(),
                 accountType,
                 targetEarnings,
-                bio: formData.bio,
+                bioDraft,
                 location: formData.location,
                 styleTags: formData.styleTags,
                 socialLinks,
                 photos: {
-                    front: photos.profile,
                     gallery: photos.gallery.filter(Boolean),
+                    videos: photos.videos ? photos.videos.filter(Boolean) : [],
                 },
                 contentPreferences,
                 eliteBoost,
@@ -309,7 +346,7 @@ const BecomeModel = () => {
 
             localStorage.removeItem(STORAGE_KEY);
             setCreatedModel(result);
-            setStep(TOTAL_STEPS + 1); // Success state (step 8)
+            setStep(TOTAL_STEPS + 1);
         } catch (err) {
             console.error('Failed to create model profile:', err);
             setSubmitError(err.message || 'Failed to create profile. Please try again.');
@@ -323,13 +360,11 @@ const BecomeModel = () => {
     // Validation per step
     const canContinue = () => {
         switch (step) {
-            case 1: return !!accountType;
-            case 2: return formData.name.trim().length > 0;
-            case 3: return !!photos.profile && totalPhotos >= minPhotosRequired;
-            case 4: return contentPreferences.length > 0;
+            case 1: return selection.real || selection.ai;
+            case 2: return true;
+            case 3: return galleryPhotoCount >= minPhotosRequired;
+            case 4: return formData.name.trim().length > 0 && formData.location.trim().length > 0 && contentPreferences.length > 0;
             case 5: return true;
-            case 6: return true; // Social links optional
-            case 7: return true; // Elite optional
             default: return true;
         }
     };
@@ -451,519 +486,10 @@ const BecomeModel = () => {
                     </>
                 );
 
-            // ========================================
-            // STEP 2: Profile Creation
+                        // ========================================
+            // STEP 2: Target Earnings
             // ========================================
             case 2:
-                return (
-                    <div className="step-content-wrapper">
-                        <div className="step-header">
-                            <div className="separator-line"></div>
-                            <h2 className="step-headline">Create your <span className="italic-text text-primary">profile</span></h2>
-                            <p className="step-description">
-                                Define your identity within the fashion ecosystem. This information will be visible on your public profile.
-                            </p>
-                        </div>
-
-                        <div className="form-section">
-                            <label className="input-label">DISPLAY NAME *</label>
-                            <input
-                                type="text"
-                                value={formData.name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                className="polish-input"
-                                placeholder="Your professional name"
-                            />
-                        </div>
-
-                        <div className="form-section">
-                            <label className="input-label">BIOGRAPHY</label>
-                            <div className="bio-input-wrapper">
-                                <textarea
-                                    className="bio-textarea"
-                                    placeholder="Describe your style, aesthetic, and professional history..."
-                                    value={formData.bio}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                                    maxLength={500}
-                                ></textarea>
-                                <div className="char-counter">
-                                    {formData.bio.length} / 500 CHARACTERS
-                                </div>
-                            </div>
-                        </div>
-
-                        {accountType !== 'ai_only' && (
-                            <div className="form-section">
-                                <label className="input-label">LOCATION</label>
-                                <div style={{ position: 'relative' }}>
-                                    <input
-                                        type="text"
-                                        value={formData.location}
-                                        onChange={(e) => {
-                                            setFormData(prev => ({ ...prev, location: e.target.value }));
-                                            setShowLocationDropdown(true);
-                                        }}
-                                        onFocus={() => setShowLocationDropdown(true)}
-                                        onBlur={() => setTimeout(() => setShowLocationDropdown(false), 200)}
-                                        className="polish-input"
-                                        placeholder="e.g. London, UK"
-                                    />
-                                    {showLocationDropdown && (
-                                        <div className="location-dropdown" style={{
-                                            position: 'absolute',
-                                            top: '100%',
-                                            left: 0,
-                                            right: 0,
-                                            background: '#1a1a1a',
-                                            border: '1px solid rgba(255,255,255,0.1)',
-                                            borderTop: 'none',
-                                            borderBottomLeftRadius: '8px',
-                                            borderBottomRightRadius: '8px',
-                                            maxHeight: '200px',
-                                            overflowY: 'auto',
-                                            zIndex: 10,
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
-                                        }}>
-                                            {POPULAR_LOCATIONS.filter(loc => loc.toLowerCase().includes(formData.location.toLowerCase())).length > 0 ? (
-                                                POPULAR_LOCATIONS.filter(loc => loc.toLowerCase().includes(formData.location.toLowerCase())).map(loc => (
-                                                    <div
-                                                        key={loc}
-                                                        style={{ padding: '12px 16px', cursor: 'pointer', color: '#fff', fontSize: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}
-                                                        onMouseDown={(e) => {
-                                                            e.preventDefault(); // prevent blur
-                                                            setFormData(prev => ({ ...prev, location: loc }));
-                                                            setShowLocationDropdown(false);
-                                                        }}
-                                                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                                                        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                                                    >
-                                                        {loc}
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
-                                                    Use custom location: "{formData.location}"
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="form-section">
-                            <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>HEIGHT (OPTIONAL)</span>
-                                {formData.height && (
-                                    <span style={{ color: '#F1E0B6', fontWeight: 500 }}>
-                                        {formData.height} cm / {Math.floor(formData.height / 30.48)}'{Math.round((formData.height / 2.54) % 12)}"
-                                    </span>
-                                )}
-                            </label>
-
-                            <div className="slider-container" style={{ marginTop: '6px' }}>
-                                <input
-                                    type="range"
-                                    min="140"
-                                    max="200"
-                                    step="1"
-                                    value={formData.height || 170}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, height: e.target.value }))}
-                                    className="earn-slider"
-                                    style={{
-                                        background: `linear-gradient(to right, #F1E0B6 0%, #F1E0B6 ${((formData.height || 170) - 140) / 60 * 100}%, rgba(255, 255, 255, 0.1) ${((formData.height || 170) - 140) / 60 * 100}%, rgba(255, 255, 255, 0.1) 100%)`
-                                    }}
-                                />
-                                <div className="slider-labels" style={{ marginTop: '4px', color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>
-                                    <span>140 cm (4'7")</span>
-                                    <span>170 cm (5'7")</span>
-                                    <span>200 cm (6'7")</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="form-section">
-                            <div className="section-head">
-                                <label className="input-label">STYLE TAGS</label>
-                                <span className="section-meta">{formData.styleTags.length} SELECTED</span>
-                            </div>
-                            <div className="chips-container">
-                                {STYLE_TAGS.map(tag => (
-                                    <div
-                                        key={tag}
-                                        className={`chip ${formData.styleTags.includes(tag) ? 'active' : ''}`}
-                                        onClick={() => toggleStyleTag(tag)}
-                                    >
-                                        <div className="chip-text-wrapper" style={{ display: 'grid' }}>
-                                            <span style={{ gridArea: '1 / 1', visibility: 'hidden', fontWeight: 600 }}>{tag}</span>
-                                            <span style={{ gridArea: '1 / 1', fontWeight: formData.styleTags.includes(tag) ? 600 : 400 }}>{tag}</span>
-                                        </div>
-                                        {formData.styleTags.includes(tag) ?
-                                            <span className="material-symbols-outlined chip-icon" style={{ marginLeft: '4px' }}>close</span> :
-                                            <span className="material-symbols-outlined chip-icon" style={{ marginLeft: '4px' }}>add</span>
-                                        }
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            // ========================================
-            // STEP 3: Media Upload
-            // ========================================
-            case 3:
-                return (
-                    <div className="step-content-wrapper" style={{ width: '100%', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 24px' }}>
-                        <div className="step-header" style={{ width: '100%', maxWidth: '800px' }}>
-                            <h2 className="step-headline" style={{ textAlign: 'center' }}>Upload your <span className="italic-text">media</span></h2>
-                            <p className="step-description" style={{ textAlign: 'center' }}>
-                                {accountType === 'ai_only'
-                                    ? 'Upload at least 1 photo to create your AI profile.'
-                                    : `Upload at least ${minPhotosRequired} photos. These will be used for your portfolio${accountType !== 'real_only' ? ' and to create your AI modelling twin' : ''}.`
-                                }
-                            </p>
-
-                            {/* Hiển thị lỗi Upload nếu có */}
-                            {uploadError && (
-                                <div style={{
-                                    margin: '16px auto 0',
-                                    padding: '12px 16px',
-                                    backgroundColor: 'rgba(255, 71, 87, 0.1)',
-                                    border: '1px solid rgba(255, 71, 87, 0.3)',
-                                    borderRadius: '8px',
-                                    color: '#ff4757',
-                                    fontSize: '0.85rem',
-                                    textAlign: 'center',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px'
-                                }}>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>error</span>
-                                    {uploadError}
-                                </div>
-                            )}
-
-                            <div className="quality-guidelines" style={{ background: 'rgba(241, 224, 182, 0.05)', border: '1px solid rgba(241, 224, 182, 0.2)', padding: '16px 20px', borderRadius: '8px', marginTop: '32px', textAlign: 'left', width: '100%', margin: '32px auto 0' }}>
-                                <h4 style={{ fontSize: '0.65rem', color: 'var(--primary, #F1E0B6)', marginBottom: '8px', letterSpacing: '0.1em' }}>QUALITY GUIDELINES</h4>
-                                <ul style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', paddingLeft: '16px', margin: 0, lineHeight: 1.5 }}>
-                                    <li>Good lighting (natural preferred)</li>
-                                    <li>Clear face visibility (no sunglasses/heavy makeup)</li>
-                                    <li>Mix of full body, half body, and close-ups</li>
-                                    <li>Neutral backgrounds recommended</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Profile Photo */}
-                        <div className="upload-section-title" style={{ width: '100%', maxWidth: '800px', fontSize: '0.9rem', fontWeight: 700, color: 'white', marginBottom: '16px', marginTop: '32px', textAlign: 'left' }}>
-                            Profile Photo
-                        </div>
-
-                        <div className="primary-photo-container" style={{ width: '100%', maxWidth: '800px', marginBottom: '32px' }}>
-                            <div
-                                className="profile-upload-slot"
-                                style={{
-                                    width: '100%',
-                                    maxWidth: '240px',
-                                    aspectRatio: '3/4',
-                                    background: 'rgba(255,255,255,0.03)',
-                                    border: photos.profile ? '1px solid rgba(241, 224, 182, 0.4)' : '1px dashed rgba(255,255,255,0.15)',
-                                    borderRadius: '8px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    overflow: 'hidden',
-                                    position: 'relative',
-                                    transition: 'all 0.2s ease'
-                                }}
-                                onClick={() => document.getElementById('upload-profile').click()}
-                                onMouseOver={(e) => !photos.profile && (e.currentTarget.style.borderColor = 'rgba(241, 224, 182, 0.4)')}
-                                onMouseOut={(e) => !photos.profile && (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)')}
-                            >
-                                <input id="upload-profile" type="file" accept="image/*" style={{ display: 'none' }}
-                                    onChange={(e) => {
-                                        const file = e.target.files[0];
-                                        if (!file) return;
-                                        // Tạo local URL để hiện trong crop modal
-                                        const objectUrl = URL.createObjectURL(file);
-                                        setCropImageSrc(objectUrl);
-                                        e.target.value = '';
-                                    }} />
-
-                                {uploading.profile ? (
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                        <div className="processing-spinner" style={{ width: '32px', height: '32px', border: '3px solid rgba(241, 224, 182, 0.2)', borderTopColor: '#F1E0B6', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '12px' }}></div>
-                                        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Uploading...</span>
-                                    </div>
-                                ) : photos.profile ? (
-                                    <>
-                                        <img src={photos.profile} alt="Primary Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', padding: '16px 12px 12px', display: 'flex', justifyContent: 'center' }}>
-                                            <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 500, letterSpacing: '0.05em' }}>CHANGE PHOTO</span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span className="material-symbols-outlined" style={{ opacity: 0.4, fontSize: '32px', marginBottom: '12px', color: 'var(--primary, #F1E0B6)' }}>add_a_photo</span>
-                                        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Upload Headshot</span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Gallery Photos */}
-                        <div className="upload-section-title" style={{ width: '100%', maxWidth: '800px', fontSize: '0.9rem', fontWeight: 700, color: 'white', marginBottom: '16px', textAlign: 'left' }}>
-                            Gallery <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: '8px', fontSize: '0.75rem' }}>(Minimum {minPhotosRequired} photos required)</span>
-                        </div>
-
-                        <div className="gallery-upload-grid" style={{ width: '100%', maxWidth: '800px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-                            {/* Render uploaded photos */}
-                            {photos.gallery.map((url, index) => (
-                                <div
-                                    key={`gallery-${index}`}
-                                    className="gallery-item-slot"
-                                    style={{
-                                        aspectRatio: '1/1',
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        overflow: 'hidden',
-                                        position: 'relative'
-                                    }}
-                                >
-                                    <img src={url} alt={`Gallery ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    {/* Optional: Add a delete button here later if needed */}
-                                </div>
-                            ))}
-
-                            {/* Render exactly ONE empty upload slot at the end */}
-                            <div
-                                className="gallery-item-slot"
-                                style={{
-                                    aspectRatio: '1/1',
-                                    background: 'rgba(255,255,255,0.03)',
-                                    border: '1px dashed rgba(255,255,255,0.15)',
-                                    borderRadius: '8px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    overflow: 'hidden',
-                                    position: 'relative',
-                                    transition: 'all 0.2s ease'
-                                }}
-                                onClick={() => document.getElementById('gallery-upload-new').click()}
-                                onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(241, 224, 182, 0.4)'}
-                                onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'}
-                            >
-                                <input
-                                    id="gallery-upload-new"
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    style={{ display: 'none' }}
-                                    onChange={async (e) => {
-                                        const files = e.target.files;
-                                        if (!files || files.length === 0) return;
-                                        // Upload tất cả file được chọn cùng lúc
-                                        await handleMultiGalleryUpload(files);
-                                        // Reset input so same file can be selected again
-                                        e.target.value = '';
-                                    }}
-                                />
-                                {uploading.galleryIndexes.size > 0 ? (
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                                        <div className="processing-spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(241, 224, 182, 0.2)', borderTopColor: '#F1E0B6', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                                        <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)' }}>{uploading.galleryIndexes.size} file(s)</span>
-                                    </div>
-                                ) : (
-                                    <span className="material-symbols-outlined" style={{ opacity: 0.3, fontSize: '24px' }}>add_a_photo</span>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Videos Section */}
-                        <div className="upload-section-title" style={{ width: '100%', maxWidth: '800px', fontSize: '0.9rem', fontWeight: 700, color: 'white', marginBottom: '16px', textAlign: 'left' }}>
-                            Videos <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(optional)</span>
-                        </div>
-
-                        <div className="gallery-upload-grid" style={{ width: '100%', maxWidth: '800px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-                            {[0, 1, 2].map(index => (
-                                <div
-                                    key={`video-${index}`}
-                                    className="gallery-item-slot"
-                                    style={{
-                                        aspectRatio: '1/1',
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px dashed rgba(255,255,255,0.15)',
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        cursor: 'pointer',
-                                        overflow: 'hidden',
-                                        position: 'relative',
-                                        transition: 'all 0.2s ease'
-                                    }}
-                                    onClick={() => document.getElementById(`video-upload-${index}`).click()}
-                                    onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(241, 224, 182, 0.4)'}
-                                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'}
-                                >
-                                    <input
-                                        id={`video-upload-${index}`}
-                                        type="file"
-                                        accept="video/*"
-                                        style={{ display: 'none' }}
-                                        onChange={async (e) => {
-                                            const file = e.target.files[0];
-                                            if (!file) return;
-                                            await handleFileUpload('videos', file, index);
-                                        }}
-                                    />
-                                    {uploading.videos === index ? (
-                                        <div className="processing-spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(241, 224, 182, 0.2)', borderTopColor: '#F1E0B6', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                                    ) : photos.videos && photos.videos[index] ? (
-                                        <video src={photos.videos[index]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <span className="material-symbols-outlined" style={{ opacity: 0.3, fontSize: '24px' }}>videocam</span>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-
-                        {totalPhotos < minPhotosRequired && (
-                            <p className="launch-eta" style={{ color: '#ff6b6b', textAlign: 'center', width: '100%', maxWidth: '800px' }}>
-                                {minPhotosRequired - totalPhotos} more photo{minPhotosRequired - totalPhotos > 1 ? 's' : ''} needed
-                            </p>
-                        )}
-                    </div>
-                );
-
-            // ========================================
-            // STEP 4: Content Preferences (NEW)
-            // ========================================
-            case 4:
-                return (
-                    <div className="step-content-wrapper" style={{ width: '100%', maxWidth: '520px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <div className="step-header" style={{ width: '100%' }}>
-                            <h2 className="step-headline" style={{ textAlign: 'center' }}>Content <span className="italic-text text-primary">preferences</span></h2>
-                            <p className="step-description" style={{ textAlign: 'center' }}>
-                                Select the content categories you're comfortable with. Brands will respect your boundaries.
-                            </p>
-                        </div>
-
-                        <div style={{
-                            width: '100%',
-                            marginTop: '32px',
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.06)',
-                            borderRadius: '16px',
-                            overflow: 'hidden'
-                        }}>
-                            {CONTENT_CATEGORIES.map((cat, idx) => {
-                                const isSelected = contentPreferences.includes(cat.key);
-                                return (
-                                    <div
-                                        key={cat.key}
-                                        onClick={() => toggleContentPreference(cat.key)}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            padding: '18px 24px',
-                                            cursor: 'pointer',
-                                            borderBottom: idx < CONTENT_CATEGORIES.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                                            background: isSelected ? 'rgba(241, 224, 182, 0.03)' : 'transparent',
-                                            transition: 'background 0.25s ease'
-                                        }}
-                                        onMouseOver={(e) => { e.currentTarget.style.background = isSelected ? 'rgba(241, 224, 182, 0.05)' : 'rgba(255,255,255,0.03)'; }}
-                                        onMouseOut={(e) => { e.currentTarget.style.background = isSelected ? 'rgba(241, 224, 182, 0.03)' : 'transparent'; }}
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                            <div style={{
-                                                width: '36px',
-                                                height: '36px',
-                                                borderRadius: '10px',
-                                                background: isSelected ? 'rgba(241, 224, 182, 0.12)' : 'rgba(255,255,255,0.04)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                transition: 'all 0.25s ease'
-                                            }}>
-                                                <span className="material-symbols-outlined" style={{
-                                                    fontSize: '18px',
-                                                    color: isSelected ? '#F1E0B6' : 'rgba(255,255,255,0.45)',
-                                                    fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24",
-                                                    transition: 'color 0.25s ease'
-                                                }}>{cat.icon}</span>
-                                            </div>
-                                            <span style={{
-                                                fontSize: '0.9rem',
-                                                fontWeight: 500,
-                                                color: isSelected ? '#fff' : 'rgba(255,255,255,0.7)',
-                                                letterSpacing: '0.01em',
-                                                transition: 'color 0.25s ease'
-                                            }}>
-                                                {cat.label}
-                                            </span>
-                                        </div>
-
-                                        {/* Toggle Switch */}
-                                        <div style={{
-                                            width: '44px',
-                                            height: '24px',
-                                            borderRadius: '12px',
-                                            background: isSelected ? '#F1E0B6' : 'rgba(255,255,255,0.08)',
-                                            position: 'relative',
-                                            transition: 'background 0.3s ease',
-                                            flexShrink: 0,
-                                            boxShadow: isSelected ? '0 0 12px rgba(241, 224, 182, 0.15)' : 'none'
-                                        }}>
-                                            <div style={{
-                                                width: '18px',
-                                                height: '18px',
-                                                borderRadius: '50%',
-                                                background: isSelected ? '#0A0A0A' : 'rgba(255,255,255,0.25)',
-                                                position: 'absolute',
-                                                top: '3px',
-                                                left: isSelected ? '23px' : '3px',
-                                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-                                            }} />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {contentPreferences.length === 0 && (
-                            <p className="launch-eta" style={{ color: '#ff6b6b', marginTop: '20px', fontSize: '0.8rem' }}>
-                                Select at least one content category
-                            </p>
-                        )}
-
-                        {contentPreferences.includes('mature_adult') && (
-                            <div style={{ width: '100%', marginTop: '20px', padding: '14px 20px', background: 'rgba(255, 107, 107, 0.06)', borderRadius: '12px', border: '1px solid rgba(255, 107, 107, 0.12)' }}>
-                                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.5 }}>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '8px', color: '#ff6b6b' }}>warning</span>
-                                    Age verification (18+) will be required before your profile can go live for mature content.
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                );
-
-            // ========================================
-            // STEP 5: Income & Pricing
-            // ========================================
-            case 5:
                 return (
                     <div className="step-content-wrapper">
                         <div className="step-header" style={{ width: '100%', maxWidth: '700px' }}>
@@ -1009,6 +535,285 @@ const BecomeModel = () => {
                                 Recommended starting range: £1,500 - £3,000
                             </p>
                         </div>
+                    </div>
+                );
+
+            // ========================================
+            // STEP 3: Media Upload
+            // ========================================
+            case 3:
+                return (
+                    <div className="step-content-wrapper" style={{ width: '100%', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 24px' }}>
+                        <div className="step-header" style={{ width: '100%', maxWidth: '800px' }}>
+                            <div className="separator-line"></div>
+                            <h2 className="step-headline" style={{ textAlign: 'center' }}>Upload your <span className="italic-text text-primary">source media</span></h2>
+                            <p className="step-description" style={{ textAlign: 'center' }}>
+                                {accountType === 'ai_only'
+                                    ? 'Add at least 1 source photo to create your AI profile privately.'
+                                    : `Add at least ${minPhotosRequired} source photos to continue.`
+                                }
+                            </p>
+
+                            {/* Hiển thị lỗi Upload nếu có */}
+                            {uploadError && (
+                                <div style={{
+                                    margin: '16px auto 0',
+                                    padding: '12px 16px',
+                                    backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                                    border: '1px solid rgba(255, 71, 87, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#ff4757',
+                                    fontSize: '0.85rem',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>error</span>
+                                    {uploadError}
+                                </div>
+                            )}
+
+                            <div className="quality-guidelines" style={{ background: 'rgba(241, 224, 182, 0.05)', border: '1px solid rgba(241, 224, 182, 0.2)', padding: '18px 20px', borderRadius: '8px', textAlign: 'left', width: '100%', margin: '32px auto 0' }}>
+                                <h4 style={{ fontSize: '0.65rem', color: 'var(--primary, #F1E0B6)', marginBottom: '12px', letterSpacing: '0.12em' }}>FOR BEST APPROVAL RESULTS</h4>
+                                <div style={{ display: 'grid', gap: '10px' }}>
+                                    {[
+                                        'Good lighting (natural preferred)',
+                                        'Clear face visibility (no sunglasses/heavy makeup)',
+                                        'Mix of full body, half body, and close-ups',
+                                        'Neutral backgrounds recommended'
+                                    ].map((item) => (
+                                        <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'rgba(255,255,255,0.72)', fontSize: '0.8rem', lineHeight: 1.45 }}>
+                                            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--primary, #F1E0B6)', marginTop: '1px' }}>check_circle</span>
+                                            <span>{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(241, 224, 182, 0.12)', display: 'grid', gap: '8px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'rgba(255,255,255,0.72)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--primary, #F1E0B6)', marginTop: '1px' }}>shield_lock</span>
+                                        <span>Uploaded photos and videos stay private during onboarding and are used for review and AI image generation only.</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'rgba(255,255,255,0.55)', fontSize: '0.74rem', lineHeight: 1.45 }}>
+                                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'rgba(255,255,255,0.35)', marginTop: '1px' }}>visibility_off</span>
+                                        <span>Your uploaded source media is not published publicly at this stage.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-section" style={{ width: '100%', maxWidth: '800px', marginTop: '32px' }}>
+                            <div className="section-header-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                                <h3 style={{ fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.15em', fontWeight: 600 }}>SOURCE PHOTOS ({galleryPhotoCount} / 6)</h3>
+                                <p className="bio-hint" style={{ marginTop: 0 }}>Upload the photos that will be used later to generate your profile imagery.</p>
+                            </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '16px', marginTop: '16px' }}>
+                                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                                        <div key={i} style={{ aspectRatio: '3/4', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', position: 'relative' }}>
+                                            {photos.gallery[i] ? (
+                                                <>
+                                                    <img src={photos.gallery[i]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <button
+                                                        onClick={() => setPhotos(prev => {
+                                                            const g = [...prev.gallery];
+                                                            g[i] = null;
+                                                            return { ...prev, gallery: g };
+                                                        })}
+                                                        style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer' }}
+                                                    >
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>close</span>
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <label style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '8px', color: 'rgba(255,255,255,0.4)' }}>
+                                                    <input type="file" accept="image/*" onChange={(e) => handleFileUpload('gallery', e.target.files[0], i)} style={{ display: 'none' }} />
+                                                    <span className="material-symbols-outlined" style={{ opacity: 0.45, fontSize: '24px' }}>add</span>
+                                                    <span style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Add photo</span>
+                                                </label>
+                                            )}
+                                            {uploading.galleryIndexes.has(i) && (
+                                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div className="spinner-small"></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div style={{ marginTop: '16px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '999px', border: `1px solid ${remainingPhotosRequired > 0 ? 'rgba(241, 224, 182, 0.24)' : 'rgba(91, 214, 141, 0.25)'}`, background: remainingPhotosRequired > 0 ? 'rgba(241, 224, 182, 0.08)' : 'rgba(91, 214, 141, 0.08)', color: remainingPhotosRequired > 0 ? 'var(--primary, #F1E0B6)' : '#5BD68D', fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{remainingPhotosRequired > 0 ? 'schedule' : 'check_circle'}</span>
+                                    <span>
+                                        {remainingPhotosRequired > 0
+                                            ? `${remainingPhotosRequired} more photo${remainingPhotosRequired > 1 ? 's' : ''} required to continue`
+                                            : 'Ready to continue'}
+                                    </span>
+                                </div>
+                        </div>
+
+                        <div className="form-section" style={{ width: '100%', maxWidth: '800px', marginTop: '40px' }}>
+                            <div className="section-header-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                                <h3 style={{ fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.15em', fontWeight: 600 }}>PRIVATE VIDEO (OPTIONAL)</h3>
+                                <p className="bio-hint" style={{ marginTop: 0 }}>Add one intro or movement clip for internal review. This will not be published at this stage.</p>
+                            </div>
+                            <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
+                                <div style={{ aspectRatio: '16/10', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)', position: 'relative' }}>
+                                    {uploadedVideos[0] ? (
+                                        <>
+                                            <video src={uploadedVideos[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} controls muted playsInline />
+                                            <button
+                                                onClick={() => setPhotos(prev => ({ ...prev, videos: [] }))}
+                                                style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.55)', border: 'none', color: 'white', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            >
+                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <label style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '8px', color: 'rgba(255,255,255,0.4)', padding: '20px', textAlign: 'center' }}>
+                                            <input type="file" accept="video/*" onChange={(e) => handleFileUpload('videos', e.target.files[0], 0)} style={{ display: 'none' }} />
+                                            <span className="material-symbols-outlined" style={{ opacity: 0.5, fontSize: '28px' }}>video_library</span>
+                                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Upload video</span>
+                                            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1.4 }}>MP4, MOV or WebM</span>
+                                        </label>
+                                    )}
+                                    {uploading.videos === 0 && (
+                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div className="spinner-small"></div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-section" style={{ width: '100%', maxWidth: '800px', marginTop: '40px' }}>
+                            <div className="section-header-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                                <h3 style={{ fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.15em', fontWeight: 600 }}>ELITE BOOST (OPTIONAL)</h3>
+                                <p className="bio-hint" style={{ marginTop: 0 }}>Increase visibility after review with priority placement and a premium badge.</p>
+                            </div>
+                            <div
+                                className={`elite-toggle-wrapper ${eliteBoost ? 'active' : ''}`}
+                                onClick={() => setEliteBoost(!eliteBoost)}
+                                style={{ marginTop: '16px', maxWidth: '520px' }}
+                            >
+                                <div className="toggle-switch">
+                                    <div className="toggle-knob"></div>
+                                </div>
+                                <div className="toggle-label-group">
+                                    <span className="toggle-main-label">ACTIVATE ELITE BOOST</span>
+                                    <span className="toggle-sub-label">Priority visibility after approval</span>
+                                </div>
+                            </div>
+                            <p className="bio-hint" style={{ marginTop: '12px', opacity: eliteBoost ? 0.8 : 0.45 }}>
+                                Annual fee applies only after your profile has been reviewed and approved.
+                            </p>
+                        </div>
+                    </div>
+                );
+
+            // ========================================
+            // STEP 4: Profile & Preferences
+            // ========================================
+            case 4:
+                return (
+                    <div className="step-content-wrapper">
+                        <div className="step-header" style={{ width: '100%', maxWidth: '800px' }}>
+                            <div className="separator-line"></div>
+                            <h2 className="step-headline" style={{ textAlign: 'center' }}>Shape your <span className="italic-text text-primary">profile</span></h2>
+                            <p className="step-description" style={{ textAlign: 'center' }}>
+                                Add the details reviewers and future profile previews will use once your application is approved.
+                            </p>
+                        </div>
+
+                        <div className="form-section">
+                            <label className="input-label">DISPLAY NAME *</label>
+                            <input
+                                type="text"
+                                value={formData.name}
+                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                className="polish-input"
+                                placeholder="Your professional name"
+                            />
+                        </div>
+
+                        <div className="form-section">
+                            <label className="input-label">AI BIOGRAPHY</label>
+                            <div className="bio-input-wrapper" style={{ position: 'relative' }}>
+                                <div
+                                    className="bio-textarea"
+                                    style={{ minHeight: '180px', paddingBottom: '56px', whiteSpace: 'pre-wrap' }}
+                                >
+                                    {bioDraft || 'Generate an AI bio draft from your profile details. You can edit it after you submit for review.'}
+                                </div>
+                                <div style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                                    <div className="char-counter" style={{ fontSize: '0.6rem', opacity: 0.5 }}>
+                                        {bioDraft ? `${bioDraft.length} / 500` : 'Ready to generate'}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleGenerateBio}
+                                        disabled={isGeneratingBio}
+                                        style={{
+                                            background: 'rgba(241, 224, 182, 0.1)',
+                                            border: '1px solid rgba(241, 224, 182, 0.2)',
+                                            color: 'var(--primary)',
+                                            fontSize: '0.65rem',
+                                            padding: '4px 10px',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px'
+                                        }}
+                                    >
+                                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>{isGeneratingBio ? 'sync' : 'auto_awesome'}</span>
+                                        {isGeneratingBio ? 'GENERATING...' : bioDraft ? 'REGENERATE' : 'GENERATE AI BIO'}
+                                    </button>
+                                </div>
+                            </div>
+                            <p className="bio-hint" style={{ marginTop: '10px' }}>
+                                This draft will be generated from your onboarding details and can be edited after you submit for review.
+                            </p>
+                            {bioDraftError && (
+                                <p className="bio-hint" style={{ marginTop: '8px', color: '#ff6b6b' }}>
+                                    {bioDraftError}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="form-section" style={{ position: 'relative' }}>
+                            <label className="input-label">CITY *</label>
+                            <input
+                                type="text"
+                                value={formData.location}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setFormData(prev => ({ ...prev, location: value }));
+                                    setShowLocationDropdown(value.trim().length > 0);
+                                }}
+                                onFocus={() => setShowLocationDropdown(formData.location.trim().length > 0)}
+                                onBlur={() => setTimeout(() => setShowLocationDropdown(false), 150)}
+                                className="polish-input"
+                                placeholder="Search for your city"
+                            />
+                            {showLocationDropdown && filteredLocations.length > 0 && (
+                                <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, zIndex: 10, background: '#141414', border: '1px solid rgba(241, 224, 182, 0.14)', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.45)' }}>
+                                    {filteredLocations.map((location) => (
+                                        <button
+                                            key={location}
+                                            type="button"
+                                            onMouseDown={() => {
+                                                setFormData(prev => ({ ...prev, location }));
+                                                setShowLocationDropdown(false);
+                                            }}
+                                            style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.82)', padding: '12px 16px', fontSize: '0.8rem', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                                        >
+                                            {location}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            <p className="bio-hint" style={{ marginTop: '10px' }}>Select your base city so brands and agencies know where you are available.</p>
+                        </div>
 
                         {/* Show booking rates only for real/both */}
                         {accountType !== 'ai_only' && (
@@ -1051,29 +856,23 @@ const BecomeModel = () => {
                                 </div>
                             </div>
                         )}
-                    </div>
-                );
 
-            // ========================================
-            // STEP 6: Social Connection
-            // ========================================
-            case 6:
-                return (
-                    <div className="step-content-wrapper">
-                        <div className="step-header">
-                            <h2 className="step-headline" style={{ textAlign: 'center' }}>Connect your <span className="italic-text text-primary">socials</span></h2>
-                            <p className="step-description" style={{ textAlign: 'center' }}>
-                                Link your social accounts to build credibility. Follower counts will be displayed on your profile.
+                        <div style={{ width: '100%', margin: '40px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}></div>
+
+                        <div className="step-header" style={{ width: '100%', maxWidth: '800px', marginBottom: '20px', alignItems: 'flex-start', textAlign: 'left' }}>
+                            <h2 className="step-headline" style={{ textAlign: 'left', fontSize: '1.6rem' }}>Optional — Connect your <span className="italic-text text-primary">socials</span></h2>
+                            <p className="step-description" style={{ textAlign: 'left', maxWidth: '100%' }}>
+                                Helps reviewers understand your presence and gives agencies more context once your profile is approved.
                             </p>
                         </div>
 
-                        <div className="social-grid">
+                        <div className="social-grid" style={{ width: '100%', maxWidth: '800px' }}>
                             <div className={`social-card ${socialLinks.instagram ? 'connected' : ''}`}>
                                 <div className="social-info">
                                     <div className="social-icon" style={{ background: 'transparent', overflow: 'hidden', borderRadius: '8px' }}>
                                         <svg viewBox="0 0 2500 2500" xmlns="http://www.w3.org/2000/svg" width="32" height="32"><defs><radialGradient id="ig0" cx="332.14" cy="2511.81" r="3263.54" gradientUnits="userSpaceOnUse"><stop offset=".09" stopColor="#fa8f21" /><stop offset=".78" stopColor="#d82d7e" /></radialGradient><radialGradient id="ig1" cx="1516.14" cy="2623.81" r="2572.12" gradientUnits="userSpaceOnUse"><stop offset=".64" stopColor="#8c3aaa" stopOpacity="0" /><stop offset="1" stopColor="#8c3aaa" /></radialGradient></defs><path d="M833.4,1250c0-230.11,186.49-416.7,416.6-416.7s416.7,186.59,416.7,416.7-186.59,416.7-416.7,416.7S833.4,1480.11,833.4,1250m-225.26,0c0,354.5,287.36,641.86,641.86,641.86S1891.86,1604.5,1891.86,1250,1604.5,608.14,1250,608.14,608.14,895.5,608.14,1250M1767.27,582.69a150,150,0,1,0,150.06-149.94h-0.06a150.07,150.07,0,0,0-150,149.94M745,2267.47c-121.87-5.55-188.11-25.85-232.13-43-58.36-22.72-100-49.78-143.78-93.5s-70.88-85.32-93.5-143.68c-17.16-44-37.46-110.26-43-232.13-6.06-131.76-7.27-171.34-7.27-505.15s1.31-373.28,7.27-505.15c5.55-121.87,26-188,43-232.13,22.72-58.36,49.78-100,93.5-143.78s85.32-70.88,143.78-93.5c44-17.16,110.26-37.46,232.13-43,131.76-6.06,171.34-7.27,505-7.27s373.28,1.31,505.15,7.27c121.87,5.55,188,26,232.13,43,58.36,22.62,100,49.78,143.78,93.5s70.78,85.42,93.5,143.78c17.16,44,37.46,110.26,43,232.13,6.06,131.87,7.27,171.34,7.27,505.15s-1.21,373.28-7.27,505.15c-5.55,121.87-25.95,188.11-43,232.13-22.72,58.36-49.78,100-93.5,143.68s-85.42,70.78-143.78,93.5c-44,17.16-110.26,37.46-232.13,43-131.76,6.06-171.34,7.27-505.15,7.27s-373.28-1.21-505-7.27M734.65,7.57c-133.07,6.06-224,27.16-303.41,58.06C349,97.54,279.38,140.35,209.81,209.81S97.54,349,65.63,431.24c-30.9,79.46-52,170.34-58.06,303.41C1.41,867.93,0,910.54,0,1250s1.41,382.07,7.57,515.35c6.06,133.08,27.16,223.95,58.06,303.41,31.91,82.19,74.62,152,144.18,221.43S349,2402.37,431.24,2434.37c79.56,30.9,170.34,52,303.41,58.06C868,2498.49,910.54,2500,1250,2500s382.07-1.41,515.35-7.57c133.08-6.06,223.95-27.16,303.41-58.06,82.19-32,151.86-74.72,221.43-144.18s112.18-139.24,144.18-221.43c30.9-79.46,52.1-170.34,58.06-303.41,6.06-133.38,7.47-175.89,7.47-515.35s-1.41-382.07-7.47-515.35c-6.06-133.08-27.16-224-58.06-303.41-32-82.19-74.72-151.86-144.18-221.43S2150.95,97.54,2068.86,65.63c-79.56-30.9-170.44-52.1-303.41-58.06C1632.17,1.51,1589.56,0,1250.1,0S868,1.41,734.65,7.57" fill="url(#ig0)" /><path d="M833.4,1250c0-230.11,186.49-416.7,416.6-416.7s416.7,186.59,416.7,416.7-186.59,416.7-416.7,416.7S833.4,1480.11,833.4,1250m-225.26,0c0,354.5,287.36,641.86,641.86,641.86S1891.86,1604.5,1891.86,1250,1604.5,608.14,1250,608.14,608.14,895.5,608.14,1250M1767.27,582.69a150,150,0,1,0,150.06-149.94h-0.06a150.07,150.07,0,0,0-150,149.94M745,2267.47c-121.87-5.55-188.11-25.85-232.13-43-58.36-22.72-100-49.78-143.78-93.5s-70.88-85.32-93.5-143.68c-17.16-44-37.46-110.26-43-232.13-6.06-131.76-7.27-171.34-7.27-505.15s1.31-373.28,7.27-505.15c5.55-121.87,26-188,43-232.13,22.72-58.36,49.78-100,93.5-143.78s85.32-70.88,143.78-93.5c44-17.16,110.26-37.46,232.13-43,131.76-6.06,171.34-7.27,505-7.27s373.28,1.31,505.15,7.27c121.87,5.55,188,26,232.13,43,58.36,22.62,100,49.78,143.78,93.5s70.78,85.42,93.5,143.78c17.16,44,37.46,110.26,43,232.13,6.06,131.87,7.27,171.34,7.27,505.15s-1.21,373.28-7.27,505.15c-5.55,121.87-25.95,188.11-43,232.13-22.72,58.36-49.78,100-93.5,143.68s-85.42,70.78-143.78,93.5c-44,17.16-110.26,37.46-232.13,43-131.76,6.06-171.34,7.27-505.15,7.27s-373.28-1.21-505-7.27M734.65,7.57c-133.07,6.06-224,27.16-303.41,58.06C349,97.54,279.38,140.35,209.81,209.81S97.54,349,65.63,431.24c-30.9,79.46-52,170.34-58.06,303.41C1.41,867.93,0,910.54,0,1250s1.41,382.07,7.57,515.35c6.06,133.08,27.16,223.95,58.06,303.41,31.91,82.19,74.62,152,144.18,221.43S349,2402.37,431.24,2434.37c79.56,30.9,170.34,52,303.41,58.06C868,2498.49,910.54,2500,1250,2500s382.07-1.41,515.35-7.57c133.08-6.06,223.95-27.16,303.41-58.06,82.19-32,151.86-74.72,221.43-144.18s112.18-139.24,144.18-221.43c30.9-79.46,52.1-170.34,58.06-303.41,6.06-133.38,7.47-175.89,7.47-515.35s-1.41-382.07-7.47-515.35c-6.06-133.08-27.16-224-58.06-303.41-32-82.19-74.72-151.86-144.18-221.43S2150.95,97.54,2068.86,65.63c-79.56-30.9-170.44-52.1-303.41-58.06C1632.17,1.51,1589.56,0,1250.1,0S868,1.41,734.65,7.57" fill="url(#ig1)" /></svg>
                                     </div>
-                                    <div className="social-details" style={{ flex: 1 }}>
+                                    <div className="social-details" style={{ flex: 1, minWidth: 0 }}>
                                         <span className="social-name">Instagram</span>
                                         <input
                                             type="text"
@@ -1081,7 +880,7 @@ const BecomeModel = () => {
                                             value={socialLinks.instagram}
                                             onChange={(e) => setSocialLinks(prev => ({ ...prev, instagram: e.target.value }))}
                                             className="social-input"
-                                            style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.75rem', padding: '4px 0', width: '100%', outline: 'none', boxShadow: 'none' }}
+                                            style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.75rem', padding: '4px 0', width: '100%', minWidth: 0, outline: 'none', boxShadow: 'none' }}
                                         />
                                     </div>
                                 </div>
@@ -1093,7 +892,7 @@ const BecomeModel = () => {
                                     <div className="social-icon" style={{ background: 'transparent', overflow: 'hidden', borderRadius: '8px' }}>
                                         <svg viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg" width="32" height="32"><g clipRule="evenodd" fillRule="evenodd"><path d="M25 0h200c13.808 0 25 11.192 25 25v200c0 13.808-11.192 25-25 25H25c-13.808 0-25-11.192-25-25V25C0 11.192 11.192 0 25 0z" fill="#010101" /><path d="M156.98 230c7.607 0 13.774-6.117 13.774-13.662s-6.167-13.663-13.774-13.663h-2.075c7.607 0 13.774 6.118 13.774 13.663S162.512 230 154.905 230z" fill="#ee1d51" /><path d="M154.717 202.675h-2.075c-7.607 0-13.775 6.118-13.775 13.663S145.035 230 152.642 230h2.075c-7.608 0-13.775-6.117-13.775-13.662s6.167-13.663 13.775-13.663z" fill="#66c8cf" /><ellipse cx="154.811" cy="216.338" fill="#010101" rx="6.699" ry="6.643" /><path d="M50 196.5v6.925h8.112v26.388h8.115v-26.201h6.603l2.264-7.112zm66.415 0v6.925h8.112v26.388h8.115v-26.201h6.603l2.264-7.112zm-39.81 3.93c0-2.17 1.771-3.93 3.959-3.93 2.19 0 3.963 1.76 3.963 3.93s-1.772 3.93-3.963 3.93c-2.188-.001-3.959-1.76-3.959-3.93zm0 6.738h7.922v22.645h-7.922zM87.924 196.5v33.313h7.925v-8.608l2.453-2.248L106.037 230h8.49l-11.133-16.095 10-9.733h-9.622l-7.923 7.86V196.5zm85.47 0v33.313h7.926v-8.608l2.452-2.248L191.509 230H200l-11.133-16.095 10-9.733h-9.622l-7.925 7.86V196.5z" fill="#ffffff" /><path d="M161.167 81.186c10.944 7.819 24.352 12.42 38.832 12.42V65.755a39.26 39.26 0 0 1-8.155-.853v21.923c-14.479 0-27.885-4.601-38.832-12.42v56.835c0 28.432-23.06 51.479-51.505 51.479-10.613 0-20.478-3.207-28.673-8.707C82.187 183.57 95.23 189.5 109.66 189.5c28.447 0 51.508-23.047 51.508-51.48V81.186zm10.06-28.098c-5.593-6.107-9.265-14-10.06-22.726V26.78h-7.728c1.945 11.09 8.58 20.565 17.788 26.308zm-80.402 99.107a23.445 23.445 0 0 1-4.806-14.256c0-13.004 10.548-23.547 23.561-23.547a23.6 23.6 0 0 1 7.147 1.103V87.022a51.97 51.97 0 0 0-8.152-.469v22.162a23.619 23.619 0 0 0-7.15-1.103c-13.013 0-23.56 10.543-23.56 23.548 0 9.195 5.272 17.157 12.96 21.035z" fill="#ee1d52" /><path d="M153.012 74.405c10.947 7.819 24.353 12.42 38.832 12.42V64.902c-8.082-1.72-15.237-5.942-20.617-11.814-9.208-5.743-15.843-15.218-17.788-26.308H133.14v111.239c-.046 12.968-10.576 23.468-23.561 23.468-7.652 0-14.45-3.645-18.755-9.292-7.688-3.878-12.96-11.84-12.96-21.035 0-13.005 10.547-23.548 23.56-23.548 2.493 0 4.896.388 7.15 1.103V86.553c-27.945.577-50.42 23.399-50.42 51.467 0 14.011 5.597 26.713 14.68 35.993 8.195 5.5 18.06 8.707 28.673 8.707 28.445 0 51.505-23.048 51.505-51.479z" fill="#ffffff" /><path d="M191.844 64.902v-5.928a38.84 38.84 0 0 1-20.617-5.887 38.948 38.948 0 0 0 20.617 11.815zM153.439 26.78a39.524 39.524 0 0 1-.427-3.198V20h-28.028v111.24c-.045 12.967-10.574 23.467-23.56 23.467-3.813 0-7.412-.904-10.6-2.512 4.305 5.647 11.103 9.292 18.755 9.292 12.984 0 23.515-10.5 23.561-23.468V26.78zm-44.864 59.773v-6.311a51.97 51.97 0 0 0-7.067-.479C73.06 79.763 50 102.811 50 131.24c0 17.824 9.063 33.532 22.835 42.772-9.083-9.28-14.68-21.982-14.68-35.993 0-28.067 22.474-50.889 50.42-51.466z" fill="#69c9d0" /><path d="M154.904 230c7.607 0 13.775-6.117 13.775-13.662s-6.168-13.663-13.775-13.663h-.188c-7.607 0-13.774 6.118-13.774 13.663S147.109 230 154.716 230zm-6.792-13.662c0-3.67 3-6.643 6.7-6.643 3.697 0 6.697 2.973 6.697 6.643s-3 6.645-6.697 6.645c-3.7-.001-6.7-2.975-6.7-6.645z" fill="#ffffff" /></g></svg>
                                     </div>
-                                    <div className="social-details" style={{ flex: 1 }}>
+                                    <div className="social-details" style={{ flex: 1, minWidth: 0 }}>
                                         <span className="social-name">TikTok</span>
                                         <input
                                             type="text"
@@ -1101,7 +900,7 @@ const BecomeModel = () => {
                                             value={socialLinks.tiktok}
                                             onChange={(e) => setSocialLinks(prev => ({ ...prev, tiktok: e.target.value }))}
                                             className="social-input"
-                                            style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.75rem', padding: '4px 0', width: '100%', outline: 'none', boxShadow: 'none' }}
+                                            style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.75rem', padding: '4px 0', width: '100%', minWidth: 0, outline: 'none', boxShadow: 'none' }}
                                         />
                                     </div>
                                 </div>
@@ -1109,111 +908,93 @@ const BecomeModel = () => {
                             </div>
                         </div>
 
-                        <p className="bio-hint" style={{ marginTop: '16px' }}>
+                        <p className="bio-hint" style={{ width: '100%', maxWidth: '800px', marginTop: '16px', opacity: 0.5 }}>
                             Social links are optional but recommended. Verified social presence increases your discoverability.
                         </p>
                     </div>
                 );
 
             // ========================================
-            // STEP 7: Elite Program
+            // STEP 5: Elite & Launch
             // ========================================
-            case 7:
+            case 5:
                 return (
-                    <div className="step-content-wrapper full-height-step" style={{ justifyContent: 'space-between', flex: 1, width: '100%', paddingTop: '48px' }}>
-                        <div className="elite-container">
-                            {/* Left Column */}
-                            <div className="elite-left">
-                                <div className="premium-badge">
-                                    <span className="material-symbols-outlined badge-star">star</span>
-                                    <span>PREMIUM FEATURE</span>
-                                </div>
-                                <h2 className="elite-headline">
-                                    Elevate your<br />
-                                    <span className="italic-text">Digital</span><br />
-                                    <span className="italic-text">Presence.</span>
-                                </h2>
-                                <p className="elite-description">
-                                    The Elite membership prioritises your model profile across the entire platform, ensuring exposure to luxury brands and top-tier designers.
-                                </p>
+                    <div className="step-content-wrapper full-height-step" style={{ flex: 1, width: '100%', paddingTop: '32px', paddingBottom: '32px' }}>
+                        <div className="step-header" style={{ width: '100%', maxWidth: '900px', alignItems: 'flex-start', textAlign: 'left', marginBottom: '28px' }}>
+                            <h2 className="step-headline" style={{ textAlign: 'left' }}>Review your <span className="italic-text text-primary">private draft</span></h2>
+                            <p className="step-description" style={{ textAlign: 'left', maxWidth: '100%' }}>
+                                Your uploaded source media stays private. Step 5 is a final review and submission step; image generation happens after approval.
+                            </p>
+                        </div>
 
-                                <div
-                                    className={`elite-toggle-wrapper ${eliteBoost ? 'active' : ''}`}
-                                    onClick={() => setEliteBoost(!eliteBoost)}
-                                >
-                                    <div className="toggle-switch">
-                                        <div className="toggle-knob"></div>
-                                    </div>
-                                    <div className="toggle-label-group">
-                                        <span className="toggle-main-label">ACTIVATE ELITE BOOST</span>
-                                        <span className="toggle-sub-label">HIGHLY RECOMMENDED</span>
-                                    </div>
+                        <div style={{ width: '100%', maxWidth: '900px', display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px' }}>
+                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', overflow: 'hidden' }}>
+                                <div style={{ aspectRatio: '16/9', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {photos.gallery[0] ? (
+                                        <img src={photos.gallery[0]} alt="Source photo preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <div style={{ color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', fontSize: '0.72rem', textAlign: 'center', lineHeight: 1.5, padding: '24px' }}>Your first uploaded source photo appears here as the draft preview</div>
+                                    )}
                                 </div>
-
-                                <p style={{
-                                    fontSize: '0.7rem',
-                                    color: 'rgba(241, 224, 182, 0.7)',
-                                    marginTop: '12px',
-                                    opacity: eliteBoost ? 1 : 0,
-                                    maxHeight: eliteBoost ? '40px' : '0px',
-                                    overflow: 'hidden',
-                                    transition: 'opacity 0.3s ease, max-height 0.3s ease',
-                                    marginBottom: 0
-                                }}>
-                                    Annual fee applies. Payment will be processed after profile review.
-                                </p>
+                                <div style={{ padding: '24px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
+                                        <div>
+                                            <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#fff' }}>{formData.name || 'Your display name'}</h3>
+                                            <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>{formData.location || 'City will appear here'}</p>
+                                        </div>
+                                        {eliteBoost && <span style={{ border: '1px solid rgba(241, 224, 182, 0.26)', color: 'var(--primary)', borderRadius: '999px', padding: '6px 10px', fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Elite boost</span>}
+                                    </div>
+                                    <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, fontSize: '0.86rem' }}>{bioDraft || (isGeneratingBio ? 'Generating your AI bio draft...' : 'Generate your AI bio draft in step 4 before submitting for review.')}</p>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '20px' }}>
+                                        {contentPreferences.map(pref => (
+                                            <span key={pref} style={{ padding: '7px 12px', borderRadius: '999px', border: '1px solid rgba(241, 224, 182, 0.18)', color: 'rgba(255,255,255,0.75)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{pref}</span>
+                                        ))}
+                                    </div>
+                                    {accountType !== 'ai_only' && (
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '12px', marginTop: '24px' }}>
+                                            {[
+                                                ['Hourly', pricing.hourlyRate],
+                                                ['Half Day', pricing.halfDayRate],
+                                                ['Full Day', pricing.fullDayRate],
+                                            ].map(([label, value]) => (
+                                                <div key={label} style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px', background: 'rgba(255,255,255,0.02)' }}>
+                                                    <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
+                                                    <div style={{ marginTop: '6px', fontSize: '1rem', color: '#fff' }}>£{value || 0}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            {/* Right Column */}
-                            <div className="elite-right">
-                                <div className="benefits-header">
-                                    <span>EXCLUSIVE BENEFITS</span>
-                                    <div className="line"></div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '20px' }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>Draft summary</div>
+                                    <div style={{ display: 'grid', gap: '10px', color: 'rgba(255,255,255,0.72)', fontSize: '0.8rem' }}>
+                                        <div>{totalPhotos} source photo{totalPhotos !== 1 ? 's' : ''} uploaded</div>
+                                        <div>{uploadedVideos.length ? `${uploadedVideos.length} private video uploaded` : 'No private video uploaded yet'}</div>
+                                        <div>{socialLinks.instagram || socialLinks.tiktok ? 'Social links added' : 'No social links added yet'}</div>
+                                        <div>{accountType === 'ai_only' ? 'AI twin profile' : accountType === 'real_only' ? 'Real model profile' : 'Hybrid profile'}</div>
+                                    </div>
                                 </div>
 
-                                <div className="benefits-list">
-                                    <div className="benefit-item">
-                                        <div className="benefit-icon-box">
-                                            <span className="material-symbols-outlined">keyboard_double_arrow_up</span>
-                                        </div>
-                                        <div className="benefit-content">
-                                            <h4>PRIORITY VISIBILITY</h4>
-                                            <p>Appear at the forefront of brand search results and curated luxury collections.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="benefit-item">
-                                        <div className="benefit-icon-box">
-                                            <span className="material-symbols-outlined">auto_awesome</span>
-                                        </div>
-                                        <div className="benefit-content">
-                                            <h4>10X ENGAGEMENT</h4>
-                                            <p>Access high-paying campaigns exclusive to Elite status members.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="benefit-item">
-                                        <div className="benefit-icon-box">
-                                            <span className="material-symbols-outlined">verified</span>
-                                        </div>
-                                        <div className="benefit-content">
-                                            <h4>VERIFIED SEAL</h4>
-                                            <p>Instant credibility marker for global agencies and independent fashion labels.</p>
-                                        </div>
-                                    </div>
+                                <div style={{ background: 'rgba(241, 224, 182, 0.05)', border: '1px solid rgba(241, 224, 182, 0.16)', borderRadius: '20px', padding: '20px' }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>Next stage</div>
+                                    <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, fontSize: '0.82rem' }}>
+                                        Once you submit, your profile stays private and enters review. AI image generation and public publishing are handled later after approval.
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Confirm & Launch */}
-                        <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                            <div className={`confirm-box ${finalConfig.confirmed ? 'checked' : ''}`} onClick={() => setFinalConfig({ ...finalConfig, confirmed: !finalConfig.confirmed })} style={{ maxWidth: '560px', width: '100%' }}>
+                        <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%' }}>
+                            <div className={`confirm-box ${finalConfig.confirmed ? 'checked' : ''}`} onClick={() => setFinalConfig({ ...finalConfig, confirmed: !finalConfig.confirmed })} style={{ maxWidth: '720px', width: '100%' }}>
                                 <div className="checkbox-custom">
                                     {finalConfig.confirmed && <span className="material-symbols-outlined">check</span>}
                                 </div>
                                 <div className="confirm-text">
-                                    <h4>Confirm Talent Listing</h4>
-                                    <p>I agree to the <span className="underline">Terms of Service</span> and understand that my persona will be publicly visible to agencies.</p>
+                                    <h4>Confirm Private Submission</h4>
+                                    <p>I agree to the <span className="underline">Terms of Service</span> and understand that my uploaded media remains private during review.</p>
                                 </div>
                             </div>
 
@@ -1223,27 +1004,31 @@ const BecomeModel = () => {
                                     !finalConfig.confirmed ||
                                     isSubmitting ||
                                     !formData.name ||
-                                    !photos.profile
+                                    !formData.location ||
+                                    !bioDraft ||
+                                    galleryPhotoCount === 0
                                 }
                                 onClick={handleSubmit}
-                                style={{ maxWidth: '560px', width: '100%' }}
+                                style={{ maxWidth: '720px', width: '100%' }}
                             >
-                                {isSubmitting ? 'LAUNCHING...' : 'LAUNCH PROFILE'} <span className="material-symbols-outlined rocket-icon">rocket_launch</span>
+                                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT FOR REVIEW'} <span className="material-symbols-outlined rocket-icon">arrow_outward</span>
                             </button>
                             {submitError && (
                                 <p className="launch-eta" style={{ color: '#ff6b6b' }}>{submitError}</p>
                             )}
                             <p className="launch-eta" style={{ textAlign: 'center' }}>
-                                {!photos.profile ? 'Missing Profile Photo • ' : ''}
+                                {galleryPhotoCount === 0 ? 'Source Photos Required • ' : ''}
                                 {!formData.name ? 'Display Name Required • ' : ''}
-                                Estimated processing: 2-5 minutes
+                                {!formData.location ? 'City Required • ' : ''}
+                                {!bioDraft ? 'AI Bio Required • ' : ''}
+                                Private review submission
                             </p>
                         </div>
                     </div>
                 );
 
             // ========================================
-            // STEP 8: Success
+            // STEP 6: Success
             // ========================================
             case TOTAL_STEPS + 1:
                 return (
@@ -1361,11 +1146,14 @@ const BecomeModel = () => {
     return (
         <div className="onboarding-container">
             {/* Main Content */}
-            <main className="onboarding-main">
+            <main
+                className="onboarding-main"
+                style={step === 3 || step === 4 ? { justifyContent: 'flex-start', paddingTop: '56px' } : undefined}
+            >
                 {renderStep()}
             </main>
 
-            {/* Footer - ẩn khi ở step 8 (success) */}
+            {/* Footer — hidden on success screen */}
             {step <= TOTAL_STEPS && (
                 <footer className="onboarding-footer">
                     <div className="footer-content">
@@ -1375,7 +1163,7 @@ const BecomeModel = () => {
                         </button>
 
                         <div className="footer-actions">
-                            {step <= TOTAL_STEPS && step < 7 && (
+                            {step <= TOTAL_STEPS && step < TOTAL_STEPS && (
                                 <>
                                     <div className="progress-info">
                                         <span className="progress-label">Step {step} / {TOTAL_STEPS}</span>

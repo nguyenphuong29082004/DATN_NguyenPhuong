@@ -100,11 +100,6 @@ const Marketplace = () => {
             <div className="marketplace-content">
                 {/* Header */}
                 <header className="marketplace-header">
-                    <div className="subtitle-group justify-center">
-                        <div className="subtitle-line"></div>
-                        <span className="subtitle-text">MARKETPLACE & BOOKING</span>
-                        <div className="subtitle-line"></div>
-                    </div>
                     <h1 className="marketplace-title editorial-kern">Marketplace & <span className="italic">Booking</span></h1>
                     <p className="marketplace-subtitle">
                         Discover and book AI models or real models for your fashion shoots. Browse curated talent and start your creative journey.

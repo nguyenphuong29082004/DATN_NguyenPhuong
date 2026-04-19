@@ -1,9 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { container } from '../../di/container';
 
-/**
- * Query keys for model-related queries
- */
 export const modelKeys = {
     all: ['models'],
     public: (filters) => ['models', 'public', filters],
@@ -54,6 +51,45 @@ export function useModelByUsername(username) {
         model: data || null,
         isLoading,
         error,
+    };
+}
+
+export function useUpdateModelBio() {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: async (data) => {
+            const useCase = container.getUpdateModelBioUseCase();
+            const result = await useCase.execute(data);
+            if (result.isFailure()) throw new Error(result.getError());
+            return result.getValue();
+        },
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: modelKeys.byUsername(variables.username) });
+        },
+    });
+
+    return {
+        updateModelBio: mutation.mutate,
+        updateModelBioAsync: mutation.mutateAsync,
+        isUpdating: mutation.isPending,
+        error: mutation.error,
+    };
+}
+
+export function useRegisterModel() {
+    const mutation = useMutation({
+        mutationFn: async (input) => {
+            const useCase = container.getRegisterModelUseCase();
+            return useCase.execute(input);
+        },
+    });
+
+    return {
+        registerModel: mutation.mutate,
+        registerModelAsync: mutation.mutateAsync,
+        isRegistering: mutation.isPending,
+        error: mutation.error,
     };
 }
 

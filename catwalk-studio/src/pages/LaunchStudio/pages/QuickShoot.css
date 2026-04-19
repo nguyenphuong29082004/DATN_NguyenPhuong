@@ -253,16 +253,16 @@
 .quick-shoot-config textarea,
 .quick-shoot-config input {
     width: 100%;
-    padding: 9px 12px;
-    min-height: unset;
+    padding: 12px 14px;
+    min-height: 44px;
     height: auto;
     margin-bottom: 0;
     background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
+    border-radius: 6px;
     color: var(--white, #FFFFFF);
     font-family: var(--font-display, "Inter", sans-serif);
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     transition: border-color 0.2s ease;
     box-sizing: border-box;
 }
@@ -293,13 +293,14 @@
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 6px 10px;
+    padding: 10px 14px;
+    min-height: 48px;
     background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
+    border-radius: 6px;
     color: var(--white, #FFFFFF);
     font-family: var(--font-display, "Inter", sans-serif);
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: border-color 0.2s ease;
     text-align: left;
@@ -329,8 +330,8 @@
 }
 
 .model-dropdown__thumb {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -461,8 +462,9 @@
 .model-dropdown__option {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
+    gap: 12px;
+    padding: 12px 14px;
+    min-height: 48px;
     cursor: pointer;
     transition: background 0.15s ease;
 }
@@ -654,15 +656,15 @@
 }
 
 .size-preset-btn {
-    padding: 6px 12px;
-    min-height: unset;
+    padding: 10px 16px;
+    min-height: 40px;
     margin-bottom: 0;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 2px;
+    border-radius: 6px;
     color: rgba(255, 255, 255, 0.45);
     font-family: var(--font-display, "Inter", sans-serif);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     letter-spacing: 0.03em;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1221,4 +1223,69 @@
 
 .wardrobe-picker__link:hover {
     opacity: 0.8;
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+    .quick-shoot-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .quick-shoot-config {
+        max-height: none;
+        height: auto;
+    }
+
+    .quick-shoot-config select,
+    .quick-shoot-config textarea,
+    .quick-shoot-config input {
+        font-size: 16px; /* Prevents iOS auto-zoom */
+        min-height: 48px;
+        padding: 14px 16px;
+    }
+
+    .model-dropdown__trigger {
+        min-height: 52px;
+        padding: 12px 16px;
+        font-size: 16px;
+    }
+
+    .model-dropdown__option {
+        min-height: 52px;
+        padding: 14px 16px;
+    }
+
+    .size-presets,
+    .quality-presets {
+        flex-wrap: wrap;
+    }
+
+    .size-preset-btn {
+        min-height: 44px;
+        padding: 12px 18px;
+        font-size: 0.85rem;
+        flex: 1;
+        min-width: 60px;
+    }
+
+    .output-row--stack-mobile {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .output-separator {
+        display: none;
+    }
+
+    .format-select {
+        width: 100% !important;
+    }
+
+    /* Result panel full width on mobile */
+    .quick-shoot-result {
+        min-height: 400px;
+    }
 }

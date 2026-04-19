@@ -9,6 +9,7 @@
     z-index: 1000;
     padding: 16px;
     animation: cm-modal-fade-in 0.2s ease;
+    overscroll-behavior: contain;
 }
 
 /* ===== Modal Container ===== */
@@ -184,8 +185,15 @@
     }
 
     .cm-modal__footer {
-        padding: 12px 20px;
-        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        padding: 16px 20px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .cm-modal__footer button {
+        width: 100%;
+        margin: 0;
     }
 }
 

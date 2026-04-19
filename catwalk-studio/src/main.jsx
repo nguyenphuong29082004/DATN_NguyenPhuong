@@ -4,7 +4,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import './styles/index.css'
 import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext'
-import { LanguageProvider } from './contexts/LanguageContext'
+import './i18n'
 
 // Create a React Query client
 const queryClient = new QueryClient({
@@ -19,11 +19,9 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </LanguageProvider>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
     {import.meta.env.DEV && (
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
     )}

@@ -44,6 +44,7 @@ import { GetModelByUsernameUseCase } from '../application/use-cases/models/GetMo
 import { GetShootableModelsUseCase } from '../application/use-cases/models/GetShootableModelsUseCase';
 import { GetAIEnginesUseCase } from '../application/use-cases/models/GetAIEnginesUseCase';
 import { GetUserAICharactersUseCase } from '../application/use-cases/models/GetUserAICharactersUseCase';
+import { UpdateModelBioUseCase } from '../application/use-cases/models/UpdateModelBioUseCase';
 
 // Generation Use Cases
 import { GenerateQuickShootUseCase } from '../application/use-cases/generations/GenerateQuickShootUseCase';
@@ -258,6 +259,10 @@ class DIContainer {
 
     static getModelByUsernameUseCase() {
         return new GetModelByUsernameUseCase(this.getModelRepository());
+    }
+
+    static getUpdateModelBioUseCase() {
+        return new UpdateModelBioUseCase(getSupabaseClient());
     }
 
     static getShootableModelsUseCase() {

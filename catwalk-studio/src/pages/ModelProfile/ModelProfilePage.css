@@ -248,6 +248,31 @@
     margin: 0;
 }
 
+.model-profile__bio-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid rgba(241, 224, 182, 0.2);
+    background: rgba(241, 224, 182, 0.08);
+    color: var(--primary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.model-profile__bio-edit-btn .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.model-profile__bio-error {
+    margin: 0;
+    color: #ff6b6b;
+    font-size: 0.8rem;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Specs Bar — location, agency, type, pricing, tags                          */
 /* -------------------------------------------------------------------------- */

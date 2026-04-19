@@ -16,6 +16,12 @@ CREATE TABLE IF NOT EXISTS public.credit_transactions (
 
 CREATE INDEX IF NOT EXISTS idx_credit_transactions_user_id ON public.credit_transactions(user_id);
 
+-- Drop existing functions to avoid signature conflicts
+DROP FUNCTION IF EXISTS public.deduct_credits(UUID, INTEGER, TEXT);
+DROP FUNCTION IF EXISTS public.deduct_credits(UUID, INTEGER, TEXT, JSONB);
+DROP FUNCTION IF EXISTS public.add_credits_secure(UUID, INTEGER, TEXT);
+DROP FUNCTION IF EXISTS public.add_credits_secure(UUID, INTEGER, TEXT, JSONB);
+
 -- Function: deduct_credits
 -- Safely deducts credits from a user's balance and logs the transaction.
 CREATE OR REPLACE FUNCTION public.deduct_credits(

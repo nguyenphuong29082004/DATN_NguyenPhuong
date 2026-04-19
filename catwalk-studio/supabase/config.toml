@@ -412,6 +412,18 @@ verify_jwt = false
 [functions.register-model]
 verify_jwt = false
 
+[functions.create-stripe-checkout]
+verify_jwt = false
+
+[functions.create-cryptomus-payment]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.cryptomus-webhook]
+verify_jwt = false
+
 [functions.replicate-webhook]
 verify_jwt = false
 

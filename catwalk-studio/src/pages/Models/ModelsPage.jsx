@@ -1,30 +1,30 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { LandingHeader, LandingFooter } from '../../components/landing';
 import { usePublicModels } from '../../hooks/models/useModels';
 import { useCreateBooking } from '../../hooks/bookings/useBookings';
 import { useAuth } from '../../hooks/useAuth';
-import { useLanguage } from '../../contexts/LanguageContext';
 import './ModelsPage.css';
 
-const MODEL_CATEGORIES = [
-  'All Models',
-  'Editorial',
-  'Runway',
-  'Streetwear',
-  'Avant-Garde',
-  'Minimalist',
-  'Commercial'
+const MODEL_CATEGORIES_KEYS = [
+  'all',
+  'editorial',
+  'runway',
+  'streetwear',
+  'avantGarde',
+  'minimalist',
+  'commercial'
 ];
 
 export function ModelsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
   const { category: urlCategory } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [manualCategory, setManualCategory] = useState('All Models');
+  const [manualCategory, setManualCategory] = useState('all');
   const [showEliteOnly, setShowEliteOnly] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -45,11 +45,16 @@ export function ModelsPage() {
     'Avant-Garde', 'Swimwear', 'Fitness', 'Lingerie', 'Plus Size'
   ];
 
-  const sortOptions = ['Elite First', 'Price: Low to High', 'Price: High to Low', 'Newest First'];
+  const sortOptions = [
+    { id: 'Elite First', label: t('marketplace.grid.eliteFirst', 'Elite First') },
+    { id: 'Price: Low to High', label: t('marketplace.grid.priceLowHigh', 'Price: Low to High') },
+    { id: 'Price: High to Low', label: t('marketplace.grid.priceHighLow', 'Price: High to Low') },
+    { id: 'Newest First', label: t('marketplace.grid.newestFirst', 'Newest First') }
+  ];
 
   const activeCategory = useMemo(() => {
     if (!urlCategory) return manualCategory;
-    const match = MODEL_CATEGORIES.find((category) => category.toLowerCase() === urlCategory.toLowerCase());
+    const match = MODEL_CATEGORIES_KEYS.find((key) => key.toLowerCase() === urlCategory.toLowerCase());
     return match || manualCategory;
   }, [manualCategory, urlCategory]);
 
@@ -94,7 +99,7 @@ export function ModelsPage() {
           model.tags.some(t => t.toLowerCase() === tag.toLowerCase())
         ));
 
-      const matchesCategory = activeCategory === 'All Models' || 
+      const matchesCategory = activeCategory === 'all' || 
         (model.tags && model.tags.some(t => t.toLowerCase() === activeCategory.toLowerCase()));
 
       return matchesSearch && matchesCategory && matchesType && matchesTagsList;
@@ -145,7 +150,7 @@ export function ModelsPage() {
     // Validation
     const todayStr = new Date().toISOString().split('T')[0];
     if (bookingData.date < todayStr) {
-        alert(t('models.selectFutureDate'));
+        alert(t('marketplace.booking.invalidDate', 'Please select today or a future date for the booking.'));
         return;
     }
 
@@ -167,7 +172,7 @@ export function ModelsPage() {
       }, 2000);
     } catch (err) {
       console.error('Booking failed:', err);
-      alert(t('models.bookingFailed') + err.message);
+      alert('Failed to submit booking: ' + err.message);
     }
   };
 
@@ -186,7 +191,7 @@ export function ModelsPage() {
 
   const clearAllFilters = () => {
     setSearchQuery('');
-    setManualCategory('All Models');
+    setManualCategory('all');
     setShowEliteOnly(false);
     setFilterModelType({ ai: true, real: true, both: true });
     setSelectedTags([]);
@@ -215,18 +220,14 @@ export function ModelsPage() {
       <div className="marketplace-content">
         {/* Header */}
         <header className="marketplace-header">
-          <div className="subtitle-group justify-center">
-            <div className="subtitle-line"></div>
-            <span className="subtitle-text">{t('models.marketplaceBooking')}</span>
-            <div className="subtitle-line"></div>
-          </div>
-          <h1 className="marketplace-title editorial-kern">{t('models.marketplaceTitle')} <span className="italic">{t('models.marketplaceTitleItalic')}</span></h1>
+
+          <h1 className="marketplace-title editorial-kern">{t('marketplace.header.titlePart1')} <span className="italic">{t('marketplace.header.titlePart2')}</span></h1>
           <p className="marketplace-subtitle">
-            {t('models.marketplaceSubtitle')}
+            {t('marketplace.header.description')}
           </p>
           <p className="marketplace-become-wrap">
             <Link to="/models/register" className="marketplace-become-model-link">
-              {t('models.becomeModel')}
+              {t('marketplace.header.becomeModel')}
               <span className="material-symbols-outlined thin-icon" aria-hidden="true">
                 arrow_forward
               </span>
@@ -240,7 +241,7 @@ export function ModelsPage() {
             <span className="material-symbols-outlined search-icon thin-icon">search</span>
             <input
               type="text"
-              placeholder={t('models.searchPlaceholder')}
+              placeholder={t('marketplace.search.placeholder')}
               className="marketplace-search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -251,32 +252,28 @@ export function ModelsPage() {
         {/* Category Bar */}
         <div className="marketplace-category-bar">
           <div className="category-list">
-            {MODEL_CATEGORIES.map((cat) => {
-              const catKey = cat === 'All Models' ? 'allModels' : cat === 'Avant-Garde' ? 'avantGarde' : cat.toLowerCase();
-              return (
-                <button
-                  key={cat}
-                  className={`category-item ${activeCategory === cat ? 'active' : ''}`}
-                  onClick={() => setManualCategory(cat)}
-                >
-                  {t(`models.${catKey}`)}
-                </button>
-              );
-            })}
+            {MODEL_CATEGORIES_KEYS.map((catKey) => (
+              <button
+                key={catKey}
+                className={`category-item ${activeCategory === catKey ? 'active' : ''}`}
+                onClick={() => setManualCategory(catKey)}
+              >
+                {t(`marketplace.categories.${catKey}`)}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Main Content */}
         <div className="marketplace-main-layout">
-          {/* Sidebar Filters */}
-          <aside className="marketplace-sidebar">
+          {/* Sidebar Filters *            <aside className="marketplace-sidebar">
             <div>
-              <h3 className="sidebar-section-title">{t('models.refineDiscovery')}</h3>
+              <h3 className="sidebar-section-title">{t('marketplace.sidebar.title')}</h3>
               <div className="filter-group">
                 <div className="elite-toggle-card">
                   <div className="toggle-info">
-                    <span className="toggle-label">{t('models.eliteTalent')}</span>
-                    <span className="toggle-subtext">{t('models.topTierModels')}</span>
+                    <span className="toggle-label">{t('marketplace.sidebar.elite')}</span>
+                    <span className="toggle-subtext">{t('marketplace.sidebar.eliteSub')}</span>
                   </div>
                   <label className="toggle-switch">
                     <input
@@ -290,30 +287,31 @@ export function ModelsPage() {
 
                 <div className="accordion-filter">
                   <div className="accordion-header">
-                    <span className="accordion-title active">{t('models.modelType')}</span>
+                    <span className="accordion-title active">{t('marketplace.sidebar.modelType')}</span>
                     <span className="material-symbols-outlined thin-icon">expand_less</span>
                   </div>
                   <div className="filter-options">
                     <label className="filter-option">
                       <input type="checkbox" checked={filterModelType.ai}
-                        onChange={e => setFilterModelType(prev => ({ ...prev, ai: e.target.checked }))} /> {t('models.aiModels')}
+                        onChange={e => setFilterModelType(prev => ({ ...prev, ai: e.target.checked }))} /> {t('marketplace.sidebar.aiModels')}
                     </label>
                     <label className="filter-option">
                       <input type="checkbox" checked={filterModelType.real}
-                        onChange={e => setFilterModelType(prev => ({ ...prev, real: e.target.checked }))} /> {t('models.realModels')}
+                        onChange={e => setFilterModelType(prev => ({ ...prev, real: e.target.checked }))} /> {t('marketplace.sidebar.realModels')}
                     </label>
                     <label className="filter-option">
                       <input type="checkbox" checked={filterModelType.both}
-                        onChange={e => setFilterModelType(prev => ({ ...prev, both: e.target.checked }))} /> {t('models.both')}
+                        onChange={e => setFilterModelType(prev => ({ ...prev, both: e.target.checked }))} /> {t('marketplace.sidebar.both')}
                     </label>
                   </div>
                 </div>
 
                 <div className="accordion-filter">
                   <div className="accordion-header">
-                    <span className="accordion-title active">{t('models.styleSelection')}</span>
+                    <span className="accordion-title active">{t('marketplace.sidebar.styleSelection')}</span>
                     <span className="material-symbols-outlined thin-icon">expand_less</span>
                   </div>
+v>
                   <div className="filter-options">
                     {commonTags.map(tag => (
                       <label key={tag} className="filter-option">
@@ -328,20 +326,20 @@ export function ModelsPage() {
                 </div>
               </div>
             </div>
-            <button className="clear-filters-btn" onClick={clearAllFilters}>{t('common.clearAll')}</button>
+            <button className="clear-filters-btn" onClick={clearAllFilters}>{t('marketplace.sidebar.clearAll')}</button>
           </aside>
 
           {/* Models Grid */}
           <section className="marketplace-grid-area">
             <div className="grid-header">
               <div className="grid-header-info">
-                <h2>{t('models.modelDiscovery')}</h2>
+                <h2>{t('marketplace.grid.titlePart1')} <span>{t('marketplace.grid.titlePart2')}</span></h2>
                 <p className="results-count">
-                  {filteredModels.length} {filteredModels.length === 1 ? t('models.model') : t('models.models')} {t('models.available')}
+                  {t(filteredModels.length === 1 ? 'marketplace.grid.results_one' : 'marketplace.grid.results_other', { count: filteredModels.length })}
                 </p>
               </div>
               <div className="grid-sort">
-                <span>{t('models.sort')}:</span>
+                <span>{t('marketplace.grid.sort')}</span>
                 <div className={`sort-dropdown ${sortOpen ? 'is-open' : ''}`}>
                   <button
                     type="button"
@@ -350,10 +348,7 @@ export function ModelsPage() {
                     aria-haspopup="listbox"
                     aria-expanded={sortOpen}
                   >
-                    {sortBy === 'Elite First' ? t('models.eliteFirst') :
-                     sortBy === 'Price: Low to High' ? t('models.priceLowHigh') :
-                     sortBy === 'Price: High to Low' ? t('models.priceHighLow') :
-                     sortBy === 'Newest First' ? t('models.newestFirst') : sortBy}
+                    {sortOptions.find(o => o.id === sortBy)?.label || sortBy}
                     <span className="material-symbols-outlined sort-chevron thin-icon">expand_more</span>
                   </button>
                   {sortOpen && (
@@ -362,19 +357,16 @@ export function ModelsPage() {
                       <ul className="sort-dropdown-list" role="listbox">
                         {sortOptions.map((opt) => (
                           <li
-                            key={opt}
+                            key={opt.id}
                             role="option"
-                            aria-selected={sortBy === opt}
-                            className={`sort-dropdown-option ${sortBy === opt ? 'active' : ''}`}
+                            aria-selected={sortBy === opt.id}
+                            className={`sort-dropdown-option ${sortBy === opt.id ? 'active' : ''}`}
                             onClick={() => {
-                              setSortBy(opt);
+                              setSortBy(opt.id);
                               setSortOpen(false);
                             }}
                           >
-                            {opt === 'Elite First' ? t('models.eliteFirst') :
-                             opt === 'Price: Low to High' ? t('models.priceLowHigh') :
-                             opt === 'Price: High to Low' ? t('models.priceHighLow') :
-                             opt === 'Newest First' ? t('models.newestFirst') : opt}
+                            {opt.label}
                           </li>
                         ))}
                       </ul>
@@ -387,13 +379,13 @@ export function ModelsPage() {
             {loading ? (
               <div className="marketplace-loading">
                 <div className="marketplace-loading__spinner"></div>
-                <p>{t('models.loadingModels')}</p>
+                <p>{t('marketplace.grid.loading')}</p>
               </div>
             ) : filteredModels.length === 0 ? (
               <div className="marketplace-empty">
                 <span className="material-symbols-outlined thin-icon">person_off</span>
-                <h3>{t('models.noModelsFound')}</h3>
-                <p>{t('models.tryAdjustingFilters')}</p>
+                <h3>{t('marketplace.grid.noModels')}</h3>
+                <p>{t('marketplace.grid.adjustFilters')}</p>
               </div>
             ) : (
               <>
@@ -408,7 +400,7 @@ export function ModelsPage() {
                         {model.elite && (
                           <div className="elite-badge">
                             <span className="material-symbols-outlined thin-icon">star</span>
-                            {t('models.eliteBadget')}
+                            {t('marketplace.card.elite')}
                           </div>
                         )}
                         <img
@@ -427,7 +419,7 @@ export function ModelsPage() {
                                 handleStartShoot(model.model_id);
                               }}
                             >
-                              {t('models.startShoot')}
+                              {t('marketplace.card.startShoot')}
                             </button>
                             {model.model_type === 'real' || model.model_type === 'both' ? (
                               <button
@@ -438,7 +430,7 @@ export function ModelsPage() {
                                   handleBookModel(model);
                                 }}
                               >
-                                {t('models.bookModel')}
+                                {t('marketplace.card.bookModel')}
                               </button>
                             ) : null}
                             <Link
@@ -446,7 +438,7 @@ export function ModelsPage() {
                               className="btn-profile"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              {t('models.viewProfile')}
+                              {t('marketplace.card.viewProfile')}
                             </Link>
                           </div>
                         </div>
@@ -469,13 +461,13 @@ export function ModelsPage() {
                         <div className="model-pricing">
                           {model.ai_price && (
                             <div className="price-item">
-                              <span className="price-label">{t('models.aiShoot')}:</span>
+                              <span className="price-label">{t('marketplace.card.priceAi')}</span>
                               <span className="price-value">${model.ai_price}</span>
                             </div>
                           )}
                           {model.real_price && (
                             <div className="price-item">
-                              <span className="price-label">{t('models.realBooking')}:</span>
+                              <span className="price-label">{t('marketplace.card.priceReal')}</span>
                               <span className="price-value">${model.real_price}</span>
                             </div>
                           )}
@@ -497,7 +489,7 @@ export function ModelsPage() {
         <div className="booking-modal-overlay" onClick={handleCloseModal}>
           <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">{t('models.bookModelTitle', { name: selectedModel.displayName })}</h2>
+              <h2 className="modal-title">{t('marketplace.booking.title', { name: selectedModel.displayName })}</h2>
               <button className="modal-close" onClick={handleCloseModal}>
                 <span className="material-symbols-outlined thin-icon">close</span>
               </button>
@@ -505,12 +497,12 @@ export function ModelsPage() {
             {bookingSuccess ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: '#6bff8c' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>check_circle</span>
-                <p style={{ marginTop: '12px', fontSize: '0.9rem' }}>{t('models.bookingSubmitted')}</p>
+                <p style={{ marginTop: '12px', fontSize: '0.9rem' }}>{t('marketplace.booking.success')}</p>
               </div>
             ) : (
               <form className="booking-form" onSubmit={handleBookingSubmit}>
                 <div className="form-group">
-                  <label className="form-label">{t('models.date')}</label>
+                  <label className="form-label">{t('marketplace.booking.date')}</label>
                   <input
                     type="date"
                     className="form-input"
@@ -521,7 +513,7 @@ export function ModelsPage() {
                   />
                 </div>
                 <div className="form-group">
-                  <span className="form-label">{t('models.bookingType')}</span>
+                  <span className="form-label">{t('marketplace.booking.type')}</span>
                   <div className="booking-type-options" role="group" aria-label="Booking type">
                     <label className="booking-type-option">
                       <input
@@ -531,7 +523,7 @@ export function ModelsPage() {
                         checked={bookingData.bookingType === 'half_day'}
                         onChange={() => setBookingData({ ...bookingData, bookingType: 'half_day' })}
                       />
-                      <span>{t('models.halfDay')}</span>
+                      <span>{t('marketplace.booking.halfDay')}</span>
                     </label>
                     <label className="booking-type-option">
                       <input
@@ -541,26 +533,26 @@ export function ModelsPage() {
                         checked={bookingData.bookingType === 'full_day'}
                         onChange={() => setBookingData({ ...bookingData, bookingType: 'full_day' })}
                       />
-                      <span>{t('models.fullDay')}</span>
+                      <span>{t('marketplace.booking.fullDay')}</span>
                     </label>
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">{t('models.location')}</label>
+                  <label className="form-label">{t('marketplace.booking.location')}</label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder={t('models.enterLocation')}
+                    placeholder={t('marketplace.booking.locationPlaceholder')}
                     value={bookingData.location}
                     onChange={(e) => setBookingData({ ...bookingData, location: e.target.value })}
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">{t('models.additionalDetails')}</label>
+                  <label className="form-label">{t('marketplace.booking.details')}</label>
                   <textarea
                     className="form-textarea"
-                    placeholder={t('models.addRequirements')}
+                    placeholder={t('marketplace.booking.detailsPlaceholder')}
                     value={bookingData.details}
                     onChange={(e) => setBookingData({ ...bookingData, details: e.target.value })}
                     rows="4"
@@ -568,10 +560,10 @@ export function ModelsPage() {
                 </div>
                 <div className="modal-actions">
                   <button type="button" className="btn-cancel" onClick={handleCloseModal}>
-                    {t('common.cancel')}
+                    {t('marketplace.booking.cancel')}
                   </button>
                   <button type="submit" className="btn-submit" disabled={bookingSubmitting}>
-                    {bookingSubmitting ? t('models.submitting') : t('models.submitBookingRequest')}
+                    {bookingSubmitting ? t('marketplace.booking.submitting') : t('marketplace.booking.submit')}
                   </button>
                 </div>
               </form>

@@ -1,16 +1,16 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGalleryItems, useLikeGalleryItem, useGalleryLikeState } from '../../hooks/gallery/useGallery';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { LandingHeader, LandingFooter } from '../../components/landing';
 import './GalleryPage.css';
 
 const GalleryPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const queryClient = useQueryClient();
-    const { t } = useLanguage();
+    const { t } = useTranslation();
 
     const [page, setPage] = useState(0);
     const itemsPerPage = 20;
@@ -56,18 +56,18 @@ const GalleryPage = () => {
     }, [activeStyle, activeType, likeCounts, itemsPerPage, page, pageItems, queryClient]);
 
     const filterTypes = [
-        { id: 'all', label: t('gallery.types.all'), icon: 'apps' },
-        { id: 'photo', label: t('gallery.types.photos'), icon: 'photo' },
-        { id: 'video', label: t('gallery.types.videos'), icon: 'videocam' },
+        { id: 'all', label: t('gallery.filters.all'), icon: 'apps' },
+        { id: 'photo', label: t('gallery.filters.photos'), icon: 'photo' },
+        { id: 'video', label: t('gallery.filters.videos'), icon: 'videocam' },
     ];
 
     const filterStyles = [
-        { id: 'all', label: t('gallery.styles.all') },
-        { id: 'editorial', label: t('gallery.styles.editorial') },
-        { id: 'commercial', label: t('gallery.styles.commercial') },
-        { id: 'streetwear', label: t('gallery.styles.streetwear') },
-        { id: 'high-fashion', label: t('gallery.styles.highFashion') },
-        { id: 'minimalist', label: t('gallery.styles.minimalist') },
+        { id: 'all', label: t('gallery.filters.allStyles') },
+        { id: 'editorial', label: t('marketplace.categories.editorial') },
+        { id: 'commercial', label: t('marketplace.categories.commercial') },
+        { id: 'streetwear', label: t('marketplace.categories.streetwear') },
+        { id: 'high-fashion', label: t('gallery.filters.highFashion', 'High Fashion') },
+        { id: 'minimalist', label: t('marketplace.categories.minimalist') },
     ];
 
     const loadMore = () => {
@@ -123,10 +123,10 @@ const GalleryPage = () => {
     return (
         <div className="gallery-page">
             <Helmet>
-                <title>{t('gallery.pageTitle')}</title>
-                <meta name="description" content={t('gallery.pageDescription')} />
-                <meta property="og:title" content={t('gallery.pageTitle')} />
-                <meta property="og:description" content={t('gallery.pageDescription')} />
+                <title>Community Gallery | Catwalk.AI Fashion Discoveries</title>
+                <meta name="description" content="Discover stunning AI-generated fashion creations from our community. Browse editorial, streetwear, and commercial fashion photography on Catwalk.ai." />
+                <meta property="og:title" content="Community Gallery | Catwalk.AI" />
+                <meta property="og:description" content="Explore the future of fashion. AI-generated photography and videos from our top creators." />
                 <meta property="og:type" content="website" />
                 <link rel="canonical" href={`${window.location.origin}/gallery`} />
             </Helmet>
@@ -136,14 +136,14 @@ const GalleryPage = () => {
                 <div className="gallery-container">
                     {/* Header */}
                     <header className="gallery-header">
-                        <h1>{t('gallery.title')}</h1>
-                        <p>{t('gallery.subtitle')}</p>
+                        <h1>{t('gallery.header.title')}</h1>
+                        <p>{t('gallery.header.subtitle')}</p>
                     </header>
 
                     {/* Filters */}
                     <div className="gallery-filters">
                         <div className="filter-group">
-                            <span className="filter-label">{t('gallery.filterType')}:</span>
+                            <span className="filter-label">{t('gallery.filters.type')}</span>
                             <div className="filter-buttons">
                                 {filterTypes.map(type => (
                                     <button
@@ -159,7 +159,7 @@ const GalleryPage = () => {
                         </div>
 
                         <div className="filter-group">
-                            <span className="filter-label">{t('gallery.filterStyle')}:</span>
+                            <span className="filter-label">{t('gallery.filters.style')}</span>
                             <select
                                 value={activeStyle}
                                 onChange={(e) => handleStyleChange(e.target.value)}
@@ -176,16 +176,16 @@ const GalleryPage = () => {
                     {isLoading && allItems.length === 0 ? (
                         <div className="gallery-loading">
                             <div className="spinner-large"></div>
-                            <p>{t('gallery.loading')}</p>
+                            <p>{t('gallery.states.loading')}</p>
                         </div>
                     ) : allItems.length === 0 ? (
                         <div className="gallery-empty">
                             <span className="material-symbols-outlined">photo_library</span>
-                            <h3>{t('gallery.emptyTitle')}</h3>
-                            <p>{t('gallery.emptyDesc')}</p>
+                            <h3>{t('gallery.states.empty.title')}</h3>
+                            <p>{t('gallery.states.empty.description')}</p>
                             <Link to="/studio/launch/quick-shoot" className="btn-create-first">
                                 <span className="material-symbols-outlined thin-icon">add</span>
-                                {t('gallery.createFirst')}
+                                {t('gallery.states.empty.action')}
                             </Link>
                         </div>
                     ) : (
@@ -196,7 +196,7 @@ const GalleryPage = () => {
                                         <Link to={`/gallery/${item.id}`} className="gallery-item__image">
                                             <img
                                                 src={item.outputUrl}
-                                                alt={item.title || 'Gallery item'}
+                                                alt={item.title || t('gallery.filters.all')}
                                                 loading={allItems.indexOf(item) === 0 ? "eager" : "lazy"}
                                                 fetchpriority={allItems.indexOf(item) === 0 ? "high" : "auto"}
                                             />
@@ -207,7 +207,7 @@ const GalleryPage = () => {
                                             )}
                                         </Link>
                                         <div className="gallery-item__info">
-                                            <h3>{item.title || t('gallery.untitled')}</h3>
+                                            <h3>{item.title || 'Untitled'}</h3>
                                             <div className="gallery-item__meta">
                                                 {(item.users?.username || item.users?.email) && (
                                                     <span className="model-name">
@@ -244,12 +244,12 @@ const GalleryPage = () => {
                                         {isLoading ? (
                                             <>
                                                 <span className="spinner-small"></span>
-                                                {t('gallery.loadingMore')}
+                                                {t('gallery.footer.loading')}
                                             </>
                                         ) : (
                                             <>
                                                 <span className="material-symbols-outlined thin-icon">expand_more</span>
-                                                {t('gallery.loadMore')}
+                                                {t('gallery.footer.loadMore')}
                                             </>
                                         )}
                                     </button>

@@ -1,0 +1,218 @@
+.assets-library-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0 auto;
+    color: var(--white, #FFFFFF);
+    background-color: #0F0F0F;
+    font-family: var(--font-display, "Inter", sans-serif);
+    animation: fadeIn 0.6s ease-out;
+}
+
+.assets-library-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1240px;
+    padding: 16px 24px 40px;
+    box-sizing: border-box;
+}
+
+.assets-library-toolbar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.assets-filter-chip {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.02);
+    color: rgba(255, 255, 255, 0.68);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.assets-filter-chip:hover {
+    color: var(--white, #FFFFFF);
+    border-color: rgba(241, 224, 182, 0.35);
+}
+
+.assets-filter-chip.active {
+    background: rgba(241, 224, 182, 0.1);
+    color: var(--primary, #F1E0B6);
+    border-color: rgba(241, 224, 182, 0.35);
+}
+
+.assets-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+}
+
+.asset-card {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.asset-preview {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.asset-preview img,
+.asset-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.asset-card-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.asset-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.asset-chip {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.62);
+    padding: 3px 8px;
+}
+
+.asset-chip--status {
+    color: #8fc7ff;
+    border-color: rgba(143, 199, 255, 0.36);
+}
+
+.asset-chip--completed {
+    color: rgba(107, 255, 140, 0.85);
+    border-color: rgba(107, 255, 140, 0.32);
+}
+
+.asset-chip--failed,
+.asset-chip--timeout,
+.asset-chip--canceled {
+    color: #ff8080;
+    border-color: rgba(255, 128, 128, 0.4);
+}
+
+.asset-prompt {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.2em;
+}
+
+.asset-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.asset-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.asset-link-btn {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    padding: 5px 9px;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.asset-link-btn:hover {
+    border-color: rgba(241, 224, 182, 0.45);
+    color: var(--primary, #F1E0B6);
+}
+
+.assets-empty-state {
+    text-align: center;
+    padding: 80px 30px;
+    color: rgba(255, 255, 255, 0.36);
+}
+
+.assets-empty-state .material-symbols-outlined {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.assets-empty-state h3 {
+    margin-bottom: 8px;
+    font-family: var(--font-serif, "Cormorant Garamond", serif);
+    font-size: 1.45rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.assets-empty-state p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 768px) {
+    .assets-library-main {
+        padding: 12px 16px 32px;
+    }
+
+    .assets-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

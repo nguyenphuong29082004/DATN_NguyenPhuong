@@ -1,15 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useRef, useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { useUserCampaigns, useCreateCampaign } from '../../../hooks/campaigns/useCampaigns';
 import { getSupabaseClient } from '../../../infrastructure/supabase/supabase.client';
-import { useLanguage } from '../../../contexts/LanguageContext';
 import { Button } from '../../../components/common/Button/Button';
 import { Modal } from '../../../components/common/Modal/Modal';
 import './CreateCampaign.css';
 
 const CampaignCard = ({ campaign, onClick }) => {
-    const { t } = useLanguage();
     const genCount = campaign.generationCount || 0;
 
     const formatDate = (dateStr) => {
@@ -37,7 +35,7 @@ const CampaignCard = ({ campaign, onClick }) => {
             <div className="campaign-card__footer">
                 <div className="campaign-card__stat">
                     <span className="material-symbols-outlined">image</span>
-                    <span>{genCount} {t('campaigns.generations')}</span>
+                    <span>{genCount} generations</span>
                 </div>
                 <span className="campaign-card__date">{formatDate(campaign.createdAt || campaign.created_at)}</span>
             </div>
@@ -47,27 +45,44 @@ const CampaignCard = ({ campaign, onClick }) => {
 
 const CreateCampaign = () => {
     const { user } = useAuth();
-    const { t } = useLanguage();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const { campaigns, isLoading } = useUserCampaigns(user?.id);
     const { createCampaignAsync, isCreating } = useCreateCampaign();
     const fileInputRef = useRef(null);
 
-    const [showCreatePanel, setShowCreatePanel] = useState(false);
+    const [showCreatePanel, setShowCreatePanel] = useState(searchParams.get('new') === '1');
     const [formData, setFormData] = useState({ name: '', details: '', brandGuidelinesUrl: '' });
     const [brandGuidelinesFile, setBrandGuidelinesFile] = useState(null);
     const [isUploadingGuidelines, setIsUploadingGuidelines] = useState(false);
     const [error, setError] = useState('');
+    // Sync modal state with URL parameters
+    useEffect(() => {
+        const isNew = searchParams.get('new') === '1';
+        if (isNew) {
+            setShowCreatePanel(true);
+        }
+    }, [searchParams]);
+
+    // Remove the ?new=1 param when modal closes so it doesn't re-open on refresh
+    const handleCloseModal = () => {
+        setShowCreatePanel(false);
+        if (searchParams.has('new')) {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('new');
+            setSearchParams(newParams, { replace: true });
+        }
+    };
 
     const handleCreate = async () => {
         if (!user?.id) {
-            setError(t('campaigns.signInRequired'));
+            setError('Please sign in to create a campaign');
             return;
         }
 
         if (!formData.name.trim()) {
-            setError(t('campaigns.nameRequired'));
+            setError('Campaign name is required');
             return;
         }
 
@@ -100,7 +115,7 @@ const CreateCampaign = () => {
                 brandGuidelinesUrl: uploadedGuidelinesUrl,
             });
 
-            setShowCreatePanel(false);
+            handleCloseModal();
             setFormData({ name: '', details: '', brandGuidelinesUrl: '' });
             setBrandGuidelinesFile(null);
             navigate(`/studio/create-campaign/${result.id}`);
@@ -116,25 +131,25 @@ const CreateCampaign = () => {
         <div className="campaigns-page">
             <main className="campaigns-main">
                 <div className="step-header">
-                    <h2>{t('campaigns.title')}</h2>
-                    <p>{t('campaigns.subtitle')}</p>
+                    <h2>Campaigns</h2>
+                    <p>Organize your shoots into campaigns — like folders for your creative projects</p>
                 </div>
 
                 <div className="campaigns-toolbar">
                     <Button variant="primary" size="md" icon="add" onClick={() => setShowCreatePanel(true)}>
-                        {t('campaigns.newCampaign')}
+                        New Campaign
                     </Button>
                 </div>
 
                 <Modal
                     open={showCreatePanel}
-                    onClose={() => setShowCreatePanel(false)}
-                    title={t('campaigns.createCampaign')}
+                    onClose={handleCloseModal}
+                    title="Create Campaign"
                     className="campaign-create-modal"
                     footer={(
                         <>
-                            <Button variant="secondary" size="md" onClick={() => setShowCreatePanel(false)}>
-                                {t('common.cancel')}
+                            <Button variant="secondary" size="md" onClick={handleCloseModal}>
+                                Cancel
                             </Button>
                             <Button
                                 variant="primary"
@@ -143,13 +158,13 @@ const CreateCampaign = () => {
                                 disabled={!formData.name.trim() || isCreating || isUploadingGuidelines}
                                 loading={isCreating || isUploadingGuidelines}
                             >
-                                {isCreating || isUploadingGuidelines ? t('campaigns.creating') : t('campaigns.createCampaign')}
+                                {isCreating || isUploadingGuidelines ? 'Creating...' : 'Create Campaign'}
                             </Button>
                         </>
                     )}
                 >
                     <div className="form-group">
-                        <label>{t('campaigns.campaignName')}</label>
+                        <label>Campaign Name</label>
                         <input
                             type="text"
                             value={formData.name}
@@ -157,21 +172,20 @@ const CreateCampaign = () => {
                                 setFormData(prev => ({ ...prev, name: e.target.value }));
                                 if (error) setError('');
                             }}
-                            placeholder={t('campaigns.campaignNamePlaceholder')}
-                            autoFocus
+                            placeholder="e.g., Summer 2026, Product Shoot"
                         />
                     </div>
                     <div className="form-group">
-                        <label>{t('campaigns.description')} <span className="optional">{t('common.optional')}</span></label>
+                        <label>Description <span className="optional">(optional)</span></label>
                         <textarea
                             value={formData.details}
                             onChange={(e) => setFormData(prev => ({ ...prev, details: e.target.value }))}
-                            placeholder={t('campaigns.whatIsThisCampaign')}
+                            placeholder="What's this campaign about?"
                             rows={3}
                         />
                     </div>
                     <div className="form-group">
-                        <label>{t('campaigns.brandGuidelinesUpload')} <span className="optional">{t('common.optional')}</span></label>
+                        <label>Brand Guidelines Upload <span className="optional">(optional)</span></label>
                         {brandGuidelinesFile ? (
                             <div className="campaign-upload-selected">
                                 <div className="campaign-upload-selected__info">
@@ -202,7 +216,7 @@ const CreateCampaign = () => {
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     <span className="material-symbols-outlined">upload</span>
-                                    {t('campaigns.brandGuidelinesUpload')}
+                                    Upload Brand Guidelines
                                 </button>
                                 <input
                                     ref={fileInputRef}
@@ -216,7 +230,7 @@ const CreateCampaign = () => {
                         <p className="campaign-upload-note">PDF, DOC, DOCX, PNG, JPG, JPEG, WEBP</p>
                     </div>
                     <div className="form-group">
-                        <label>{t('campaigns.brandGuidelinesUrl')} <span className="optional">{t('common.optional')}</span></label>
+                        <label>Brand Guidelines URL <span className="optional">(optional)</span></label>
                         <input
                             type="url"
                             value={formData.brandGuidelinesUrl}
@@ -231,7 +245,7 @@ const CreateCampaign = () => {
                 {isLoading && (
                     <div className="campaigns-empty">
                         <span className="material-symbols-outlined">hourglass_empty</span>
-                        <h3>{t('campaigns.loadingCampaigns')}</h3>
+                        <h3>Loading campaigns...</h3>
                     </div>
                 )}
 
@@ -239,8 +253,8 @@ const CreateCampaign = () => {
                 {!isLoading && campaigns.length === 0 && (
                     <div className="campaigns-empty">
                         <span className="material-symbols-outlined">folder_open</span>
-                        <h3>{t('campaigns.noCampaignsYet')}</h3>
-                        <p>{t('campaigns.createFirstCampaign')}</p>
+                        <h3>No campaigns yet</h3>
+                        <p>Create your first campaign to start organizing your content</p>
                     </div>
                 )}
 
@@ -250,7 +264,7 @@ const CreateCampaign = () => {
                         {/* New campaign card */}
                         <div className="campaign-card campaign-card--new" onClick={() => setShowCreatePanel(true)}>
                             <span className="material-symbols-outlined">create_new_folder</span>
-                            <span>{t('campaigns.newCampaign')}</span>
+                            <span>New Campaign</span>
                         </div>
 
                         {campaigns.map((campaign) => (

@@ -1,23 +1,19 @@
-import { useLanguage } from '../../../contexts/LanguageContext';
-
 export function CTASection() {
-  const { t } = useLanguage();
-
   return (
     <section className="cta-section">
       <div className="container-wide cta-container">
-        <span className="cta-subtitle">{t('landing.cta.subtitle')}</span>
-        <h2 className="cta-title editorial-kern">{t('landing.cta.title')}</h2>
+        <span className="cta-subtitle">Invitations Only</span>
+        <h2 className="cta-title editorial-kern">Join the Elite.</h2>
         <p className="cta-description">
-          {t('landing.cta.description')}
+          Applications are reviewed on a rolling basis. We look for uniqueness, professionalism, and digital readiness.
         </p>
         <button
           className="btn-cta-large"
           onClick={() => window.location.href = '/models/register'}
         >
-          {t('landing.cta.startApplication')}
+          Start Your Application
         </button>
-        <p className="cta-footer-text">{t('landing.cta.limitedOpenings')}</p>
+        <p className="cta-footer-text">Limited Openings for Q4 2024</p>
       </div>
     </section>
   );

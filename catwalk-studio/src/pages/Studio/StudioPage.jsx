@@ -1,84 +1,67 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './StudioPage.css';
 import { LandingHeader, LandingFooter } from '../../components/landing';
-import { useLanguage } from '../../contexts/LanguageContext';
 
 export function StudioPage() {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   const tools = [
     {
       icon: 'photo_camera',
-      title: t('studioPage.tools.photoEditor'),
-      description: t('studioPage.tools.photoEditorDesc'),
+      title: t('studio_landing.tools.tool1.title'),
+      description: t('studio_landing.tools.tool1.description'),
     },
     {
       icon: 'auto_awesome',
-      title: t('studioPage.tools.aiEnhancement'),
-      description: t('studioPage.tools.aiEnhancementDesc'),
+      title: t('studio_landing.tools.tool2.title'),
+      description: t('studio_landing.tools.tool2.description'),
     },
     {
       icon: 'accessibility_new',
-      title: t('studioPage.tools.poseLibrary'),
-      description: t('studioPage.tools.poseLibraryDesc'),
+      title: t('studio_landing.tools.tool3.title'),
+      description: t('studio_landing.tools.tool3.description'),
     },
     {
       icon: 'light_mode',
-      title: t('studioPage.tools.lightingSetup'),
-      description: t('studioPage.tools.lightingSetupDesc'),
+      title: t('studio_landing.tools.tool4.title'),
+      description: t('studio_landing.tools.tool4.description'),
     },
     {
       icon: 'palette',
-      title: t('studioPage.tools.colorGrading'),
-      description: t('studioPage.tools.colorGradingDesc'),
+      title: t('studio_landing.tools.tool5.title'),
+      description: t('studio_landing.tools.tool5.description'),
     },
     {
       icon: 'view_in_ar',
-      title: t('studioPage.tools.preview3d'),
-      description: t('studioPage.tools.preview3dDesc'),
+      title: t('studio_landing.tools.tool6.title'),
+      description: t('studio_landing.tools.tool6.description'),
     },
   ];
 
   const plans = [
     {
-      name: t('studioPage.plans.free'),
+      name: t('studio_landing.pricing.free.name'),
       price: '$0',
-      period: t('studioPage.plans.forever'),
-      features: [
-        t('studioPage.plans.projects5'),
-        t('studioPage.plans.basicEditingTools'),
-        t('studioPage.plans.standardExports'),
-        t('studioPage.plans.communitySupport'),
-      ],
-      cta: t('studioPage.plans.getStarted'),
+      period: t('studio_landing.pricing.forever'),
+      features: t('studio_landing.pricing.free.features', { returnObjects: true }),
+      cta: t('studio_landing.pricing.free.cta'),
       highlight: false,
     },
     {
-      name: t('studioPage.plans.pro'),
+      name: t('studio_landing.pricing.pro.name'),
       price: '$29',
-      period: t('studioPage.plans.perMonth'),
-      features: [
-        t('studioPage.plans.unlimitedProjects'),
-        t('studioPage.plans.aiEnhancement'),
-        t('studioPage.plans.allEditingTools'),
-        t('studioPage.plans.exports4k'),
-        t('studioPage.plans.prioritySupport'),
-      ],
-      cta: t('studioPage.plans.startProTrial'),
+      period: t('studio_landing.pricing.perMonth'),
+      features: t('studio_landing.pricing.pro.features', { returnObjects: true }),
+      cta: t('studio_landing.pricing.pro.cta'),
       highlight: true,
     },
     {
-      name: t('studioPage.plans.enterprise'),
-      price: t('studioPage.plans.custom'),
+      name: t('studio_landing.pricing.enterprise.name'),
+      price: 'Custom',
       period: '',
-      features: [
-        t('studioPage.plans.everythingInPro'),
-        t('studioPage.plans.teamCollaboration'),
-        t('studioPage.plans.apiAccess'),
-        t('studioPage.plans.customIntegrations'),
-        t('studioPage.plans.dedicatedSupport'),
-      ],
-      cta: t('studioPage.plans.contactSales'),
+      features: t('studio_landing.pricing.enterprise.features', { returnObjects: true }),
+      cta: t('studio_landing.pricing.enterprise.cta'),
       highlight: false,
     },
   ];
@@ -91,24 +74,20 @@ export function StudioPage() {
         <section className="studio-hero section-padding">
           <div className="container-wide">
             <div className="studio-hero-content">
-              <div className="subtitle-group justify-center">
-                <div className="subtitle-line"></div>
-                <span className="subtitle-text">{t('studioPage.subtitle')}</span>
-                <div className="subtitle-line"></div>
-              </div>
+
               <h1 className="studio-hero-title editorial-kern">
-                {t('studioPage.heroTitle1')} <span className="italic">{t('studioPage.heroTitle2')}</span>
+                {t('studio_landing.hero.titlePart1')} <span className="italic">{t('studio_landing.hero.titlePart2')}</span>
               </h1>
               <p className="studio-hero-description">
-                {t('studioPage.heroDescription')}
+                {t('studio_landing.hero.description')}
               </p>
               <div className="studio-hero-actions">
                 <Link to="/studio/quick-shoot" className="btn-hero-primary">
-                  <span>{t('studioPage.launchStudio')}</span>
+                  <span>{t('studio_landing.hero.launch')}</span>
                   <span className="material-symbols-outlined thin-icon">rocket_launch</span>
                 </Link>
                 <button className="btn-hero-secondary">
-                  <span>{t('studioPage.watchDemo')}</span>
+                  <span>{t('studio_landing.hero.demo')}</span>
                   <span className="material-symbols-outlined thin-icon">play_circle</span>
                 </button>
               </div>
@@ -120,13 +99,9 @@ export function StudioPage() {
         <section className="studio-tools-section section-padding">
           <div className="container-wide">
             <div className="section-header text-center">
-              <div className="subtitle-group justify-center">
-                <div className="subtitle-line"></div>
-                <span className="subtitle-text">{t('studioPage.theSuite')}</span>
-                <div className="subtitle-line"></div>
-              </div>
+
               <h2 className="studio-section-title editorial-kern">
-                {t('studioPage.powerfulTools')} <span className="italic">{t('studioPage.powerfulToolsItalic')}</span>
+                {t('studio_landing.tools.titlePart1')} <span className="italic">{t('studio_landing.tools.titlePart2')}</span>
               </h2>
             </div>
 
@@ -149,32 +124,29 @@ export function StudioPage() {
           <div className="container-wide">
             <div className="studio-preview-grid">
               <div className="studio-preview-content">
-                <div className="subtitle-group">
-                  <div className="subtitle-line"></div>
-                  <span className="subtitle-text">{t('studioPage.theInterface')}</span>
-                </div>
+
                 <h2 className="studio-preview-title editorial-kern">
-                  {t('studioPage.intuitiveWorkspace')} <span className="italic">{t('studioPage.intuitiveWorkspaceItalic')}</span>
+                  {t('studio_landing.preview.titlePart1')} <span className="italic">{t('studio_landing.preview.titlePart2')}</span>
                 </h2>
                 <p className="studio-preview-description">
-                  {t('studioPage.workspaceDescription')}
+                  {t('studio_landing.preview.description')}
                 </p>
                 <ul className="studio-preview-features">
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    {t('studioPage.dragDropTimeline')}
+                    {t('studio_landing.preview.f1')}
                   </li>
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    {t('studioPage.realtimeCollaboration')}
+                    {t('studio_landing.preview.f2')}
                   </li>
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    {t('studioPage.cloudSync')}
+                    {t('studio_landing.preview.f3')}
                   </li>
                   <li>
                     <span className="material-symbols-outlined thin-icon">check_circle</span>
-                    {t('studioPage.proKeyboardShortcuts')}
+                    {t('studio_landing.preview.f4')}
                   </li>
                 </ul>
               </div>
@@ -207,13 +179,9 @@ export function StudioPage() {
         <section className="studio-pricing-section section-padding">
           <div className="container-wide">
             <div className="section-header text-center">
-              <div className="subtitle-group justify-center">
-                <div className="subtitle-line"></div>
-                <span className="subtitle-text">{t('studioPage.membership')}</span>
-                <div className="subtitle-line"></div>
-              </div>
+
               <h2 className="studio-section-title editorial-kern">
-                {t('studioPage.elevateYourCraft')} <span className="italic">{t('studioPage.elevateYourCraftItalic')}</span>
+                {t('studio_landing.pricing.titlePart1')} <span className="italic">{t('studio_landing.pricing.titlePart2')}</span>
               </h2>
             </div>
 
@@ -223,15 +191,15 @@ export function StudioPage() {
                   key={plan.name}
                   className={`studio-pricing-card ${plan.highlight ? 'highlight' : ''}`}
                 >
-                  {plan.highlight && <div className="pricing-badge">{t('studioPage.plans.recommended')}</div>}
+                  {plan.highlight && <div className="pricing-badge">{t('studio_landing.pricing.recommended')}</div>}
                   <h3 className="pricing-name">{plan.name}</h3>
                   <div className="pricing-value">
-                    <span className="currency">{plan.price === t('studioPage.plans.custom') ? '' : '$'}</span>
+                    <span className="currency">$</span>
                     <span className="amount">{plan.price.replace('$', '')}</span>
                     <span className="period">{plan.period}</span>
                   </div>
                   <ul className="pricing-features">
-                    {plan.features.map((feature) => (
+                    {Array.isArray(plan.features) && plan.features.map((feature) => (
                       <li key={feature}>
                         <span className="material-symbols-outlined thin-icon">done</span>
                         {feature}
