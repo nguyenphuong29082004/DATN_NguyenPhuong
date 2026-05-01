@@ -61,7 +61,6 @@ export function LoginPage() {
             </div>
           )}
 
-          {GOOGLE_CLIENT_ID && (
             <>
               <button 
                 className="google-signin-button"
@@ -82,7 +81,6 @@ export function LoginPage() {
                 <span>{t('login.or')}</span>
               </div>
             </>
-          )}
 
           <Button
             variant="secondary"
