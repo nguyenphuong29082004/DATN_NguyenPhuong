@@ -828,7 +828,7 @@ export const CampaignWizard = ({ campaignId, onClose, initialSelections = null, 
                                     <label>Background</label>
                                 </div>
                                 <select
-                                    value={selections.output.background.startsWith('http') ? 'custom' : selections.output.background}
+                                    value={selections.output?.background?.startsWith('http') ? 'custom' : selections.output?.background}
                                     onChange={(e) => setSelections(prev => ({ ...prev, output: { ...prev.output, background: e.target.value } }))}
                                     className="wizard-filter-select wizard-filter-select--full"
                                 >
@@ -839,12 +839,12 @@ export const CampaignWizard = ({ campaignId, onClose, initialSelections = null, 
                                     <option value="custom">Custom Image...</option>
                                 </select>
                                 
-                                {(selections.output.background === 'custom' || selections.output.background.startsWith('http')) && (
+                                {(selections.output?.background === 'custom' || selections.output?.background?.startsWith('http')) && (
                                     <div
                                         className={`wizard-upload-zone ${isUploading ? 'is-uploading' : ''}`}
                                         onClick={() => customBackgroundInputRef.current?.click()}
                                     >
-                                        {selections.output.background.startsWith('http') ? (
+                                        {selections.output?.background?.startsWith('http') ? (
                                             <div className="wizard-uploaded-bg">
                                                 <img src={selections.output.background} alt="Custom Background" className="wizard-uploaded-bg-thumb" />
                                                 <span className="material-symbols-outlined">check_circle</span>

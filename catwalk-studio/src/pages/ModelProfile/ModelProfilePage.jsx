@@ -342,17 +342,17 @@ function ModelProfilePage() {
                         {model.social_links && (Object.values(model.social_links).some(v => !!v)) && (
                             <div className="model-profile__socials">
                                 {model.social_links.instagram && (
-                                    <a href={model.social_links.instagram.startsWith('http') ? model.social_links.instagram : `https://instagram.com/${model.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="model-profile__social-link">
+                                    <a href={model.social_links.instagram?.startsWith('http') ? model.social_links.instagram : `https://instagram.com/${model.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="model-profile__social-link">
                                         <i className="fa-brands fa-instagram"></i> Instagram
                                     </a>
                                 )}
                                 {model.social_links.tiktok && (
-                                    <a href={model.social_links.tiktok.startsWith('http') ? model.social_links.tiktok : `https://tiktok.com/@${model.social_links.tiktok.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="model-profile__social-link">
+                                    <a href={model.social_links.tiktok?.startsWith('http') ? model.social_links.tiktok : `https://tiktok.com/@${model.social_links.tiktok.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="model-profile__social-link">
                                         <i className="fa-brands fa-tiktok"></i> TikTok
                                     </a>
                                 )}
                                 {model.social_links.website && (
-                                    <a href={model.social_links.website.startsWith('http') ? model.social_links.website : `https://${model.social_links.website}`} target="_blank" rel="noopener noreferrer" className="model-profile__social-link">
+                                    <a href={model.social_links.website?.startsWith('http') ? model.social_links.website : `https://${model.social_links.website}`} target="_blank" rel="noopener noreferrer" className="model-profile__social-link">
                                         <span className="material-symbols-outlined">language</span> Website
                                     </a>
                                 )}

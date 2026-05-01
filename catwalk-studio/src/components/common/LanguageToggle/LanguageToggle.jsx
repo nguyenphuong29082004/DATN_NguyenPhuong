@@ -6,11 +6,11 @@ const LanguageToggle = () => {
   const { i18n } = useTranslation();
 
   const toggleLanguage = () => {
-    const newLang = i18n.language.startsWith('en') ? 'vi' : 'en';
+    const newLang = i18n.language?.startsWith('en') ? 'vi' : 'en';
     i18n.changeLanguage(newLang);
   };
 
-  const currentLang = i18n.language.startsWith('en') ? 'EN' : 'VI';
+  const currentLang = i18n.language?.startsWith('en') ? 'EN' : 'VI';
 
   return (
     <button 

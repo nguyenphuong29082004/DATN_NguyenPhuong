@@ -241,7 +241,7 @@ const Designer = () => {
 
     // Handlers - File
     const processFile = (file) => {
-        if (!file.type.startsWith('image/')) { alert('Please select an image file (PNG, JPG, WEBP)'); return; }
+        if (!file.type?.startsWith('image/')) { alert('Please select an image file (PNG, JPG, WEBP)'); return; }
         if (file.size > 5 * 1024 * 1024) { alert('File size must not exceed 5MB'); return; }
         setSelectedFile(null);
         setImagePreview(null);
