@@ -1,4 +1,12 @@
 -- ========================================================
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- CATWALK V3: B2B Features
 -- This migration adds core B2B elements:
 -- 1. Model capabilities/pricing for real shoots vs AI twin
@@ -18,10 +26,11 @@ ALTER TABLE models
   ADD COLUMN IF NOT EXISTS real_booking_cost NUMERIC DEFAULT 1000; -- cost in fiat (e.g. USD)
 
 -- 2. MODEL BOOKINGS TABLE
-CREATE TABLE IF NOT EXISTS public.model_bookings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  model_id UUID NOT NULL REFERENCES public.models(id) ON DELETE CASCADE,
-  brand_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+DROP TABLE IF EXISTS public.model_bookings CASCADE;
+CREATE TABLE public.model_bookings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  model_id UUID NOT NULL REFERENCES public.models(model_id) ON DELETE CASCADE,
+  brand_id UUID NOT NULL REFERENCES public.users(user_id) ON DELETE CASCADE,
   booking_date TIMESTAMP WITH TIME ZONE NOT NULL,
   location TEXT,
   details TEXT,
@@ -42,7 +51,7 @@ CREATE POLICY "Users can view their own bookings"
 
 CREATE POLICY "Models can view bookings made to them"
   ON public.model_bookings FOR SELECT
-  USING (auth.uid() IN (SELECT user_id FROM models WHERE id = model_id));
+  USING (auth.uid() IN (SELECT created_by_user_id FROM models WHERE models.model_id = model_bookings.model_id));
 
 CREATE POLICY "Users can create bookings"
   ON public.model_bookings FOR INSERT
@@ -65,8 +74,8 @@ ALTER TABLE generations
 
 -- 4. USER PROMPTS TABLE
 CREATE TABLE IF NOT EXISTS public.user_prompts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.users(user_id) ON DELETE CASCADE,
   title VARCHAR(255) NOT NULL,
   prompt_text TEXT NOT NULL,
   negative_prompt TEXT,
