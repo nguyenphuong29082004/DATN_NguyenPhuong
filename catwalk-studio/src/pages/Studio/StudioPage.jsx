@@ -86,10 +86,10 @@ export function StudioPage() {
                   <span>{t('studio_landing.hero.launch')}</span>
                   <span className="material-symbols-outlined thin-icon">rocket_launch</span>
                 </Link>
-                <button className="btn-hero-secondary">
+                <a href="https://youtu.be/F68UFG3i4R8" target="_blank" rel="noopener noreferrer" className="btn-hero-secondary">
                   <span>{t('studio_landing.hero.demo')}</span>
                   <span className="material-symbols-outlined thin-icon">play_circle</span>
-                </button>
+                </a>>
               </div>
             </div>
           </div>
