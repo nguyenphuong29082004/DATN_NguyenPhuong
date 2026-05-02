@@ -99,7 +99,7 @@ export class PromptRepository extends IPromptRepository {
             let query = this.client
                 .from(this.tableName)
                 .select('*')
-                .or('is_public.eq.true,prompt_type.eq.system')
+                .or('is_public.eq.true,prompt_type.in.(system,platform_default)')
                 .order('usage_count', { ascending: false });
 
             if (typeof limit === 'number' && limit > 0) {

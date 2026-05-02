@@ -5,7 +5,7 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
 
 function formatContentPreferenceLabel(value: string): string {
     return value
@@ -44,45 +44,42 @@ function buildBioPrompt(modelData: any): string {
 }
 
 async function generateModelBio(modelData: any): Promise<string> {
-    const openAiApiKey = Deno.env.get('OPENAI_API_KEY') || ''
-    const openAiModel = Deno.env.get('OPENAI_MODEL') || 'gpt-4o'
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY') || ''
 
-    if (!openAiApiKey) {
-        throw new Error('Missing OPENAI_API_KEY')
+    if (!geminiApiKey) {
+        throw new Error('Missing GEMINI_API_KEY')
     }
 
-    const response = await fetch(OPENAI_API_URL, {
+    const url = `${GEMINI_API_URL}?key=${geminiApiKey}`
+
+    const response = await fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${openAiApiKey}`,
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            model: openAiModel,
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You write concise premium fashion-model biographies for profile onboarding.'
-                },
-                {
-                    role: 'user',
-                    content: buildBioPrompt(modelData)
-                }
-            ],
-            temperature: 0.8,
+            systemInstruction: {
+                parts: [{ text: 'You write concise premium fashion-model biographies for profile onboarding.' }]
+            },
+            contents: [{
+                parts: [{ text: buildBioPrompt(modelData) }]
+            }],
+            generationConfig: {
+                temperature: 0.8,
+            }
         }),
     })
 
     if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`OpenAI bio generation failed: ${response.status} ${errorText}`)
+        throw new Error(`Gemini bio generation failed: ${response.status} ${errorText}`)
     }
 
     const result = await response.json()
-    const bio = result?.choices?.[0]?.message?.content?.trim()
+    const bio = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
 
     if (!bio) {
-        throw new Error('OpenAI bio generation returned empty content')
+        throw new Error('Gemini bio generation returned empty content')
     }
 
     return bio.slice(0, 500)

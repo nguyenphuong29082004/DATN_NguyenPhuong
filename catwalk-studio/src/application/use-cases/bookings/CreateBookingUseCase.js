@@ -8,11 +8,17 @@ export class CreateBookingUseCase extends UseCase {
 
     async execute(input) {
         try {
-            const { modelId, userId, date, bookingType, location, details } = input;
+            const { modelId, userId, date, bookingType, location, details, amount } = input;
 
             if (!modelId) return Result.fail('Model ID is required');
             if (!userId) return Result.fail('User ID is required');
             if (!date) return Result.fail('Booking date is required');
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (date < todayStr) {
+                return Result.fail('Booking date cannot be in the past');
+            }
+
             if (!bookingType) return Result.fail('Booking type is required');
             if (!['half_day', 'full_day'].includes(bookingType)) {
                 return Result.fail('Invalid booking type');
@@ -27,6 +33,7 @@ export class CreateBookingUseCase extends UseCase {
                 booking_type: bookingType,
                 location,
                 details,
+                amount: amount || 0,
                 status: 'pending',
             });
 

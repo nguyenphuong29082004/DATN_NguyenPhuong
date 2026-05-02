@@ -129,6 +129,28 @@ serve(async (req) => {
             const token = authHeader.replace('Bearer ', '')
             const { data: { user } } = await supabaseAdmin.auth.getUser(token)
             userId = user?.id || null
+
+            // Ensure user exists in public users table (upsert to avoid FK violation)
+            if (userId && user) {
+                try {
+                    const { error: upsertError } = await supabaseAdmin
+                        .from('users')
+                        .upsert({
+                            user_id: userId,
+                            email: user.email || '',
+                            user_type: 'model',
+                        }, { onConflict: 'user_id' })
+                    
+                    // If upsert failed, don't use userId as FK to avoid constraint violation
+                    if (upsertError) {
+                        console.error('User upsert failed:', upsertError.message)
+                        userId = null
+                    }
+                } catch (e) {
+                    console.error('User upsert exception:', e)
+                    userId = null
+                }
+            }
         }
 
         const { modelData } = await req.json()
@@ -169,10 +191,8 @@ serve(async (req) => {
             throw new Error('At least one content preference must be selected')
         }
 
-        // 5. Use provided bioDraft; fall back to generating one via OpenAI
-        const description = modelData.bioDraft?.trim()
-            ? modelData.bioDraft.trim()
-            : await generateModelBio({ ...modelData, contentPreferences, accountType })
+        // 5. Use provided bioDraft; bio is optional, no AI fallback
+        const description = modelData.bioDraft?.trim() || ''
 
         // 6. Generate unique username from displayName
         const baseUsername = modelData.displayName
@@ -208,7 +228,7 @@ serve(async (req) => {
                 display_name: modelData.displayName,
                 username: uniqueUsername,
                 created_by_user_id: userId,
-                status: 'in_review',
+                status: 'active',
                 account_type: accountType,
                 is_ai: isAi,
                 can_book: canBook,

@@ -151,6 +151,8 @@ function ModelProfilePage() {
             return;
         }
 
+        const amount = bookingData.bookingType === 'half_day' ? (model.half_day_rate || 500) : (model.full_day_rate || 1000);
+
         try {
             await createBookingAsync({
                 modelId: model.id,
@@ -159,6 +161,7 @@ function ModelProfilePage() {
                 bookingType: bookingData.bookingType,
                 location: bookingData.location,
                 details: bookingData.details,
+                amount: amount,
             });
             setBookingSuccess(true);
             setTimeout(() => {

@@ -35,7 +35,7 @@ export class PromptMapper {
             negativePrompt: row.negative_prompt || null,
             category: row.prompt_category || null,
             isPublic: row.is_public || false,
-            isSystem: row.prompt_type === 'system',
+            isSystem: row.prompt_type === 'system' || row.prompt_type === 'platform_default',
             useCount: parseInt(row.usage_count, 10) || 0,
             tags: row.style_tags || [],
             parametersJson: row.default_parameters || {},

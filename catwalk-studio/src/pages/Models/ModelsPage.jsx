@@ -78,6 +78,8 @@ export function ModelsPage() {
     model_type: m.modelType || (m.isAi ? (m.canBook ? 'both' : 'ai') : 'real'),
     ai_price: m.aiGenerationCost || m.pricePerImage,
     real_price: m.realBookingCost || m.hourlyRate,
+    half_day_rate: m.halfDayRate || m.realBookingCost * 4 || m.hourlyRate * 4 || 500,
+    full_day_rate: m.fullDayRate || m.realBookingCost * 8 || m.hourlyRate * 8 || 1000,
   })), [dbModels]);
 
   // Filter models based on search, category, and model type
@@ -154,6 +156,8 @@ export function ModelsPage() {
         return;
     }
 
+    const amount = bookingData.bookingType === 'half_day' ? selectedModel.half_day_rate : selectedModel.full_day_rate;
+
     try {
       await createBookingAsync({
         modelId: selectedModel.model_id,
@@ -162,6 +166,7 @@ export function ModelsPage() {
         bookingType: bookingData.bookingType,
         location: bookingData.location,
         details: bookingData.details,
+        amount: amount,
       });
       setBookingSuccess(true);
       setTimeout(() => {

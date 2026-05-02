@@ -156,7 +156,7 @@ const BecomeModel = () => {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                if (parsed.step) setStep(parsed.step);
+                if (parsed.step && parsed.step >= 1 && parsed.step <= TOTAL_STEPS) setStep(parsed.step);
                 if (parsed.accountType) {
                     setSelection({
                         real: parsed.accountType === 'both' || parsed.accountType === 'real_only',
@@ -736,14 +736,26 @@ const BecomeModel = () => {
                         </div>
 
                         <div className="form-section">
-                            <label className="input-label">AI BIOGRAPHY</label>
+                            <label className="input-label">BIOGRAPHY <span style={{ opacity: 0.5, fontWeight: 400 }}>(OPTIONAL)</span></label>
                             <div className="bio-input-wrapper" style={{ position: 'relative' }}>
-                                <div
+                                <textarea
                                     className="bio-textarea"
-                                    style={{ minHeight: '180px', paddingBottom: '56px', whiteSpace: 'pre-wrap' }}
-                                >
-                                    {bioDraft || 'Generate an AI bio draft from your profile details. You can edit it after you submit for review.'}
-                                </div>
+                                    value={bioDraft}
+                                    onChange={(e) => setBioDraft(e.target.value)}
+                                    placeholder="Write your bio here, or generate an AI draft from your profile details."
+                                    style={{ 
+                                        minHeight: '180px', 
+                                        paddingBottom: '56px', 
+                                        whiteSpace: 'pre-wrap',
+                                        width: '100%',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#fff',
+                                        resize: 'vertical',
+                                        outline: 'none',
+                                        fontFamily: 'inherit'
+                                    }}
+                                />
                                 <div style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                                     <div className="char-counter" style={{ fontSize: '0.6rem', opacity: 0.5 }}>
                                         {bioDraft ? `${bioDraft.length} / 500` : 'Ready to generate'}
@@ -813,6 +825,63 @@ const BecomeModel = () => {
                                 </div>
                             )}
                             <p className="bio-hint" style={{ marginTop: '10px' }}>Select your base city so brands and agencies know where you are available.</p>
+                        </div>
+
+                        <div className="form-section" style={{ marginTop: '32px' }}>
+                            <label className="input-label">CONTENT PREFERENCES *</label>
+                            <p className="bio-hint" style={{ marginTop: 0 }}>Select the types of content you are willing to model for.</p>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginTop: '16px' }}>
+                                {CONTENT_CATEGORIES.map(cat => (
+                                    <div 
+                                        key={cat.key}
+                                        onClick={() => toggleContentPreference(cat.key)}
+                                        style={{ 
+                                            padding: '12px 16px', 
+                                            borderRadius: '8px', 
+                                            border: `1px solid ${contentPreferences.includes(cat.key) ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}`,
+                                            background: contentPreferences.includes(cat.key) ? 'rgba(241, 224, 182, 0.08)' : 'rgba(255,255,255,0.02)',
+                                            color: contentPreferences.includes(cat.key) ? 'var(--primary)' : 'rgba(255,255,255,0.7)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{cat.icon}</span>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: contentPreferences.includes(cat.key) ? 600 : 400 }}>{cat.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="form-section" style={{ marginTop: '32px' }}>
+                            <label className="input-label">STYLE TAGS (OPTIONAL)</label>
+                            <p className="bio-hint" style={{ marginTop: 0 }}>Select tags that describe your modeling style.</p>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                                {STYLE_TAGS.map(tag => (
+                                    <div 
+                                        key={tag}
+                                        onClick={() => setFormData(prev => ({
+                                            ...prev, 
+                                            styleTags: prev.styleTags.includes(tag) 
+                                                ? prev.styleTags.filter(t => t !== tag) 
+                                                : [...prev.styleTags, tag]
+                                        }))}
+                                        style={{
+                                            padding: '6px 12px',
+                                            borderRadius: '20px',
+                                            border: `1px solid ${formData.styleTags.includes(tag) ? 'var(--primary)' : 'rgba(255,255,255,0.2)'}`,
+                                            background: formData.styleTags.includes(tag) ? 'rgba(241, 224, 182, 0.1)' : 'transparent',
+                                            color: formData.styleTags.includes(tag) ? 'var(--primary)' : 'rgba(255,255,255,0.6)',
+                                            fontSize: '0.75rem',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        {tag}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Show booking rates only for real/both */}
@@ -981,7 +1050,7 @@ const BecomeModel = () => {
                                 <div style={{ background: 'rgba(241, 224, 182, 0.05)', border: '1px solid rgba(241, 224, 182, 0.16)', borderRadius: '20px', padding: '20px' }}>
                                     <div style={{ fontSize: '0.65rem', color: 'var(--primary)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>Next stage</div>
                                     <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, fontSize: '0.82rem' }}>
-                                        Once you submit, your profile stays private and enters review. AI image generation and public publishing are handled later after approval.
+                                        Once you submit, your profile goes live immediately and can be discovered by brands and agencies right away.
                                     </p>
                                 </div>
                             </div>
@@ -993,8 +1062,8 @@ const BecomeModel = () => {
                                     {finalConfig.confirmed && <span className="material-symbols-outlined">check</span>}
                                 </div>
                                 <div className="confirm-text">
-                                    <h4>Confirm Private Submission</h4>
-                                    <p>I agree to the <span className="underline">Terms of Service</span> and understand that my uploaded media remains private during review.</p>
+                                    <h4>Confirm & Go Live</h4>
+                                    <p>I agree to the <span className="underline">Terms of Service</span> and confirm that my profile is ready to be published on Catwalk.AI.</p>
                                 </div>
                             </div>
 
@@ -1005,13 +1074,12 @@ const BecomeModel = () => {
                                     isSubmitting ||
                                     !formData.name ||
                                     !formData.location ||
-                                    !bioDraft ||
                                     galleryPhotoCount === 0
                                 }
                                 onClick={handleSubmit}
                                 style={{ maxWidth: '720px', width: '100%' }}
                             >
-                                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT FOR REVIEW'} <span className="material-symbols-outlined rocket-icon">arrow_outward</span>
+                                {isSubmitting ? 'PUBLISHING...' : 'GO LIVE NOW'} <span className="material-symbols-outlined rocket-icon">arrow_outward</span>
                             </button>
                             {submitError && (
                                 <p className="launch-eta" style={{ color: '#ff6b6b' }}>{submitError}</p>
@@ -1020,8 +1088,7 @@ const BecomeModel = () => {
                                 {galleryPhotoCount === 0 ? 'Source Photos Required • ' : ''}
                                 {!formData.name ? 'Display Name Required • ' : ''}
                                 {!formData.location ? 'City Required • ' : ''}
-                                {!bioDraft ? 'AI Bio Required • ' : ''}
-                                Private review submission
+                                Your profile will be visible to brands immediately
                             </p>
                         </div>
                     </div>
@@ -1071,7 +1138,7 @@ const BecomeModel = () => {
                                 marginBottom: '16px',
                                 textTransform: 'none'
                             }}>
-                                Profile Launched
+                                You're Live 🎉
                             </h2>
 
                             {/* Subtitle */}
@@ -1084,7 +1151,7 @@ const BecomeModel = () => {
                                 maxWidth: '460px',
                                 margin: '0 auto 36px'
                             }}>
-                                Your profile is now under review. You will be notified the moment it's ready for the runway.
+                                You are now live on Catwalk.AI! Brands and agencies can discover your profile right away.
                             </p>
 
                             {/* Action Buttons */}
