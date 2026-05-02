@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
                 .from('users')
                 .upsert({
                     user_id: userId,
-                    email: email,
+                    email: email || null,
                     credits_balance: 100,
                     is_guest: false
                 }, { onConflict: 'user_id' })

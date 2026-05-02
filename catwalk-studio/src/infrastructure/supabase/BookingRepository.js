@@ -16,14 +16,18 @@ export class BookingRepository extends IBookingRepository {
             // Ensure the booking user (brand) exists in the users table to avoid FK violation
             if (booking.brand_id) {
                 const { data: { user } } = await this.client.auth.getUser();
-                if (user) {
-                    await this.client
+                if (user && user.id === booking.brand_id) {
+                    const { error: upsertError } = await this.client
                         .from('users')
                         .upsert({
                             user_id: user.id,
-                            email: user.email || '',
+                            email: user.email || null, // Use null if no email to avoid unique constraint issues with empty strings
                             user_type: 'brand',
                         }, { onConflict: 'user_id' });
+                    
+                    if (upsertError) {
+                        console.error('BookingRepository: Failed to upsert user profile:', upsertError);
+                    }
                 }
             }
 
@@ -34,6 +38,8 @@ export class BookingRepository extends IBookingRepository {
                 .single();
 
             if (error) {
+                console.error('BookingRepository: Insert failed:', error);
+                console.error('Attempted booking data:', booking);
                 throw new Error(`Failed to create booking: ${error.message}`);
             }
 
