@@ -96,23 +96,23 @@ export const AuthProvider = ({ children }) => {
         try {
             const { data, error } = await supabase
                 .from('users')
-                .insert({
+                .upsert({
                     user_id: userId,
                     email: email,
                     credits_balance: 100,
                     is_guest: false
-                })
+                }, { onConflict: 'user_id' })
                 .select()
                 .single();
 
             if (error) {
-                console.error('Error creating profile:', error);
+                console.error('Error creating/upserting profile:', error);
                 return null;
             }
 
             return data;
         } catch (error) {
-            console.error('Error creating profile:', error);
+            console.error('Error creating/upserting profile:', error);
             return null;
         }
     }, []);

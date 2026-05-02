@@ -13,6 +13,20 @@ export class BookingRepository extends IBookingRepository {
 
     async create(booking) {
         try {
+            // Ensure the booking user (brand) exists in the users table to avoid FK violation
+            if (booking.brand_id) {
+                const { data: { user } } = await this.client.auth.getUser();
+                if (user) {
+                    await this.client
+                        .from('users')
+                        .upsert({
+                            user_id: user.id,
+                            email: user.email || '',
+                            user_type: 'brand',
+                        }, { onConflict: 'user_id' });
+                }
+            }
+
             const { data, error } = await this.client
                 .from(this.tableName)
                 .insert(booking)
