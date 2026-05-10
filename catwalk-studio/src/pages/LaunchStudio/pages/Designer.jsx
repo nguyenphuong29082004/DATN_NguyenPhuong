@@ -32,7 +32,7 @@ const DESIGN_STYLES = [
     { id: 'flatlay', label: 'Flat Lay', icon: 'layers', prompt: 'flat lay photography of' },
 ];
 
-const ItemCard = ({ item, isOwner, onEdit, onUse, onDelete, onAddToCollection }) => (
+const ItemCard = ({ item, isOwner, onEdit, onUse, onUseTryOn, onDelete, onAddToCollection }) => (
     <div className="designer-card">
         <div className="designer-card__image">
             {item.thumbnailUrl ? (
@@ -52,6 +52,7 @@ const ItemCard = ({ item, isOwner, onEdit, onUse, onDelete, onAddToCollection })
                     <IconButton icon="edit" variant="ghost" onClick={() => onEdit(item)} title="Edit by Prompt" />
                 )}
                 <IconButton icon="photo_camera" variant="ghost" onClick={() => onUse(item)} title="Use in Quick Shoot" />
+                <IconButton icon="checkroom" variant="ghost" onClick={() => onUseTryOn(item)} title="Use in Try-On" />
                 {isOwner && onAddToCollection && (
                     <IconButton icon="playlist_add" variant="ghost" onClick={() => onAddToCollection(item)} title="Add to Collection" />
                 )}
@@ -315,6 +316,10 @@ const Designer = () => {
         navigate(`/studio/quick-shoot?wardrobe_item_id=${item.id}`);
     }, [navigate]);
 
+    const handleUseInTryOn = useCallback((item) => {
+        navigate(`/studio/try-on?wardrobe_item_id=${item.id}`);
+    }, [navigate]);
+
     // Handlers - Collections
     const handleCreateCollection = () => {
         if (!newCollection.name.trim() || !userId) return;
@@ -478,6 +483,7 @@ const Designer = () => {
                                                             isOwner
                                                             onEdit={handleEditItem}
                                                             onUse={handleUseInQuickShoot}
+                                                            onUseTryOn={handleUseInTryOn}
                                                             onDelete={() => handleDeleteItem(item)}
                                                             onAddToCollection={collections.length > 0 ? handleAddToCollection : null}
                                                         />
@@ -522,6 +528,7 @@ const Designer = () => {
                                                         isOwner={false}
                                                         onEdit={handleEditItem}
                                                         onUse={handleUseInQuickShoot}
+                                                        onUseTryOn={handleUseInTryOn}
                                                         onDelete={handleDeleteItem}
                                                     />
                                                 ))}
@@ -851,6 +858,7 @@ const Designer = () => {
                                             isOwner
                                             onEdit={handleEditItem}
                                             onUse={handleUseInQuickShoot}
+                                            onUseTryOn={handleUseInTryOn}
                                             onDelete={() => handleDeleteItem(item)}
                                         />
                                     ))}

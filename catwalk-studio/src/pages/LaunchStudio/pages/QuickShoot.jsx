@@ -10,6 +10,7 @@ import { SidePanel } from '../../../components/common/SidePanel/SidePanel';
 import { Modal } from '../../../components/common/Modal/Modal';
 import { ProgressBar } from '../../../components/common/ProgressBar';
 import { QUICK_SHOOT_PROMPT_CATEGORIES, filterPromptsByCategories } from './promptCategoryFilters';
+import { container } from '../../../di/container';
 import './QuickShoot.css';
 
 const PROMPT_MAX_LENGTH = 2000;
@@ -148,6 +149,7 @@ const QuickShoot = () => {
     const [generatedImage, setGeneratedImage] = useState(null);
     const [generationId, setGenerationId] = useState(null);
     const [activeGenerationId, setActiveGenerationId] = useState(null);
+    const [selectedWardrobeItemId, setSelectedWardrobeItemId] = useState(null);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -202,6 +204,7 @@ const QuickShoot = () => {
             const aiCharacterId = searchParams.get('ai_character_id');
             const promptParam = searchParams.get('prompt');
             const promptId = searchParams.get('prompt_id');
+            const wardrobeItemId = searchParams.get('wardrobe_item_id');
 
             if (aiCharacterId && userAiCharacters.length > 0) {
                 const character = userAiCharacters.find(c => c.id === aiCharacterId);
@@ -220,6 +223,24 @@ const QuickShoot = () => {
                 if (promptObj) {
                     applyPromptSelection(promptObj);
                 }
+            }
+            
+            if (wardrobeItemId) {
+                setSelectedWardrobeItemId(wardrobeItemId);
+                const repo = container.getWardrobeRepository();
+                repo.findById(wardrobeItemId).then(item => {
+                    if (item) {
+                        const clothingDescription = [item.colour, item.style, item.title, item.brand].filter(Boolean).join(' ');
+                        setPromptData(prev => {
+                            // Avoid appending duplicate text if the prompt already contains it
+                            if (prev.prompt && prev.prompt.includes(clothingDescription)) return prev;
+                            return {
+                                ...prev,
+                                prompt: prev.prompt ? `${prev.prompt}, wearing ${clothingDescription}` : `wearing ${clothingDescription}`
+                            };
+                        });
+                    }
+                }).catch(console.error);
             }
         };
         applyUrlParams();
@@ -311,6 +332,7 @@ const QuickShoot = () => {
                 format: sanitizedPromptData.format,
                 quality: sanitizedPromptData.quality,
                 seed: sanitizedPromptData.seed,
+                wardrobeItemIds: selectedWardrobeItemId ? [selectedWardrobeItemId] : [],
             });
 
             setActiveGenerationId(data.generation.id);
