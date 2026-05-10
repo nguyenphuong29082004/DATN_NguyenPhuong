@@ -218,11 +218,13 @@ const QuickShoot = () => {
                 setPromptData(prev => ({ ...prev, prompt: decodeURIComponent(promptParam) }));
             }
 
-            if (promptId && savedPrompts.length > 0) {
-                const promptObj = savedPrompts.find(p => p.id === promptId);
-                if (promptObj) {
-                    applyPromptSelection(promptObj);
-                }
+            if (promptId) {
+                const repo = container.getPromptRepository();
+                repo.findById(promptId).then(promptObj => {
+                    if (promptObj) {
+                        applyPromptSelection(promptObj);
+                    }
+                }).catch(console.error);
             }
             
             if (wardrobeItemId) {
@@ -244,7 +246,7 @@ const QuickShoot = () => {
             }
         };
         applyUrlParams();
-    }, [searchParams, models, userAiCharacters, savedPrompts, applyPromptSelection]);
+    }, [searchParams, models, userAiCharacters, applyPromptSelection]);
 
     useEffect(() => {
         if (!isGenerating) {
