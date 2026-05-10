@@ -41,7 +41,7 @@ const QUICK_SHOOT_PROGRESS_STEPS = [
 const ENGINE_UI_CONFIG = {
     default: {
         description: 'Balanced image generation for fashion shoots.',
-        requiresModelSelection: false,
+        requiresModelSelection: true,
         supportsNegativePrompt: true,
         supportsSeed: true,
         supportsQuality: true,
@@ -49,7 +49,7 @@ const ENGINE_UI_CONFIG = {
         supportedFormats: ['png', 'jpg', 'webp'],
         lockedSettings: [],
     },
-    'catwalk-ai-fast': {
+    'flux-1-schnell': {
         description: 'Fast generation with prompt, ratio, and optional seed.',
         requiresModelSelection: false,
         supportsNegativePrompt: false,
@@ -59,7 +59,7 @@ const ENGINE_UI_CONFIG = {
         supportedFormats: [],
         lockedSettings: ['Output format is handled by the engine.'],
     },
-    'catwalk-ai-pro': {
+    'flux-1-dev': {
         description: 'Best all-around engine with quality and safety controls built in.',
         requiresModelSelection: true,
         supportsNegativePrompt: false,
@@ -69,15 +69,15 @@ const ENGINE_UI_CONFIG = {
         supportedFormats: ['png', 'jpg', 'webp'],
         lockedSettings: ['Output quality and safety tolerance use engine defaults.'],
     },
-    'catwalk-ai-pro-ultra': {
-        description: 'High-end Imagen engine with fixed image size and safety profile.',
-        requiresModelSelection: false,
-        supportsNegativePrompt: false,
-        supportsSeed: false,
+    'stable-diffusion-3.5': {
+        description: 'High-end engine with fixed image size and safety profile.',
+        requiresModelSelection: true,
+        supportsNegativePrompt: true,
+        supportsSeed: true,
         supportsQuality: true,
-        supportsCustomDimensions: false,
+        supportsCustomDimensions: true,
         supportedFormats: ['png', 'jpg'],
-        lockedSettings: ['Image size is fixed to 1K.', 'Safety filter uses the engine default.'],
+        lockedSettings: ['Safety filter uses the engine default.'],
     },
 };
 
@@ -110,7 +110,7 @@ const QuickShoot = () => {
     const effectiveAiModel = selectedAiModel || aiModels[0] || null;
     const engineUiConfig = ENGINE_UI_CONFIG[effectiveAiModel?.frontend_slug] || ENGINE_UI_CONFIG.default;
     const availableFormatOptions = FORMAT_OPTIONS.filter(option => engineUiConfig.supportedFormats.length === 0 || engineUiConfig.supportedFormats.includes(option.value));
-    const marketplaceEnabled = effectiveAiModel?.frontend_slug === 'catwalk-ai-fast';
+    const marketplaceEnabled = effectiveAiModel?.frontend_slug === 'flux-1-schnell' || effectiveAiModel?.frontend_slug === 'flux-1-dev' || effectiveAiModel?.frontend_slug === 'stable-diffusion-3.5';
     const shouldShowModelSelector = engineUiConfig.requiresModelSelection || marketplaceEnabled;
     const { models, isLoading: isLoadingModels } = useShootableModels(marketplaceEnabled ? user?.id : null);
     const { characters: userAiCharacters } = useUserAICharacters(user?.id);
@@ -526,8 +526,8 @@ const QuickShoot = () => {
                                  const newAiModel = aiModels.find(m => m.frontend_slug === e.target.value);
                                  setSelectedAiModel(newAiModel);
                                  // Stale model cleanup logic moved from useEffect to avoid cascading renders
-                                 const isFast = newAiModel?.frontend_slug === 'catwalk-ai-fast';
-                                 if (!isFast && selectedModel && !selectedModel.isUserAiCharacter) {
+                                 const isMarketplace = ['flux-1-schnell', 'flux-1-dev', 'stable-diffusion-3.5'].includes(newAiModel?.frontend_slug);
+                                 if (!isMarketplace && selectedModel && !selectedModel.isUserAiCharacter) {
                                      setSelectedModel(null);
                                  }
                              }}
@@ -584,7 +584,7 @@ const QuickShoot = () => {
                                     </div>
                                     <div className="model-dropdown__options">
                                         {/* User's AI Characters from Models Generator */}
-                                        {!marketplaceEnabled && userAiCharacters.filter(c => matchesModelSearch(c, modelSearch)).length > 0 && (
+                                        {userAiCharacters.filter(c => matchesModelSearch(c, modelSearch)).length > 0 && (
                                             <>
                                                 <div className="model-dropdown__section-label">My AI Models</div>
                                                 {userAiCharacters
