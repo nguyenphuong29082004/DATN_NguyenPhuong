@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
+
 export function InterfaceSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="interface-section">
       <div
@@ -41,7 +45,10 @@ export function InterfaceSection() {
               <span className="tag tag--active">AI Synthetic</span>
             </div>
 
-            <button className="btn-profile-request">
+            <button 
+              className="btn-profile-request"
+              onClick={() => navigate('/models')}
+            >
               Request Portfolio
             </button>
           </div>
