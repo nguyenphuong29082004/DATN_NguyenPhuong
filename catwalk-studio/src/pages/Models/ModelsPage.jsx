@@ -412,7 +412,7 @@ v>
                           src={model.profile_image_url}
                           alt={model.displayName}
                           loading={filteredModels.indexOf(model) < 6 ? "eager" : "lazy"}
-                          fetchpriority={filteredModels.indexOf(model) === 0 ? "high" : "auto"}
+                          fetchPriority={filteredModels.indexOf(model) === 0 ? "high" : "auto"}
                         />
                         <div className="card-overlay">
                           <div className="overlay-actions">

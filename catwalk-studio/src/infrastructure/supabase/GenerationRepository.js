@@ -272,7 +272,7 @@ export class GenerationRepository extends IGenerationRepository {
                     likes,
                     tags,
                     created_at,
-                    generation:generations!gallery_generation_id_fkey (
+                    generation:generations!gallery_generations_rel (
                         id,
                         user_id,
                         model_id,
@@ -336,7 +336,7 @@ export class GenerationRepository extends IGenerationRepository {
                     title,
                     likes,
                     created_at,
-                    generation:generations!gallery_generation_id_fkey (
+                    generation:generations!gallery_generations_rel (
                         id,
                         output_url,
                         output_type,

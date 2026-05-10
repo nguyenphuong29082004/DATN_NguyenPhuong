@@ -198,7 +198,7 @@ const GalleryPage = () => {
                                                 src={item.outputUrl}
                                                 alt={item.title || t('gallery.filters.all')}
                                                 loading={allItems.indexOf(item) === 0 ? "eager" : "lazy"}
-                                                fetchpriority={allItems.indexOf(item) === 0 ? "high" : "auto"}
+                                                fetchPriority={allItems.indexOf(item) === 0 ? "high" : "auto"}
                                             />
                                             {item.outputType === 'video' && (
                                                 <span className="video-badge">

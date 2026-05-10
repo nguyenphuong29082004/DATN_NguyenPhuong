@@ -339,8 +339,7 @@ export const AuthProvider = ({ children }) => {
                 // Auto-login as guest if visiting /studio or model registration and no session
                 if (
                     !session?.user &&
-                    (window.location.pathname.startsWith('/studio') ||
-                        window.location.pathname.startsWith('/models/register'))
+                    (window.location.pathname.startsWith('/studio'))
                 ) {
                     if (mounted) {
                         try {

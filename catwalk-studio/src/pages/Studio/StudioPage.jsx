@@ -89,7 +89,7 @@ export function StudioPage() {
                 <a href="https://youtu.be/F68UFG3i4R8" target="_blank" rel="noopener noreferrer" className="btn-hero-secondary">
                   <span>{t('studio_landing.hero.demo')}</span>
                   <span className="material-symbols-outlined thin-icon">play_circle</span>
-                </a>>
+                </a>
               </div>
             </div>
           </div>
