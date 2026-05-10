@@ -70,10 +70,12 @@ export class WardrobeRepository extends IWardrobeRepository {
                 .eq('is_user_uploaded', true)
                 .order('created_at', { ascending: false });
 
-            if (categories.length === 1) {
-                query = query.eq('category', categories[0]);
-            } else if (categories.length > 1) {
-                query = query.in('category', categories);
+            if (categories.length > 0) {
+                const caseInsensitiveCategories = categories.flatMap(c => [
+                    c.toLowerCase(),
+                    c.charAt(0).toUpperCase() + c.slice(1).toLowerCase()
+                ]);
+                query = query.in('category', caseInsensitiveCategories);
             }
 
             if (typeof limit === 'number' && limit > 0) {
@@ -112,10 +114,12 @@ export class WardrobeRepository extends IWardrobeRepository {
                 .eq('is_stock', true)
                 .order('created_at', { ascending: false });
 
-            if (categories.length === 1) {
-                query = query.eq('category', categories[0]);
-            } else if (categories.length > 1) {
-                query = query.in('category', categories);
+            if (categories.length > 0) {
+                const caseInsensitiveCategories = categories.flatMap(c => [
+                    c.toLowerCase(),
+                    c.charAt(0).toUpperCase() + c.slice(1).toLowerCase()
+                ]);
+                query = query.in('category', caseInsensitiveCategories);
             }
 
             if (typeof limit === 'number' && limit > 0) {
