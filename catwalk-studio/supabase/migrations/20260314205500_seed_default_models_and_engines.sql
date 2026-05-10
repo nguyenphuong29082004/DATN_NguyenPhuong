@@ -2,23 +2,7 @@
 -- SEED DEFAULT MODELS AND AI ENGINES
 -- ========================================================
 
--- 1. Create aimodel_mapper table if it doesn't exist
-CREATE TABLE IF NOT EXISTS public.aimodel_mapper (
-    ai_model_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    frontend_slug VARCHAR(100) NOT NULL UNIQUE,
-    frontend_name VARCHAR(100) NOT NULL,
-    backend_model_id VARCHAR(255) NOT NULL,
-    provider_name VARCHAR(50) DEFAULT 'replicate',
-    status VARCHAR(20) DEFAULT 'active',
-    cost_per_token NUMERIC DEFAULT 1.0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Enable RLS on aimodel_mapper
-ALTER TABLE public.aimodel_mapper ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public read access to aimodel_mapper" ON public.aimodel_mapper FOR SELECT USING (true);
-
--- 2. Seed Default AI Engines
+-- 1. Seed Default AI Engines
 INSERT INTO public.aimodel_mapper (frontend_slug, frontend_name, backend_model_name, cost_per_token)
 VALUES 
 ('flux-1-schnell', 'Flux.1 Schnell (Fast)', 'black-forest-labs/flux-schnell', 1.0),
@@ -29,7 +13,7 @@ ON CONFLICT (frontend_slug) DO UPDATE SET
     backend_model_name = EXCLUDED.backend_model_name,
     cost_per_token = EXCLUDED.cost_per_token;
 
--- 3. Seed Default Marketplace Models
+-- 2. Seed Default Marketplace Models
 -- These models serve as the "Marketplace" options for Try-On
 INSERT INTO public.models (
     model_id, 
@@ -40,7 +24,7 @@ INSERT INTO public.models (
     style_tags, 
     price_per_image, 
     status,
-    model_type,
+    account_type,
     is_ai
 )
 VALUES 
@@ -80,4 +64,5 @@ VALUES
     'both',
     true
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (username) DO NOTHING;
+
