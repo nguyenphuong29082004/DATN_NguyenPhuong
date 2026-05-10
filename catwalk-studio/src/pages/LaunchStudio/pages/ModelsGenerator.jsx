@@ -139,6 +139,24 @@ const ModelsGenerator = () => {
         setModelToDelete(genId);
     };
 
+    const handleDownload = async (url, filename) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename || 'ai-model.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Download failed:', error);
+            window.open(url, '_blank'); // fallback
+        }
+    };
+
     const confirmDeleteModel = async () => {
         if (!user?.id || !modelToDelete) return;
         const genId = modelToDelete;
@@ -621,26 +639,33 @@ const ModelsGenerator = () => {
 
                             <div className="lightbox-actions">
                                 {selectedModel.imageUrl && (
-                                    <a
-                                        href={selectedModel.imageUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <button
                                         className="btn-lightbox-action"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDownload(selectedModel.imageUrl, `${selectedModel.settings?.name || 'ai_model'}.webp`);
+                                        }}
                                     >
                                         <span className="material-symbols-outlined">download</span>
                                         Download
-                                    </a>
+                                    </button>
                                 )}
                                 <button
                                     className="btn-lightbox-action"
-                                    onClick={() => navigate(`/studio/quick-shoot?ai_character_id=${selectedModel.aiModelId}`)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/studio/quick-shoot?ai_character_id=${selectedModel.aiModelId}`);
+                                    }}
                                 >
                                     <span className="material-symbols-outlined">photo_camera</span>
                                     Use in Quick Shoot
                                 </button>
                                 <button
                                     className="btn-lightbox-action btn-lightbox-delete"
-                                    onClick={() => handleDeleteClick(selectedModel.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteClick(selectedModel.id);
+                                    }}
                                 >
                                     <span className="material-symbols-outlined">delete</span>
                                     Delete
