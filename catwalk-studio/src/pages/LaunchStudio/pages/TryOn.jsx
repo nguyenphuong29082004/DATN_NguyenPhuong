@@ -10,6 +10,7 @@ import { container } from '../../../di/container';
 import { Button } from '../../../components/common/Button/Button';
 import { Modal } from '../../../components/common/Modal/Modal';
 import { ProgressBar } from '../../../components/common/ProgressBar';
+import { useFileUpload } from '../../../hooks/storage/useFileUpload';
 import { buildTryOnPayload, getTryOnProgressMessage, TRY_ON_BASE_COSTS } from '../../../infrastructure/try-on/tryOnRequest';
 import { TRY_ON_PROMPT_CATEGORIES, filterPromptsByCategories } from './promptCategoryFilters';
 import './TryOn.css';
@@ -105,7 +106,7 @@ const TryOn = () => {
     const [progressStage, setProgressStage] = useState('preparing_model');
 
     // Custom garment upload state
-    const [isUploading, setIsUploading] = useState(false);
+    const { uploadFile, isUploading } = useFileUpload();
     const fileInputRef = useRef(null);
 
     const { generation: polledGeneration } = useGenerationStatus(activeGenerationId);
@@ -438,26 +439,25 @@ const TryOn = () => {
         const file = event.target.files?.[0];
         if (!file || !user?.id) return;
 
-        setIsUploading(true);
         setError(null);
 
         try {
-            const storageService = container.getStorageService();
-            const ext = file.name.split('.').pop();
-            const path = `tryon-uploads/${user.id}/${Date.now()}.${ext}`;
-            const { url } = await storageService.upload(file, path);
+            const uploadResult = await uploadFile(file, `tryon-uploads/${user.id}`);
+            if (!uploadResult) {
+                setError('Failed to upload image. Please try again.');
+                return;
+            }
 
             setSelectedWardrobeItem({
                 id: 'custom_upload', // Sent to API to indicate it's not a DB wardrobe item
                 title: 'Custom Upload',
                 category: 'Uploaded Photo',
-                thumbnailUrl: url,
+                thumbnailUrl: uploadResult.url,
             });
         } catch (err) {
             console.error('Failed to upload custom garment:', err);
             setError(`Upload failed: ${err.message}`);
         } finally {
-            setIsUploading(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
