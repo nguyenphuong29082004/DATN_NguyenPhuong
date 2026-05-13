@@ -8,10 +8,12 @@ import { getSupabaseClient } from '../../../infrastructure/supabase/supabase.cli
 export class DeleteGenerationUseCase extends UseCase {
     /**
      * @param {import('../../../interfaces/repositories/IGenerationRepository').IGenerationRepository} generationRepository
+     * @param {import('../../../interfaces/repositories/IAIModelRepository').IAIModelRepository} aiModelRepository
      */
-    constructor(generationRepository) {
+    constructor(generationRepository, aiModelRepository) {
         super();
         this.generationRepository = generationRepository;
+        this.aiModelRepository = aiModelRepository;
         this.supabase = getSupabaseClient();
     }
 
@@ -67,6 +69,15 @@ export class DeleteGenerationUseCase extends UseCase {
 
             // Delete generation from DB
             await this.generationRepository.delete(generationId);
+
+            // cascade delete AI Model if exists
+            if (generation.aiModelId && this.aiModelRepository) {
+                try {
+                    await this.aiModelRepository.delete(generation.aiModelId);
+                } catch (cascadeError) {
+                    console.warn('Failed to delete associated AI model character:', cascadeError);
+                }
+            }
 
             return Result.ok({ success: true });
         } catch (error) {

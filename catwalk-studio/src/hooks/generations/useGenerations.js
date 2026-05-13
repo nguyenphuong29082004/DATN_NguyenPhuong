@@ -143,6 +143,9 @@ export function useDeleteGeneration() {
         onSuccess: (_, variables) => {
             // Invalidate user generations
             queryClient.invalidateQueries({ queryKey: generationKeys.userGenerations(variables.userId) });
+            // Invalidate AI characters list (used in Try-On/Quick Shoot selectors)
+            queryClient.invalidateQueries({ queryKey: ['models', 'userCharacters', variables.userId] });
+            
             // Invalidate campaign detail if campaignId provided
             if (variables.campaignId) {
                 queryClient.invalidateQueries({ queryKey: ['campaigns', 'detail', variables.campaignId] });

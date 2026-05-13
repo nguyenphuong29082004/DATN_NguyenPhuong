@@ -309,7 +309,7 @@ class DIContainer {
     }
 
     static getDeleteGenerationUseCase() {
-        return new DeleteGenerationUseCase(this.getGenerationRepository());
+        return new DeleteGenerationUseCase(this.getGenerationRepository(), this.getAIModelRepository());
     }
 
     static getGenerateAIModelUseCase() {
