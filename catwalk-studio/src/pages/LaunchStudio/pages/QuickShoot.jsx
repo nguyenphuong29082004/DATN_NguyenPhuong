@@ -257,6 +257,35 @@ const QuickShoot = () => {
             const promptParam = searchParams.get('prompt');
             const promptId = searchParams.get('prompt_id');
             const wardrobeItemId = searchParams.get('wardrobe_item_id');
+            const genId = searchParams.get('gen_id');
+
+            // Handle shared generation
+            if (genId) {
+                try {
+                    const repo = container.getGenerationRepository();
+                    const gen = await repo.findById(genId);
+                    if (gen && gen.imageUrl) {
+                        setGeneratedImage(gen.imageUrl);
+                        setGenerationId(gen.id);
+                        
+                        // Pre-fill prompt
+                        if (gen.prompt) {
+                            setPromptData(prev => ({ ...prev, prompt: gen.prompt }));
+                        }
+                        
+                        // Pre-fill model
+                        if (gen.aiModelId && userAiCharacters.length > 0) {
+                            const character = userAiCharacters.find(c => c.id === gen.aiModelId);
+                            if (character) setSelectedModel(character);
+                        } else if (gen.modelId && models.length > 0) {
+                            const model = models.find(m => m.id === gen.modelId);
+                            if (model) setSelectedModel(model);
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to load shared generation:', err);
+                }
+            }
 
             if (aiCharacterId && userAiCharacters.length > 0) {
                 const character = userAiCharacters.find(c => c.id === aiCharacterId);

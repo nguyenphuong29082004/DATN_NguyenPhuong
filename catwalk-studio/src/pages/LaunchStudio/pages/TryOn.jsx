@@ -135,6 +135,37 @@ const TryOn = () => {
         const applyUrlParams = async () => {
             const modelId = searchParams.get('model_id');
             const aiCharacterId = searchParams.get('ai_character_id');
+            const genId = searchParams.get('gen_id');
+
+            // Handle shared generation first
+            if (genId) {
+                try {
+                    const repo = container.getGenerationRepository();
+                    const gen = await repo.findById(genId);
+                    if (gen && gen.imageUrl) {
+                        setGeneratedImage(gen.imageUrl);
+                        setGenerationId(gen.id);
+                        
+                        // Try to pre-fill model
+                        if (gen.aiModelId && userAiCharacters.length > 0) {
+                            const character = userAiCharacters.find(c => c.id === gen.aiModelId);
+                            if (character) setSelectedModel(character);
+                        } else if (gen.modelId && models.length > 0) {
+                            const model = models.find(m => m.id === gen.modelId);
+                            if (model) setSelectedModel(model);
+                        }
+
+                        // Try to pre-fill garment from parameters if possible
+                        const params = gen.settings || {};
+                        if (params.garment_image_url || params.wardrobe_item_id) {
+                            // If we have a garment URL but not a full wardrobe item, we might need a placeholder
+                            // But for now let's just let it be
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to load shared generation:', err);
+                }
+            }
 
             if (aiCharacterId && userAiCharacters.length > 0) {
                 const character = userAiCharacters.find(c => c.id === aiCharacterId);
