@@ -16,7 +16,7 @@ export function useShootableModels(userId) {
             if (result.isFailure()) throw new Error(result.getError());
             return result.getValue();
         },
-        enabled: !!userId,
+        enabled: true,
     });
     return { models: query.data || [], isLoading: query.isLoading, error: query.error };
 }

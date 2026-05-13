@@ -165,7 +165,7 @@ const QuickShoot = () => {
     const availableFormatOptions = FORMAT_OPTIONS.filter(option => engineUiConfig.supportedFormats.length === 0 || engineUiConfig.supportedFormats.includes(option.value));
     const marketplaceEnabled = effectiveAiModel?.frontend_slug === 'flux-1-schnell' || effectiveAiModel?.frontend_slug === 'flux-1-dev' || effectiveAiModel?.frontend_slug === 'stable-diffusion-3.5';
     const shouldShowModelSelector = engineUiConfig.requiresModelSelection || marketplaceEnabled;
-    const { models, isLoading: isLoadingModels } = useShootableModels(marketplaceEnabled ? user?.id : null);
+    const { models, isLoading: isLoadingModels } = useShootableModels(user?.id);
     const { characters: userAiCharacters } = useUserAICharacters(user?.id);
     const { prompts: userPromptsList } = useUserPrompts(user?.id);
     const { prompts: publicPromptsList } = usePublicPrompts();
