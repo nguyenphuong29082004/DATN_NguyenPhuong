@@ -1,7 +1,10 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 export function HeroSection() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
   return (
     <section className="hero-section">
       <div className="container-wide hero-grid">
@@ -15,10 +18,10 @@ export function HeroSection() {
             {t('landing.hero.description')}
           </p>
           <div className="hero-actions">
-            <button className="btn-hero-primary" onClick={() => window.location.href = '/models/register'}>
+            <button className="btn-hero-primary" onClick={() => navigate('/models/register')}>
               {t('landing.hero.becomeModel')}
             </button>
-            <button className="btn-hero-secondary" onClick={() => window.location.href = '/models'}>
+            <button className="btn-hero-secondary" onClick={() => navigate('/models')}>
               <span>{t('landing.hero.hireTalent')}</span>
               <span className="material-symbols-outlined thin-icon">arrow_forward</span>
             </button>
