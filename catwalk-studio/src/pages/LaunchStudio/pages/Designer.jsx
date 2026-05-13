@@ -327,11 +327,11 @@ const Designer = () => {
 
     // Handlers - Use in Quick Shoot (navigate with item)
     const handleUseInQuickShoot = useCallback((item) => {
-        navigate(`/studio/quick-shoot?wardrobe_item_id=${item.id}`);
+        navigate(`/studio/quick-shoot?designer_item_id=${item.id}`);
     }, [navigate]);
 
     const handleUseInTryOn = useCallback((item) => {
-        navigate(`/studio/try-on?wardrobe_item_id=${item.id}`);
+        navigate(`/studio/try-on?designer_item_id=${item.id}`);
     }, [navigate]);
 
     // Handlers - Collections

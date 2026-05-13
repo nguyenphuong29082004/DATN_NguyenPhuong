@@ -178,24 +178,43 @@ const TryOn = () => {
         applyUrlParams();
     }, [searchParams, models, userAiCharacters]);
 
-    // Handle wardrobe_item_id from URL
+    // Handle wardrobe_item_id or designer_item_id from URL
     useEffect(() => {
         const wardrobeItemId = searchParams.get('wardrobe_item_id');
-        if (!wardrobeItemId) return;
+        const designerItemId = searchParams.get('designer_item_id');
+        
+        if (!wardrobeItemId && !designerItemId) return;
 
-        const repo = container.getWardrobeRepository();
-        repo.findById(wardrobeItemId).then(item => {
-            if (item) {
-                setSelectedWardrobeItem({
-                    id: item.id,
-                    title: item.title,
-                    category: item.category,
-                    brand: item.brand,
-                    thumbnailUrl: item.thumbnailUrl,
-                    colour: item.colour,
-                });
-            }
-        }).catch(console.error);
+        if (wardrobeItemId) {
+            const repo = container.getWardrobeRepository();
+            repo.findById(wardrobeItemId).then(item => {
+                if (item) {
+                    setSelectedWardrobeItem({
+                        id: item.id,
+                        title: item.title,
+                        category: item.category,
+                        brand: item.brand,
+                        thumbnailUrl: item.thumbnailUrl,
+                        colour: item.colour,
+                    });
+                }
+            }).catch(console.error);
+        } else if (designerItemId) {
+            const repo = container.getDesignerRepository();
+            repo.findItemById(designerItemId).then(item => {
+                if (item) {
+                    setSelectedWardrobeItem({
+                        id: item.id,
+                        isDesignerItem: true,
+                        title: item.title,
+                        category: item.category,
+                        brand: item.brand,
+                        thumbnailUrl: item.thumbnailUrl,
+                        colour: item.colour,
+                    });
+                }
+            }).catch(console.error);
+        }
     }, [searchParams]);
 
     useEffect(() => {

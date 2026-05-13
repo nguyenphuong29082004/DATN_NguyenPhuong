@@ -308,6 +308,7 @@ const QuickShoot = () => {
                 }).catch(console.error);
             }
             
+            const designerItemId = searchParams.get('designer_item_id');
             if (wardrobeItemId) {
                 setSelectedWardrobeItemId(wardrobeItemId);
                 const repo = container.getWardrobeRepository();
@@ -316,6 +317,20 @@ const QuickShoot = () => {
                         const clothingDescription = [item.colour, item.style, item.title, item.brand].filter(Boolean).join(' ');
                         setPromptData(prev => {
                             // Avoid appending duplicate text if the prompt already contains it
+                            if (prev.prompt && prev.prompt.includes(clothingDescription)) return prev;
+                            return {
+                                ...prev,
+                                prompt: prev.prompt ? `${prev.prompt}, wearing ${clothingDescription}` : `wearing ${clothingDescription}`
+                            };
+                        });
+                    }
+                }).catch(console.error);
+            } else if (designerItemId) {
+                const repo = container.getDesignerRepository();
+                repo.findItemById(designerItemId).then(item => {
+                    if (item) {
+                        const clothingDescription = [item.colour, item.style, item.title, item.brand].filter(Boolean).join(' ');
+                        setPromptData(prev => {
                             if (prev.prompt && prev.prompt.includes(clothingDescription)) return prev;
                             return {
                                 ...prev,
