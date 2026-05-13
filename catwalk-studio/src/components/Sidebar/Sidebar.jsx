@@ -36,7 +36,7 @@ const Sidebar = ({ isMobileOpen, onClose }) => {
         // Separator
         { type: 'separator' },
         // Account & Settings
-        { label: t('nav.sidebar.becomeModel'), path: '/models/register', icon: 'star' },
+        ...(!isAnonymous ? [{ label: t('nav.sidebar.becomeModel'), path: '/models/register', icon: 'star' }] : []),
         { label: t('nav.sidebar.account'), path: '/studio/account', icon: 'settings' },
     ];
 

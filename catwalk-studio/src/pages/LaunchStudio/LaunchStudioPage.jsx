@@ -15,7 +15,7 @@ import Library from './pages/Library';
 import './LaunchStudioPage.css';
 
 const MobileHeader = ({ onMenuToggle }) => {
-    const { t } = useTranslation();
+    useTranslation();
     return (
         <div className="studio-mobile-header">
             <button className="hamburger-btn" onClick={onMenuToggle}>

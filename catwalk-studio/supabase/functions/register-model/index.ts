@@ -122,35 +122,42 @@ serve(async (req) => {
         const discordWebhookUrl = Deno.env.get('DISCORD_WEBHOOK_URL') || ''
         const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-        // 1. Auth is optional — extract userId if a valid JWT is present
+        // 1. Auth is REQUIRED - only registered users can use Become a Model
         let userId: string | null = null
         const authHeader = req.headers.get('Authorization')
-        if (authHeader) {
-            const token = authHeader.replace('Bearer ', '')
-            const { data: { user } } = await supabaseAdmin.auth.getUser(token)
-            userId = user?.id || null
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            throw new Error('Authentication required')
+        }
 
-            // Ensure user exists in public users table (upsert to avoid FK violation)
-            if (userId && user) {
-                try {
-                    const { error: upsertError } = await supabaseAdmin
-                        .from('users')
-                        .upsert({
-                            user_id: userId,
-                            email: user.email || '',
-                            user_type: 'model',
-                        }, { onConflict: 'user_id' })
-                    
-                    // If upsert failed, don't use userId as FK to avoid constraint violation
-                    if (upsertError) {
-                        console.error('User upsert failed:', upsertError.message)
-                        userId = null
-                    }
-                } catch (e) {
-                    console.error('User upsert exception:', e)
-                    userId = null
-                }
+        const token = authHeader.replace('Bearer ', '')
+        const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+        if (authError || !user) {
+            throw new Error('Authentication required')
+        }
+
+        if (user.is_anonymous) {
+            throw new Error('Please sign in with a registered account to use Become a Model')
+        }
+
+        userId = user.id
+
+        // Ensure user exists in public users table (upsert to avoid FK violation)
+        try {
+            const { error: upsertError } = await supabaseAdmin
+                .from('users')
+                .upsert({
+                    user_id: userId,
+                    email: user.email || '',
+                    user_type: 'model',
+                }, { onConflict: 'user_id' })
+
+            if (upsertError) {
+                console.error('User upsert failed:', upsertError.message)
+                throw new Error('Unable to verify user profile')
             }
+        } catch (e) {
+            console.error('User upsert exception:', e)
+            throw new Error('Unable to verify user profile')
         }
 
         const { modelData } = await req.json()
@@ -296,3 +303,4 @@ serve(async (req) => {
         })
     }
 })
+

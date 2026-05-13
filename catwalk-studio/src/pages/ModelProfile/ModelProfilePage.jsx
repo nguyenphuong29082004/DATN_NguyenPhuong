@@ -86,9 +86,6 @@ function ModelProfilePage() {
         }
     }, [fetchError, model?.description, model?.username]);
 
-    useEffect(() => {
-        setBioValue(model?.description || '');
-    }, [model?.description]);
 
     if (loading) {
         return (
@@ -270,7 +267,7 @@ function ModelProfilePage() {
                                 <p className="model-profile__bio">{model.description}</p>
                             )}
                             {isOwner && (
-                                <button className="model-profile__bio-edit-btn" onClick={() => setShowBioEditor(true)}>
+                                <button className="model-profile__bio-edit-btn" onClick={() => { setBioValue(model?.description || ''); setShowBioEditor(true); }}>
                                     <span className="material-symbols-outlined">edit</span>
                                     Edit bio
                                 </button>

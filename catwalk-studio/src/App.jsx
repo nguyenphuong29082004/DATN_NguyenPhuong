@@ -101,11 +101,7 @@ function App() {
             </RequireGuest>
           } />
           
-          <Route path="/become-model" element={
-            <RequireRealAuth>
-              <BecomeModelPage />
-            </RequireRealAuth>
-          } />
+          <Route path="/become-model" element={<BecomeModelPage />} />
           
           <Route path="/help" element={<HelpPage />} />
 

@@ -21,7 +21,7 @@ const MODEL_CATEGORIES_KEYS = [
 export function ModelsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAnonymous } = useAuth();
   const { category: urlCategory } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [manualCategory, setManualCategory] = useState('all');
@@ -39,6 +39,7 @@ export function ModelsPage() {
   const [sortOpen, setSortOpen] = useState(false);
   const [filterModelType, setFilterModelType] = useState({ ai: true, real: true, both: true });
   const [selectedTags, setSelectedTags] = useState([]);
+  const [isMobileFiltersOpen] = useState(false);
 
   const commonTags = [
     'Editorial', 'Commercial', 'Streetwear', 'Runway', 'Minimalist', 
@@ -230,14 +231,17 @@ export function ModelsPage() {
           <p className="marketplace-subtitle">
             {t('marketplace.header.description')}
           </p>
-          <p className="marketplace-become-wrap">
-            <Link to="/models/register" className="marketplace-become-model-link">
-              {t('marketplace.header.becomeModel')}
-              <span className="material-symbols-outlined thin-icon" aria-hidden="true">
-                arrow_forward
-              </span>
-            </Link>
-          </p>
+          {!isAnonymous && user && (
+            <p className="marketplace-become-wrap">
+              <Link to="/models/register" className="marketplace-become-model-link">
+                {t('marketplace.header.becomeModel')}
+                <span className="material-symbols-outlined thin-icon" aria-hidden="true">
+                  arrow_forward
+                </span>
+              </Link>
+            </p>
+          )}
+
         </header>
 
         {/* Search Bar */}
@@ -271,8 +275,8 @@ export function ModelsPage() {
 
         {/* Main Content */}
         <div className="marketplace-main-layout">
-          {/* Sidebar Filters *            <aside className="marketplace-sidebar">
-            <div>
+            {/* Sidebar Filters */}
+            <div className={`marketplace-sidebar ${isMobileFiltersOpen ? 'mobile-open' : ''}`}>
               <h3 className="sidebar-section-title">{t('marketplace.sidebar.title')}</h3>
               <div className="filter-group">
                 <div className="elite-toggle-card">
@@ -316,7 +320,6 @@ export function ModelsPage() {
                     <span className="accordion-title active">{t('marketplace.sidebar.styleSelection')}</span>
                     <span className="material-symbols-outlined thin-icon">expand_less</span>
                   </div>
-v>
                   <div className="filter-options">
                     {commonTags.map(tag => (
                       <label key={tag} className="filter-option">
@@ -330,9 +333,8 @@ v>
                   </div>
                 </div>
               </div>
+              <button className="clear-filters-btn" onClick={clearAllFilters}>{t('marketplace.sidebar.clearAll')}</button>
             </div>
-            <button className="clear-filters-btn" onClick={clearAllFilters}>{t('marketplace.sidebar.clearAll')}</button>
-          </aside>
 
           {/* Models Grid */}
           <section className="marketplace-grid-area">
@@ -577,7 +579,7 @@ v>
         </div>
       )}
     </div>
-  );
-}
+    );
+};
 
 export default ModelsPage;
