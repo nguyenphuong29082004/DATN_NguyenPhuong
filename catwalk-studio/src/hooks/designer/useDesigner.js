@@ -176,3 +176,35 @@ export function useCreateDesignerItem() {
         error: mutation.error,
     };
 }
+/**
+ * Hook to add an item to a collection
+ * 
+ * @returns {Object} Mutation object
+ */
+export function useAddItemToCollection() {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: async ({ collectionId, itemId, userId }) => {
+            const useCase = container.getAddItemToCollectionUseCase();
+            const result = await useCase.execute({ collectionId, itemId });
+
+            if (result.isFailure()) {
+                throw new Error(result.getError());
+            }
+
+            return result.getValue();
+        },
+        onSuccess: (_, variables) => {
+            // Invalidate user collections
+            queryClient.invalidateQueries({ queryKey: designerKeys.collections(variables.userId) });
+        },
+    });
+
+    return {
+        addItem: mutation.mutate,
+        addItemAsync: mutation.mutateAsync,
+        isAdding: mutation.isPending,
+        error: mutation.error,
+    };
+}

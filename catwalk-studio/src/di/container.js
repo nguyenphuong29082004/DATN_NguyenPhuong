@@ -64,6 +64,7 @@ import { CreateDesignerItemUseCase } from '../application/use-cases/designer/Cre
 import { GetUserCollectionsUseCase } from '../application/use-cases/designer/GetUserCollectionsUseCase';
 import { GetWardrobeItemsUseCase } from '../application/use-cases/designer/GetWardrobeItemsUseCase';
 import { DeleteCollectionUseCase } from '../application/use-cases/designer/DeleteCollectionUseCase';
+import { AddItemToCollectionUseCase } from '../application/use-cases/designer/AddItemToCollectionUseCase';
 
 // Campaign Use Cases
 import { CreateCampaignUseCase } from '../application/use-cases/campaigns/CreateCampaignUseCase';
@@ -355,6 +356,10 @@ class DIContainer {
 
     static getDeleteCollectionUseCase() {
         return new DeleteCollectionUseCase(this.getDesignerRepository());
+    }
+
+    static getAddItemToCollectionUseCase() {
+        return new AddItemToCollectionUseCase(this.getDesignerRepository());
     }
 
     // Campaign Use Cases

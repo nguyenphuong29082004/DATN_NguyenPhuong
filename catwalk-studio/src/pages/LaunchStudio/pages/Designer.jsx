@@ -10,7 +10,7 @@ import {
     useCreateWardrobeItem,
     useDeleteWardrobeItem,
 } from '../../../hooks/wardrobe/useWardrobe';
-import { useUserCollections, useCreateCollection, useDeleteCollection } from '../../../hooks/designer/useDesigner';
+import { useUserCollections, useCreateCollection, useDeleteCollection, useAddItemToCollection } from '../../../hooks/designer/useDesigner';
 import { useFileUpload } from '../../../hooks/storage/useFileUpload';
 import { useDeductCredits } from '../../../hooks/useCredits';
 import { getNearestColorName } from '../../../utils/colors';
@@ -158,6 +158,7 @@ const Designer = () => {
     const { collections, isLoading: collectionsLoading } = useUserCollections(userId);
     const { createCollection, isCreating: isCreatingCollection } = useCreateCollection();
     const { deleteCollection, isDeleting: isDeletingCollection } = useDeleteCollection();
+    const { addItem: addItemToCollection, isAdding: isAddingToCollection } = useAddItemToCollection();
 
     const isLoading = myLoading || platformLoading;
     const error = myError || platformError;
@@ -172,6 +173,8 @@ const Designer = () => {
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [deleteCollectionConfirm, setDeleteCollectionConfirm] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
+    const [error, setError] = useState(null);
 
     // Form state - New Item
     const [newItem, setNewItem] = useState({
@@ -298,6 +301,8 @@ const Designer = () => {
         setSelectedFile(null);
         setImagePreview(null);
         setShowNewItemModal(false);
+        setSuccessMessage('Item created successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
     };
 
     // Handlers - Delete Item
@@ -332,6 +337,8 @@ const Designer = () => {
         });
         setNewCollection({ name: '', description: '', isPublic: false, tags: '' });
         setShowNewCollectionModal(false);
+        setSuccessMessage('Collection created successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
     };
 
     const handleDeleteCollection = (collection) => setDeleteCollectionConfirm({ id: collection.id, name: collection.name });
@@ -344,6 +351,24 @@ const Designer = () => {
     const handleViewCollection = (collection) => { setSelectedCollection(collection); setShowCollectionDetailModal(true); };
 
     const handleAddToCollection = (item) => { setSelectedItem(item); setShowAddToCollectionModal(true); };
+
+    const handleConfirmAddToCollection = async (collection) => {
+        if (!selectedItem || !collection || !userId) return;
+        
+        try {
+            await addItemToCollection({
+                collectionId: collection.id,
+                itemId: selectedItem.id,
+                userId
+            });
+            setSuccessMessage?.(`Added to ${collection.name}`);
+            setShowAddToCollectionModal(false);
+            setTimeout(() => setSuccessMessage?.(null), 2000);
+        } catch (err) {
+            console.error('Failed to add to collection:', err);
+            alert('Failed to add to collection: ' + err.message);
+        }
+    };
 
     const handleGenerateAiItem = async () => {
         if (!aiGenData.prompt.trim() || !userId) return;
@@ -394,6 +419,13 @@ const Designer = () => {
                     <h2>Designer</h2>
                     <p>Create and manage fashion items &amp; collections for your shoots</p>
                 </div>
+
+                {successMessage && (
+                    <div className="designer-toast success">
+                        <span className="material-symbols-outlined">check_circle</span>
+                        <span>{successMessage}</span>
+                    </div>
+                )}
 
                 {/* Tab Navigation */}
                 <div className="designer-tabs">
@@ -894,10 +926,7 @@ const Designer = () => {
                                 key={col.id}
                                 className={`add-to-collection__option ${alreadyIn ? 'added' : ''}`}
                                 disabled={alreadyIn}
-                                onClick={() => {
-                                    console.log('Add item to collection:', selectedItem?.id, col.id);
-                                    setShowAddToCollectionModal(false);
-                                }}
+                                onClick={() => handleConfirmAddToCollection(col)}
                             >
                                 <span className="material-symbols-outlined">{alreadyIn ? 'check_circle' : 'folder_special'}</span>
                                 <span>{col.name}</span>
