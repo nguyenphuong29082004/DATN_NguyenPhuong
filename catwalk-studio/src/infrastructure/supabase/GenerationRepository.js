@@ -358,19 +358,29 @@ export class GenerationRepository extends IGenerationRepository {
 
             const normalized = (data || [])
                 .filter(row => row.generation?.output_url)
-                .map(row => ({
-                    id: row.gallery_id,
-                    title: row.title,
-                    likesCount: row.likes,
-                    tags: row.tags || [],
-                    createdAt: row.created_at,
-                    outputUrl: row.generation.output_url,
-                    outputType: row.generation.output_type,
-                    promptText: row.generation.prompt_text,
-                    parametersJson: row.generation.parameters_json,
-                    users: row.generation.users,
-                    models: row.generation.models,
-                }))
+                .map(row => {
+                    const mimeType = row.generation.output_type || '';
+                    let uiType = 'photo';
+                    if (mimeType.startsWith('video/') || row.generation.type === 'video') {
+                        uiType = 'video';
+                    } else if (mimeType.startsWith('image/')) {
+                        uiType = 'photo';
+                    }
+
+                    return {
+                        id: row.gallery_id,
+                        title: row.title,
+                        likesCount: row.likes,
+                        tags: row.tags || [],
+                        createdAt: row.created_at,
+                        outputUrl: row.generation.output_url,
+                        outputType: uiType, // Map to UI-friendly type
+                        promptText: row.generation.prompt_text,
+                        parametersJson: row.generation.parameters_json,
+                        users: row.generation.users,
+                        models: row.generation.models,
+                    };
+                })
                 .filter(item => !type || type === 'all' || item.outputType === type)
                 .filter(item => !style || style === 'all' || (item.tags && item.tags.includes(style)));
 

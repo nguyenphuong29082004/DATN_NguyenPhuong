@@ -66,6 +66,7 @@ const GalleryPage = () => {
         { id: 'editorial', label: t('marketplace.categories.editorial') },
         { id: 'commercial', label: t('marketplace.categories.commercial') },
         { id: 'streetwear', label: t('marketplace.categories.streetwear') },
+        { id: 'try-on', label: 'Virtual Try-On' },
         { id: 'high-fashion', label: t('gallery.filters.highFashion', 'High Fashion') },
         { id: 'minimalist', label: t('marketplace.categories.minimalist') },
     ];
