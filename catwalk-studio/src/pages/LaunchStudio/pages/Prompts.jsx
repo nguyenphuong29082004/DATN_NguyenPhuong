@@ -121,6 +121,21 @@ const Prompts = () => {
         presets: { width: 1024, height: 1024 }
     });
 
+    const resetForm = () => {
+        setNewPrompt({
+            name: '',
+            category: PROMPT_CATEGORY_OPTIONS[0]?.value || '',
+            prompt: '',
+            negativePrompt: '',
+            presets: { width: 1024, height: 1024 }
+        });
+    };
+    
+    const handleCloseAddForm = () => {
+        setShowAddForm(false);
+        resetForm();
+    };
+
     const handleAddPrompt = () => {
         if (!newPrompt.name.trim() || !newPrompt.prompt.trim() || !userId) return;
 
@@ -133,13 +148,7 @@ const Prompts = () => {
             parametersJson: newPrompt.presets,
         });
 
-        setNewPrompt({
-            name: '',
-            category: PROMPT_CATEGORY_OPTIONS[0]?.value || '',
-            prompt: '',
-            negativePrompt: '',
-            presets: { width: 1024, height: 1024 }
-        });
+        resetForm();
         setShowAddForm(false);
     };
 
@@ -178,11 +187,11 @@ const Prompts = () => {
                 {/* Add Form Modal */}
                 <Modal
                     open={showAddForm}
-                    onClose={() => setShowAddForm(false)}
+                    onClose={handleCloseAddForm}
                     title="New Prompt Template"
                     footer={
                         <>
-                            <Button variant="secondary" size="md" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                            <Button variant="secondary" size="md" onClick={handleCloseAddForm}>Cancel</Button>
                             <Button variant="primary" size="md" onClick={handleAddPrompt} disabled={!newPrompt.name.trim() || !newPrompt.prompt.trim() || isCreating}>
                                 {isCreating ? 'Saving...' : 'Save Template'}
                             </Button>
