@@ -100,12 +100,64 @@ const matchesModelSearch = (item, query) => {
     return searchFields.some(field => field.includes(q));
 };
 
+const CustomSelect = ({ value, options, onChange, placeholder = 'Select option', className = '' }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value === value);
+
+    return (
+        <div className={`custom-select ${className}`} ref={dropdownRef}>
+            <button
+                type="button"
+                className={`custom-select__trigger ${isOpen ? 'open' : ''}`}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span className={`custom-select__value ${!selectedOption ? 'placeholder' : ''}`}>
+                    {selectedOption ? selectedOption.label : placeholder}
+                </span>
+                <span className="material-symbols-outlined custom-select__chevron">expand_more</span>
+            </button>
+            {isOpen && (
+                <div className="custom-select__list">
+                    {options.map(opt => (
+                        <div
+                            key={opt.value}
+                            className={`custom-select__option ${value === opt.value ? 'active' : ''}`}
+                            onClick={() => {
+                                onChange(opt.value);
+                                setIsOpen(false);
+                            }}
+                        >
+                            {opt.label}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const QuickShoot = () => {
     const { user, profile, refreshProfile, isAnonymous, isGuest } = useAuth();
     const [searchParams] = useSearchParams();
 
     // Data from hooks
     const { engines: aiModels } = useAIEngines();
+    const aiEngineOptions = useMemo(() => aiModels.map(aim => ({
+        value: aim.frontend_slug,
+        label: `${aim.frontend_name}${aim.cost_per_token > 1 ? ` (×${aim.cost_per_token})` : ''}`
+    })), [aiModels]);
     const [selectedAiModel, setSelectedAiModel] = useState(null);
     const [generationType, setGenerationType] = useState('photo'); // 'photo' | 'video'
     const effectiveAiModel = selectedAiModel || aiModels[0] || null;
@@ -544,24 +596,18 @@ const QuickShoot = () => {
                     {/* AI Engine */}
                     <div className="form-group">
                         <label>AI Engine</label>
-                        <select
+                        <CustomSelect
                             value={effectiveAiModel?.frontend_slug || ''}
-                             onChange={(e) => {
-                                 const newAiModel = aiModels.find(m => m.frontend_slug === e.target.value);
-                                 setSelectedAiModel(newAiModel);
-                                 // Stale model cleanup logic moved from useEffect to avoid cascading renders
-                                 const isMarketplace = ['flux-1-schnell', 'flux-1-dev', 'stable-diffusion-3.5'].includes(newAiModel?.frontend_slug);
-                                 if (!isMarketplace && selectedModel && !selectedModel.isUserAiCharacter) {
-                                     setSelectedModel(null);
-                                 }
-                             }}
-                        >
-                            {aiModels.map(aim => (
-                                <option key={aim.ai_model_id} value={aim.frontend_slug}>
-                                    {aim.frontend_name}{aim.cost_per_token > 1 ? ` (×${aim.cost_per_token})` : ''}
-                                </option>
-                            ))}
-                        </select>
+                            options={aiEngineOptions}
+                            onChange={(val) => {
+                                const newAiModel = aiModels.find(m => m.frontend_slug === val);
+                                setSelectedAiModel(newAiModel);
+                                const isMarketplace = ['flux-1-schnell', 'flux-1-dev', 'stable-diffusion-3.5'].includes(newAiModel?.frontend_slug);
+                                if (!isMarketplace && selectedModel && !selectedModel.isUserAiCharacter) {
+                                    setSelectedModel(null);
+                                }
+                            }}
+                        />
                     </div>
 
                     {/* Model Selector */}
@@ -832,15 +878,12 @@ const QuickShoot = () => {
                             </>
                             )}
                             {availableFormatOptions.length > 0 && (
-                            <select
-                                className="format-select"
-                                value={promptData.format}
-                                onChange={(e) => setPromptData(prev => ({ ...prev, format: e.target.value }))}
-                            >
-                                {availableFormatOptions.map(f => (
-                                    <option key={f.value} value={f.value}>{f.label}</option>
-                                ))}
-                            </select>
+                                <CustomSelect
+                                    className="format-select"
+                                    value={promptData.format}
+                                    options={availableFormatOptions}
+                                    onChange={(val) => setPromptData(prev => ({ ...prev, format: val }))}
+                                />
                             )}
                         </div>
                         {engineUiConfig.supportsSeed && (
