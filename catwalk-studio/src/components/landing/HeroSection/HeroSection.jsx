@@ -51,7 +51,7 @@ export function HeroSection() {
             <div className="visual-card visual-card--3">
               <div className="image-overlay image-overlay--dark"></div>
               <img
-                src="https://images.unsplash.com/photo-1539109132314-3475961e0281?q=80&w=1974&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop"
                 alt="Elite Fashion"
               />
             </div>

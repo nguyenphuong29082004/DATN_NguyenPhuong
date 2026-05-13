@@ -335,6 +335,7 @@ export class GenerationRepository extends IGenerationRepository {
                     gallery_id,
                     title,
                     likes,
+                    tags,
                     created_at,
                     generation:generations!gallery_generations_rel (
                         id,
@@ -361,6 +362,7 @@ export class GenerationRepository extends IGenerationRepository {
                     id: row.gallery_id,
                     title: row.title,
                     likesCount: row.likes,
+                    tags: row.tags || [],
                     createdAt: row.created_at,
                     outputUrl: row.generation.output_url,
                     outputType: row.generation.output_type,
@@ -370,7 +372,7 @@ export class GenerationRepository extends IGenerationRepository {
                     models: row.generation.models,
                 }))
                 .filter(item => !type || type === 'all' || item.outputType === type)
-                .filter(item => !style || style === 'all' || item.parametersJson?.style === style);
+                .filter(item => !style || style === 'all' || (item.tags && item.tags.includes(style)));
 
             return {
                 items: normalized,
