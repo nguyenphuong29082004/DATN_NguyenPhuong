@@ -1,6 +1,6 @@
 export const TRY_ON_BASE_COSTS = {
-    standard: 5,
-    hd: 10,
+    standard: 50,
+    hd: 100,
 };
 
 export function buildTryOnPayload({ selectedModel, selectedWardrobeItem, promptData }) {

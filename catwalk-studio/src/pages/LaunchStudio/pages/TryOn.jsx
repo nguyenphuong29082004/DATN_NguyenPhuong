@@ -23,8 +23,8 @@ const FORMAT_OPTIONS = [
 ];
 
 const QUALITY_OPTIONS = [
-    { value: 'standard', label: 'Standard', credits: 5 },
-    { value: 'hd', label: 'HD', credits: 10 },
+    { value: 'standard', label: 'Standard', credits: 50 },
+    { value: 'hd', label: 'HD', credits: 100 },
 ];
 
 const SIZE_PRESETS = [
