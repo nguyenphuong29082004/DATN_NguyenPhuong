@@ -277,6 +277,18 @@ const Designer = () => {
 
     const handleRemoveImage = () => { setSelectedFile(null); setImagePreview(null); };
 
+    const handleCloseNewItemModal = () => {
+        setShowNewItemModal(false);
+        setNewItem({ title: '', description: '', category: 'clothing', brand: '', style: '', colour: '', colourHex: '', gender: '' });
+        setSelectedFile(null);
+        setImagePreview(null);
+    };
+
+    const handleCloseNewCollectionModal = () => {
+        setShowNewCollectionModal(false);
+        setNewCollection({ name: '', description: '', isPublic: false, tags: '' });
+    };
+
     // Handlers - Create Item
     const handleCreateItem = async () => {
         if (!newItem.title.trim() || !userId || !selectedFile) return;
@@ -297,10 +309,7 @@ const Designer = () => {
             highResImageUrl: uploadResult.url,
         });
 
-        setNewItem({ title: '', description: '', category: 'clothing', brand: '', style: '', colour: '', colourHex: '', gender: '' });
-        setSelectedFile(null);
-        setImagePreview(null);
-        setShowNewItemModal(false);
+        handleCloseNewItemModal();
         setSuccessMessage('Item created successfully!');
         setTimeout(() => setSuccessMessage(null), 3000);
     };
@@ -335,8 +344,7 @@ const Designer = () => {
             isPublic: newCollection.isPublic,
             tags: newCollection.tags ? newCollection.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
         });
-        setNewCollection({ name: '', description: '', isPublic: false, tags: '' });
-        setShowNewCollectionModal(false);
+        handleCloseNewCollectionModal();
         setSuccessMessage('Collection created successfully!');
         setTimeout(() => setSuccessMessage(null), 3000);
     };
@@ -649,11 +657,11 @@ const Designer = () => {
             {/* New Item Modal */}
             <Modal
                 open={showNewItemModal}
-                onClose={() => setShowNewItemModal(false)}
+                onClose={handleCloseNewItemModal}
                 title="Create New Item"
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setShowNewItemModal(false)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={handleCloseNewItemModal}>Cancel</Button>
                         <Button
                             variant="primary" size="md"
                             onClick={handleCreateItem}
@@ -812,11 +820,11 @@ const Designer = () => {
             {/* New Collection Modal */}
             <Modal
                 open={showNewCollectionModal}
-                onClose={() => setShowNewCollectionModal(false)}
+                onClose={handleCloseNewCollectionModal}
                 title="New Collection"
                 footer={
                     <>
-                        <Button variant="secondary" size="md" onClick={() => setShowNewCollectionModal(false)}>Cancel</Button>
+                        <Button variant="secondary" size="md" onClick={handleCloseNewCollectionModal}>Cancel</Button>
                         <Button variant="primary" size="md" onClick={handleCreateCollection} disabled={!newCollection.name.trim() || isCreatingCollection}>
                             {isCreatingCollection ? 'Creating...' : 'Create Collection'}
                         </Button>
