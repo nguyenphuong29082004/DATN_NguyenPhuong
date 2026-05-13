@@ -189,8 +189,13 @@ const BecomeModel = () => {
 
     const handleNext = () => setStep(step + 1);
     const handleBack = () => {
-        if (step > 1) setStep(step - 1);
-        else window.history.back();
+        if (step > 1) {
+            setStep(step - 1);
+        } else {
+            // If backing out from the first step, clear the draft
+            localStorage.removeItem(STORAGE_KEY);
+            window.history.back();
+        }
     };
 
     const handleFileUpload = async (type, file, index) => {

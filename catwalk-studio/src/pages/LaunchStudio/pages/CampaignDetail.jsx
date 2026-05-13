@@ -84,20 +84,6 @@ const CampaignDetail = () => {
         });
     };
 
-    if (isGuest) {
-        return (
-            <div className="campaign-detail">
-                <div className="campaign-detail__not-found">
-                    <span className="material-symbols-outlined">lock</span>
-                    <h3>Sign in to view campaigns</h3>
-                    <button className="btn-secondary" onClick={() => navigate('/studio/campaigns')}>
-                    Back to Campaigns
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     const handleDownload = async (url, format = 'png') => {
         if (!url) return;
         try {

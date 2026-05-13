@@ -118,7 +118,7 @@ const CreateCampaign = () => {
             handleCloseModal();
             setFormData({ name: '', details: '', brandGuidelinesUrl: '' });
             setBrandGuidelinesFile(null);
-            navigate(`/studio/create-campaign/${result.id}`);
+            navigate(`/studio/campaigns/${result.id}`);
         } catch (err) {
             console.error('Error creating campaign:', err);
             setError(err.message || 'Failed to create campaign');
@@ -271,7 +271,7 @@ const CreateCampaign = () => {
                             <CampaignCard
                                 key={campaign.id}
                                 campaign={campaign}
-                                onClick={() => navigate(`/studio/create-campaign/${campaign.id}`)}
+                                onClick={() => navigate(`/studio/campaigns/${campaign.id}`)}
                             />
                         ))}
                     </div>

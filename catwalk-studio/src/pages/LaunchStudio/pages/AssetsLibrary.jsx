@@ -123,7 +123,7 @@ const AssetsLibrary = () => {
                                             {asset.campaign_id && (
                                                 <button
                                                     className="asset-link-btn"
-                                                    onClick={() => navigate(`/studio/create-campaign/${asset.campaign_id}`)}
+                                                    onClick={() => navigate(`/studio/campaigns/${asset.campaign_id}`)}
                                                 >
                                                     Campaign
                                                 </button>

@@ -40,7 +40,7 @@ const LaunchStudioPage = () => {
             <div className="launch-studio-main">
                 <Routes>
                     <Route path="campaigns" element={<CreateCampaign />} />
-                    <Route path="create-campaign/:campaignId" element={<CampaignDetail />} />
+                    <Route path="campaigns/:campaignId" element={<CampaignDetail />} />
                     <Route path="quick-shoot" element={<QuickShoot />} />
                     <Route path="try-on" element={<TryOn />} />
                     <Route path="prompts" element={<Prompts />} />
