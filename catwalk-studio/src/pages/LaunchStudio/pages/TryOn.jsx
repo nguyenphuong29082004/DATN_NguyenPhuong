@@ -270,7 +270,9 @@ const TryOn = () => {
     const handleDownload = async () => {
         if (!generatedImage) return;
         try {
-            const response = await fetch(generatedImage);
+            // Try to fetch with CORS
+            const response = await fetch(generatedImage, { mode: 'cors' });
+            if (!response.ok) throw new Error('Network response was not ok');
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -283,7 +285,11 @@ const TryOn = () => {
             setSuccessMessage('Image downloaded!');
             setTimeout(() => setSuccessMessage(null), 2000);
         } catch (err) {
-            setError('Download failed: ' + err.message);
+            console.warn('CORS download failed, falling back to new tab:', err);
+            // Fallback: Open in new tab if CORS fails
+            window.open(generatedImage, '_blank');
+            setSuccessMessage('Opening image in new tab...');
+            setTimeout(() => setSuccessMessage(null), 3000);
         }
     };
 
@@ -888,7 +894,7 @@ const TryOn = () => {
                             <div className="generated-result">
                                 <div className={`preview-stage ${isGenerating ? 'is-generating' : ''}`}>
                                     {generatedImage ? (
-                                        <img src={generatedImage} alt="Try-on result" className="preview-stage__image" />
+                                        <img src={generatedImage} alt="Try-on result" className="preview-stage__image" crossOrigin="anonymous" />
                                     ) : (
                                         <div className="preview-placeholder preview-stage__placeholder">
                                             <span className="material-symbols-outlined">checkroom</span>

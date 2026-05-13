@@ -87,7 +87,9 @@ const CampaignDetail = () => {
     const handleDownload = async (url, format = 'png') => {
         if (!url) return;
         try {
-            const response = await fetch(url);
+            // Try to fetch with CORS
+            const response = await fetch(url, { mode: 'cors' });
+            if (!response.ok) throw new Error('Network response was not ok');
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -98,7 +100,9 @@ const CampaignDetail = () => {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(blobUrl);
         } catch (err) {
-            console.error('Download failed', err);
+            console.warn('CORS download failed, falling back to new tab:', err);
+            // Fallback: Open in new tab if CORS fails
+            window.open(url, '_blank');
         }
     };
 
@@ -298,7 +302,8 @@ const CampaignDetail = () => {
                                         {gen.status === 'completed' && gen.output_url ? (
                                             <img
                                                 src={gen.output_url}
-                                                alt="Generated content"
+                                                alt={gen.prompt_text}
+                                                crossOrigin="anonymous"
                                                 className="campaign-gen-card__image"
                                             />
                                         ) : gen.status === 'processing' || gen.status === 'pending' ? (
