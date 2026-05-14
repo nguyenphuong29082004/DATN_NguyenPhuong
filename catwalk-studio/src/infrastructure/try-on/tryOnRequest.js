@@ -8,7 +8,7 @@ export function buildTryOnPayload({ selectedModel, selectedWardrobeItem, promptD
         throw new Error('Try-on requires a selected model');
     }
 
-    // Auto-inject gender keywords to improve AI accuracy
+    // Auto-inject gender keywords
     const gender = (selectedModel.gender || '').toLowerCase();
     let enhancedPrompt = promptData.prompt || '';
     let enhancedNegativePrompt = promptData.negativePrompt || null;
@@ -25,31 +25,37 @@ export function buildTryOnPayload({ selectedModel, selectedWardrobeItem, promptD
             : `man, male, boy, masculine`;
     }
 
+    // Convert to snake_case as expected by most Supabase Edge Functions
     const payload = {
         prompt: enhancedPrompt || null,
-        negativePrompt: enhancedNegativePrompt,
-        wardrobeItemId: selectedWardrobeItem?.id || null,
-        garmentUrl: selectedWardrobeItem?.highResImageUrl || selectedWardrobeItem?.thumbnailUrl || null,
-        width: promptData.width || null,
-        height: promptData.height || null,
-        format: promptData.format || null,
-        quality: promptData.quality || null,
-        seed: promptData.seed || null,
+        negative_prompt: enhancedNegativePrompt,
+        // If it's a custom upload, we don't send the "custom_upload" string as ID
+        wardrobe_item_id: selectedWardrobeItem?.id === 'custom_upload' ? null : (selectedWardrobeItem?.id || null),
+        garment_url: selectedWardrobeItem?.highResImageUrl || selectedWardrobeItem?.thumbnailUrl || null,
+        width: parseInt(promptData.width) || 768,
+        height: parseInt(promptData.height) || 1024,
+        format: promptData.format || 'png',
+        quality: promptData.quality || 'standard',
+        seed: promptData.seed === '' ? null : (parseInt(promptData.seed) || null),
     };
 
+    let finalPayload;
     if (selectedModel.isUserAiCharacter) {
-        return {
+        finalPayload = {
             ...payload,
-            aiCharacterId: selectedModel.id,
-            modelImageUrl: selectedModel.imageUrl || null,
+            ai_character_id: selectedModel.id,
+            model_image_url: selectedModel.imageUrl || null,
+        };
+    } else {
+        finalPayload = {
+            ...payload,
+            model_id: selectedModel.id,
+            model_image_url: selectedModel.imageUrl || null,
         };
     }
 
-    return {
-        ...payload,
-        modelId: selectedModel.id,
-        modelImageUrl: selectedModel.imageUrl || null,
-    };
+    console.log('DEBUG: Final Payload (Snake Case):', finalPayload);
+    return finalPayload;
 }
 
 export function getTryOnProgressMessage({ stage }) {
