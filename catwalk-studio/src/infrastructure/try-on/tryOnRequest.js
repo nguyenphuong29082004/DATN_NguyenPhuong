@@ -8,9 +8,22 @@ export function buildTryOnPayload({ selectedModel, selectedWardrobeItem, promptD
         throw new Error('Try-on requires a selected model');
     }
 
+    // Auto-inject gender keywords to improve AI accuracy
+    const gender = selectedModel.gender?.toLowerCase();
+    let enhancedPrompt = promptData.prompt;
+    let enhancedNegativePrompt = promptData.negativePrompt || '';
+
+    if (gender === 'male' || gender === 'man' || selectedModel.name?.toLowerCase().includes('male')) {
+        enhancedPrompt = `A male model, man, masculine, ${enhancedPrompt}`;
+        enhancedNegativePrompt = `woman, female, girl, feminine, ${enhancedNegativePrompt}`;
+    } else if (gender === 'female' || gender === 'woman' || selectedModel.name?.toLowerCase().includes('female')) {
+        enhancedPrompt = `A female model, woman, feminine, ${enhancedPrompt}`;
+        enhancedNegativePrompt = `man, male, boy, masculine, ${enhancedNegativePrompt}`;
+    }
+
     const payload = {
-        prompt: promptData.prompt,
-        negativePrompt: promptData.negativePrompt,
+        prompt: enhancedPrompt,
+        negativePrompt: enhancedNegativePrompt,
         wardrobeItemId: selectedWardrobeItem?.id || null,
         garmentUrl: selectedWardrobeItem?.highResImageUrl || selectedWardrobeItem?.thumbnailUrl || null,
         width: promptData.width,
