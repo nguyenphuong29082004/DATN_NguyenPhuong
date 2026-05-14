@@ -174,7 +174,7 @@ const Designer = () => {
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [deleteCollectionConfirm, setDeleteCollectionConfirm] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
-    const [error, setError] = useState(null);
+    const [formError, setFormError] = useState(null);
 
     // Form state - New Item
     const [newItem, setNewItem] = useState({
