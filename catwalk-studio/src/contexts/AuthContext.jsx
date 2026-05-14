@@ -328,6 +328,22 @@ export const AuthProvider = ({ children }) => {
             }
 
             try {
+                const isOAuthRedirect = window.location.hash.includes('access_token') || window.location.search.includes('access_token');
+
+                if (isOAuthRedirect) {
+                    const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+                    if (error) {
+                        console.warn('[Auth] getSessionFromUrl failed:', error);
+                    }
+
+                    if (data?.session?.user && mounted) {
+                        setUser(data.session.user);
+                    }
+
+                    // Remove auth token fragments from the URL after processing.
+                    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+                }
+
                 const { data: { session } } = await withTimeout(
                     supabase.auth.getSession(),
                     AUTH_INIT_SESSION_TIMEOUT_MS,
