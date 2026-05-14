@@ -35,8 +35,8 @@ const DESIGN_STYLES = [
 const ItemCard = ({ item, isOwner, onEdit, onUse, onUseTryOn, onDelete, onAddToCollection }) => (
     <div className="designer-card">
         <div className="designer-card__image">
-            {item.thumbnailUrl ? (
-                <img src={item.thumbnailUrl} alt={item.altText || item.title} />
+            {(item.thumbnailUrl || item.imageUrl || item.highResImageUrl) ? (
+                <img src={item.thumbnailUrl || item.imageUrl || item.highResImageUrl} alt={item.altText || item.title || item.name} />
             ) : (
                 <div className="designer-card__placeholder">
                     <span className="material-symbols-outlined">image</span>
@@ -63,7 +63,7 @@ const ItemCard = ({ item, isOwner, onEdit, onUse, onUseTryOn, onDelete, onAddToC
         </div>
         <div className="designer-card__info">
             <div className="designer-card__meta">
-                <h3>{item.title}</h3>
+                <h3>{item.title || item.name}</h3>
                 <span className="designer-card__category">{item.category}</span>
                 {item.brand && <span className="designer-card__brand">{item.brand}</span>}
             </div>
@@ -794,9 +794,11 @@ const Designer = () => {
             >
                 {selectedItem && (
                     <div className="edit-item-preview">
-                        {selectedItem.thumbnailUrl && <img src={selectedItem.thumbnailUrl} alt={selectedItem.altText || selectedItem.title} />}
+                        {(selectedItem.thumbnailUrl || selectedItem.imageUrl || selectedItem.highResImageUrl) && (
+                            <img src={selectedItem.thumbnailUrl || selectedItem.imageUrl || selectedItem.highResImageUrl} alt={selectedItem.altText || selectedItem.title || selectedItem.name} />
+                        )}
                         <div>
-                            <h4>{selectedItem.title}</h4>
+                            <h4>{selectedItem.title || selectedItem.name}</h4>
                             {selectedItem.brand && <p className="edit-item-brand">{selectedItem.brand}</p>}
                             {selectedItem.description && <p className="original-prompt">{selectedItem.description}</p>}
                         </div>
@@ -922,8 +924,10 @@ const Designer = () => {
             >
                 {selectedItem && (
                     <div className="add-to-collection__item">
-                        {selectedItem.thumbnailUrl && <img src={selectedItem.thumbnailUrl} alt={selectedItem.title} />}
-                        <span>{selectedItem.title}</span>
+                        {(selectedItem.thumbnailUrl || selectedItem.imageUrl || selectedItem.highResImageUrl) && (
+                            <img src={selectedItem.thumbnailUrl || selectedItem.imageUrl || selectedItem.highResImageUrl} alt={selectedItem.title || selectedItem.name} />
+                        )}
+                        <span>{selectedItem.title || selectedItem.name}</span>
                     </div>
                 )}
                 <div className="add-to-collection__list">
