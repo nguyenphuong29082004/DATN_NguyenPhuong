@@ -10,7 +10,7 @@ const Library = () => {
 
     const filteredGenerations = generations?.filter(g => {
         if (filter === 'all') return true;
-        return g.type === filter;
+        return g.outputType === filter;
     }) || [];
 
     return (
@@ -57,14 +57,14 @@ const Library = () => {
                     {filteredGenerations.map((gen) => (
                         <div key={gen.id} className="asset-card">
                             <div className="asset-media">
-                                {gen.type === 'video' ? (
+                                {gen.outputType === 'video' ? (
                                     <video src={gen.imageUrl} muted loop onMouseOver={e => e.target.play()} onMouseOut={e => e.target.pause()} />
                                 ) : (
-                                    <img src={gen.imageUrl} alt={gen.prompt} loading="lazy" />
+                                    <img src={gen.imageUrl} alt={gen.prompt || 'Generated asset'} loading="lazy" />
                                 )}
                             </div>
                             <div className="asset-info">
-                                <span className="asset-type">{gen.type?.toUpperCase()}</span>
+                                <span className="asset-type">{(gen.outputType || gen.type || 'asset').toUpperCase()}</span>
                                 <span className="asset-date">{new Date(gen.createdAt).toLocaleDateString()}</span>
                             </div>
                         </div>

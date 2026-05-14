@@ -563,20 +563,26 @@ export class GenerationRepository extends IGenerationRepository {
                 throw new Error(`Failed to update generation image: ${updateError.message}`);
             }
 
-            const { data, error } = await this.client
-                .from('gallery')
-                .insert({
-                    generation_id: generationId,
+            const { data, error } = await this.client.functions.invoke('add-to-gallery', {
+                body: {
+                    generationId,
                     title: title?.trim()?.slice(0, 120) || null,
                     description: description?.trim() || null,
                     tags: tags || [],
-                    type_label: typeLabel || 'quick-shoot',
+                    typeLabel: typeLabel || 'quick-shoot',
                     username: username || null,
-                })
-                .select()
-                .single();
-            if (error) throw new Error(`Failed to add to gallery: ${error.message}`);
-            return { alreadyExists: false, galleryId: data.gallery_id, outputUrl: persistedUrl };
+                }
+            });
+
+            if (error) {
+                throw new Error(`Failed to add to gallery: ${error.message}`);
+            }
+
+            if (!data || !data.success) {
+                throw new Error(`Failed to add to gallery: ${data?.error || 'Unknown error'}`);
+            }
+
+            return { alreadyExists: data.alreadyExists === true, galleryId: data.galleryId, outputUrl: persistedUrl };
         } catch (error) {
             console.error('Error in addToGallery:', error);
             throw error;
