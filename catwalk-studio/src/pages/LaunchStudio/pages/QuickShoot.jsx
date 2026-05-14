@@ -22,8 +22,8 @@ const FORMAT_OPTIONS = [
 ];
 
 const QUALITY_OPTIONS = [
-    { value: 'standard', label: 'Standard', credits: 50 },
-    { value: 'hd', label: 'HD', credits: 100 },
+    { value: 'standard', label: 'Standard', credits: 5 },
+    { value: 'hd', label: 'HD', credits: 10 },
 ];
 
 const SIZE_PRESETS = [
@@ -218,7 +218,7 @@ const QuickShoot = () => {
     const { generation: polledGeneration } = useGenerationStatus(activeGenerationId);
 
     const creditBalance = profile?.credits_balance ?? 0;
-    const baseQualityCost = QUALITY_OPTIONS.find(q => q.value === promptData.quality)?.credits ?? 50;
+    const baseQualityCost = QUALITY_OPTIONS.find(q => q.value === promptData.quality)?.credits ?? 5;
     const engineMultiplier = effectiveAiModel?.cost_per_token ?? 1;
     const generationCost = Math.ceil(baseQualityCost * engineMultiplier);
     const progressMessage = QUICK_SHOOT_PROGRESS_STEPS.find(step => progressValue <= step.until)?.label || 'Generating image...';
