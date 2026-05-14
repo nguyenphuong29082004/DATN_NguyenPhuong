@@ -423,14 +423,13 @@ const TryOn = () => {
         }
     }, [isLoadingWardrobe, wardrobeHasMore, loadMoreWardrobe]);
 
-    const handleSelectWardrobeItem = (wItem) => {
         setSelectedWardrobeItem({
-            id: wItem.item_id,
-            title: wItem.title,
+            id: wItem.item_id || wItem.id,
+            title: wItem.title || wItem.name,
             category: wItem.category,
             brand: wItem.brand,
-            thumbnailUrl: wItem.thumbnail_url,
-            colour: wItem.colour,
+            thumbnailUrl: wItem.thumbnail_url || wItem.thumbnailUrl || wItem.imageUrl,
+            colour: wItem.colour || wItem.color,
         });
         setShowWardrobePicker(false);
     };
@@ -665,8 +664,8 @@ const TryOn = () => {
                                 <div className="clothing-actions-group">
                                     {selectedWardrobeItem ? (
                                         <div className="wardrobe-selected">
-                                            {selectedWardrobeItem.thumbnailUrl && (
-                                                <img src={selectedWardrobeItem.thumbnailUrl} alt="" className="wardrobe-selected__thumb" />
+                                            {(selectedWardrobeItem.thumbnailUrl || selectedWardrobeItem.imageUrl) && (
+                                                <img src={selectedWardrobeItem.thumbnailUrl || selectedWardrobeItem.imageUrl} alt="" className="wardrobe-selected__thumb" />
                                             )}
                                             <div className="wardrobe-selected__info">
                                                 <span className="wardrobe-selected__name">{selectedWardrobeItem.title}</span>
@@ -719,7 +718,9 @@ const TryOn = () => {
                                                             setWardrobeSearch('');
                                                         }}
                                                     >
-                                                        {wItem.thumbnail_url && <img src={wItem.thumbnail_url} alt="" className="wardrobe-picker__thumb" loading="lazy" />}
+                                                        {(wItem.thumbnail_url || wItem.thumbnailUrl || wItem.imageUrl) && (
+                                                            <img src={wItem.thumbnail_url || wItem.thumbnailUrl || wItem.imageUrl} alt="" className="wardrobe-picker__thumb" loading="lazy" />
+                                                        )}
                                                         <div className="wardrobe-picker__item-info">
                                                             <span className="wardrobe-picker__name">{wItem.title || 'Untitled'}</span>
                                                             <span className="wardrobe-picker__category">{wItem.category}{wItem.brand ? ` · ${wItem.brand}` : ''}</span>
