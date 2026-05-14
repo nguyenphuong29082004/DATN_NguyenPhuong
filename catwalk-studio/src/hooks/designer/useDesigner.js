@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { container } from '../../di/container';
+import { wardrobeKeys } from '../wardrobe/useWardrobe';
 
 /**
  * Query keys for designer-related queries
@@ -165,7 +166,7 @@ export function useCreateDesignerItem() {
         },
         onSuccess: (_, variables) => {
             // Invalidate user wardrobe
-            queryClient.invalidateQueries({ queryKey: designerKeys.wardrobe(variables.userId) });
+            queryClient.invalidateQueries({ queryKey: wardrobeKeys.userItems(variables.userId) });
         },
     });
 
@@ -198,6 +199,8 @@ export function useAddItemToCollection() {
         onSuccess: (_, variables) => {
             // Invalidate user collections
             queryClient.invalidateQueries({ queryKey: designerKeys.collections(variables.userId) });
+            // Also invalidate wardrobe items since collection items come from wardrobe
+            queryClient.invalidateQueries({ queryKey: wardrobeKeys.userItems(variables.userId) });
         },
     });
 
