@@ -167,11 +167,34 @@ async function resolveGarmentDetails(supabaseAdmin: any, wardrobeItemId: string 
     let garmentCategory = 'tops'
 
     if (wardrobeItemId && wardrobeItemId !== 'custom_upload') {
-        const { data: wardrobeItem } = await supabaseAdmin
+        let wardrobeItem = null
+
+        const { data: wardrobeData } = await supabaseAdmin
             .from('wardrobe_items')
             .select('title, category, brand, colour, high_res_image_url, thumbnail_url')
             .eq('item_id', wardrobeItemId)
             .single()
+
+        if (wardrobeData) {
+            wardrobeItem = wardrobeData
+        } else {
+            const { data: designerItem } = await supabaseAdmin
+                .from('designer_items')
+                .select('name, category, brand, color, image_url')
+                .eq('id', wardrobeItemId)
+                .single()
+
+            if (designerItem) {
+                wardrobeItem = {
+                    title: designerItem.name,
+                    category: designerItem.category,
+                    brand: designerItem.brand,
+                    colour: designerItem.color,
+                    high_res_image_url: designerItem.image_url,
+                    thumbnail_url: designerItem.image_url,
+                }
+            }
+        }
 
         if (wardrobeItem) {
             const parts = [wardrobeItem.title].filter(Boolean)
@@ -201,11 +224,13 @@ async function resolvePreparedMarketplaceImage({
     model,
     userId,
     replicateApiToken,
+    fallbackModelImageUrl,
 }: {
     supabaseAdmin: any
     model: any
     userId: string
     replicateApiToken: string
+    fallbackModelImageUrl?: string | null
 }) {
     const sourceSignature = buildSourceSignature(model.training_data)
     const existingAssetQuery = await supabaseAdmin
@@ -255,6 +280,14 @@ async function resolvePreparedMarketplaceImage({
 
     const preparationReference = derivePreparationReference(model.training_data)
     if (!preparationReference) {
+        if (fallbackModelImageUrl) {
+            return {
+                modelImageUrl: fallbackModelImageUrl,
+                reusedPreparedImage: false,
+                sourceSignature,
+            }
+        }
+
         await supabaseAdmin
             .from('try_on_temp_assets')
             .update({
@@ -471,7 +504,7 @@ serve(async (req: Request) => {
         } else {
             const { data: model } = await supabaseAdmin
                 .from('models')
-                .select('model_id, display_name, ai_model_id, training_data')
+                .select('model_id, display_name, ai_model_id, training_data, profile_image_url')
                 .eq('model_id', modelId)
                 .eq('status', 'active')
                 .single()
@@ -488,6 +521,7 @@ serve(async (req: Request) => {
                 model,
                 userId: user.id,
                 replicateApiToken,
+                fallbackModelImageUrl: model.profile_image_url || clientModelImageUrl || null,
             })
 
             modelImageUrl = preparedResult.modelImageUrl

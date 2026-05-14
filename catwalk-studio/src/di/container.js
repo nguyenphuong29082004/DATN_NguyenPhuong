@@ -343,7 +343,7 @@ class DIContainer {
     }
 
     static getCreateDesignerItemUseCase() {
-        return new CreateDesignerItemUseCase(this.getDesignerRepository());
+        return new CreateDesignerItemUseCase(this.getDesignerRepository(), this.getWardrobeRepository());
     }
 
     static getUserCollectionsUseCase() {

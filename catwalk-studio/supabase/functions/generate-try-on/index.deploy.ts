@@ -84,23 +84,52 @@ async function refundCredits(supabaseAdmin: any, userId: string, amount: number,
 async function resolveGarmentDetails(supabaseAdmin: any, wardrobeItemId: string | null, garmentUrl: string | null) {
   let clothingDescription = ''
   let resolvedGarmentUrl = garmentUrl || null
+  let garmentCategory = 'tops'
+
   if (wardrobeItemId && wardrobeItemId !== 'custom_upload') {
-    const { data: wardrobeItem } = await supabaseAdmin.from('wardrobe_items').select('title, category, brand, colour, high_res_image_url, thumbnail_url').eq('item_id', wardrobeItemId).single()
+    let wardrobeItem = null
+
+    const { data: wardrobeData } = await supabaseAdmin.from('wardrobe_items').select('title, category, brand, colour, high_res_image_url, thumbnail_url').eq('item_id', wardrobeItemId).single()
+
+    if (wardrobeData) {
+      wardrobeItem = wardrobeData
+    } else {
+      const { data: designerItem } = await supabaseAdmin.from('designer_items').select('name, category, brand, color, image_url').eq('id', wardrobeItemId).single()
+      if (designerItem) {
+        wardrobeItem = {
+          title: designerItem.name,
+          category: designerItem.category,
+          brand: designerItem.brand,
+          colour: designerItem.color,
+          high_res_image_url: designerItem.image_url,
+          thumbnail_url: designerItem.image_url,
+        }
+      }
+    }
+
     if (wardrobeItem) {
       const parts = [wardrobeItem.title].filter(Boolean)
       if (wardrobeItem.colour) parts.push(wardrobeItem.colour)
       if (wardrobeItem.brand) parts.push(`by ${wardrobeItem.brand}`)
-      if (wardrobeItem.category) parts.push(`(${wardrobeItem.category})`)
+      if (wardrobeItem.category) {
+        parts.push(`(${wardrobeItem.category})`)
+        const cat = wardrobeItem.category.toLowerCase()
+        if (cat.includes('bottom') || cat.includes('pant') || cat.includes('skirt') || cat.includes('trousers') || cat.includes('jeans')) {
+          garmentCategory = 'bottoms'
+        } else if (cat.includes('dress') || cat.includes('one-piece') || cat.includes('suit') || cat.includes('jumpsuit')) {
+          garmentCategory = 'one-pieces'
+        }
+      }
       clothingDescription = parts.join(' ')
       resolvedGarmentUrl = wardrobeItem.high_res_image_url || wardrobeItem.thumbnail_url || resolvedGarmentUrl
     }
   } else if (wardrobeItemId === 'custom_upload') {
     clothingDescription = 'Custom Uploaded Garment'
   }
-  return { clothingDescription, resolvedGarmentUrl }
+  return { clothingDescription, resolvedGarmentUrl, garmentCategory }
 }
 
-async function resolvePreparedMarketplaceImage({ supabaseAdmin, model, userId, replicateApiToken }: { supabaseAdmin: any; model: any; userId: string; replicateApiToken: string }) {
+async function resolvePreparedMarketplaceImage({ supabaseAdmin, model, userId, replicateApiToken, fallbackModelImageUrl }: { supabaseAdmin: any; model: any; userId: string; replicateApiToken: string; fallbackModelImageUrl?: string | null }) {
   const sourceSignature = buildSourceSignature(model.training_data)
   const { data: existingAsset } = await supabaseAdmin.from('try_on_temp_assets').select('*').eq('user_id', userId).eq('model_id', model.model_id).maybeSingle()
   const nowIso = new Date().toISOString()
@@ -208,11 +237,22 @@ serve(async (req: Request) => {
       modelImageUrl = aiChar.preview_images?.[0] || clientModelImageUrl || null
       if (!modelImageUrl) throw new Error('Selected AI character is missing a usable image')
     } else {
-      const { data: model } = await supabaseAdmin.from('models').select('model_id, display_name, ai_model_id, training_data').eq('model_id', modelId).single()
+      const { data: model } = await supabaseAdmin
+        .from('models')
+        .select('model_id, display_name, ai_model_id, training_data, profile_image_url')
+        .eq('model_id', modelId)
+        .single()
+
       if (!model) throw new Error('Selected marketplace model could not be found')
       modelName = model.display_name || modelName
       resolvedAiModelId = model.ai_model_id || null
-      const preparedResult = await resolvePreparedMarketplaceImage({ supabaseAdmin, model, userId: user.id, replicateApiToken })
+      const preparedResult = await resolvePreparedMarketplaceImage({
+        supabaseAdmin,
+        model,
+        userId: user.id,
+        replicateApiToken,
+        fallbackModelImageUrl: model.profile_image_url || null,
+      })
       modelImageUrl = preparedResult.modelImageUrl
       reusedPreparedImage = preparedResult.reusedPreparedImage
     }

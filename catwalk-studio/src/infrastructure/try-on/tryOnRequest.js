@@ -12,7 +12,7 @@ export function buildTryOnPayload({ selectedModel, selectedWardrobeItem, promptD
         prompt: promptData.prompt,
         negativePrompt: promptData.negativePrompt,
         wardrobeItemId: selectedWardrobeItem?.id || null,
-        garmentUrl: selectedWardrobeItem?.thumbnailUrl || null,
+        garmentUrl: selectedWardrobeItem?.highResImageUrl || selectedWardrobeItem?.thumbnailUrl || null,
         width: promptData.width,
         height: promptData.height,
         format: promptData.format,
@@ -31,6 +31,7 @@ export function buildTryOnPayload({ selectedModel, selectedWardrobeItem, promptD
     return {
         ...payload,
         modelId: selectedModel.id,
+        modelImageUrl: selectedModel.imageUrl || null,
     };
 }
 

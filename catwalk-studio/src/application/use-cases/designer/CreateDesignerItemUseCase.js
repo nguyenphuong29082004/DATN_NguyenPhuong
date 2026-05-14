@@ -1,5 +1,6 @@
 import { UseCase, Result } from '../UseCase.js';
 import { DesignerItem } from '../../../domain/entities/DesignerItem.js';
+import { WardrobeItem } from '../../../domain/entities/WardrobeItem.js';
 import { DesignerItemDTO } from '../../dto/DesignerDTO.js';
 
 /**
@@ -8,10 +9,12 @@ import { DesignerItemDTO } from '../../dto/DesignerDTO.js';
 export class CreateDesignerItemUseCase extends UseCase {
     /**
      * @param {import('../../../interfaces/repositories/IDesignerRepository').IDesignerRepository} designerRepository
+     * @param {import('../../../interfaces/repositories/IWardrobeRepository').IWardrobeRepository} wardrobeRepository
      */
-    constructor(designerRepository) {
+    constructor(designerRepository, wardrobeRepository) {
         super();
         this.designerRepository = designerRepository;
+        this.wardrobeRepository = wardrobeRepository;
     }
 
     /**
@@ -50,6 +53,27 @@ export class CreateDesignerItemUseCase extends UseCase {
 
             // Save item
             const savedItem = await this.designerRepository.createItem(item);
+
+            // Sync to wardrobe so it can be used in Try-on
+            try {
+                const wardrobeItem = WardrobeItem.create({
+                    userId,
+                    title: name.trim(),
+                    category: category.toLowerCase(),
+                    brand: brand || 'Designer',
+                    thumbnailUrl: imageUrl || null,
+                    highResImageUrl: imageUrl || null,
+                    colour: color || null,
+                    description: description || '',
+                    isUserUploaded: true,
+                    isStock: false
+                });
+                await this.wardrobeRepository.create(wardrobeItem);
+            } catch (syncError) {
+                console.error('Failed to sync designer item to wardrobe:', syncError);
+                // We don't fail the whole operation if wardrobe sync fails, 
+                // but ideally it should work.
+            }
 
             // Convert to DTO
             const itemDTO = DesignerItemDTO.fromEntity(savedItem);
